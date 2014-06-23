@@ -521,22 +521,49 @@
           }else{
             //第三个大任务充值话费尚未领取
             if($.inArray(0,window.data.t3_status) < 0 && $.inArray(2,window.data. t3_status) < 0){
-              $.carnivalbox({
-                width:460,
-                title:'您已完成全部关卡',
-                content:'系统奖励您<b>10元话费</b>,并且赠送您一次<b>抽奖机会</b>',
-                btnCont:'马上领取',
-                beforeshow:function(){},
-                aftershow:function(){
-                  var sub_btn   = $('.carnival-popup a.btn');
-                  sub_btn.live('click',function(){
-                    if(!sub_btn.hasClass('disabled')){
-                        sub_btn.addClass('disabled');
-                        sendAjax(4,null,null);
-                    }
-                  });
-                }
-              })
+              if(window.data.lot_status[1] > 0){
+                var rema = window.data.share_num - window.data.share_lottery_num
+              }else{
+                var rema = window.data.share_num + 1 - window.data.share_lottery_num
+              }
+              
+              if(rema > 0){
+                $.carnivalbox({
+                  width:460,
+                  title:'您已完成全部关卡',
+                  content:'系统奖励您一次<b>抽奖机会</b>',
+                  btnCont:'马上去抽奖',
+                  beforeshow:function(){},
+                  aftershow:function(){
+                    var sub_btn   = $('.carnival-popup a.btn');
+                    sub_btn.live('click',function(){
+                      $.fancybox.close();
+                      makeFire();
+                      flyBalloon();
+                    });
+                  }
+                })                
+              }
+              // 去除了第三关的10块钱的奖励,完成第三关，直接去抽大奖
+
+
+
+              // $.carnivalbox({
+              //   width:460,
+              //   title:'您已完成全部关卡',
+              //   content:'系统奖励您<b>10元话费</b>,并且赠送您一次<b>抽奖机会</b>',
+              //   btnCont:'马上领取',
+              //   beforeshow:function(){},
+              //   aftershow:function(){
+              //     var sub_btn   = $('.carnival-popup a.btn');
+              //     sub_btn.live('click',function(){
+              //       if(!sub_btn.hasClass('disabled')){
+              //           sub_btn.addClass('disabled');
+              //           sendAjax(4,null,null);
+              //       }
+              //     });
+              //   }
+              // })
             }
           }
         }

@@ -108,6 +108,53 @@
           }
         }
       }
+      .g_order{
+        display: none;
+      //------------------------------
+        .prize-lottery{
+          
+          // width:80%;
+          // height:200px;
+          margin:0 auto;
+          background:#d1e6f7;
+          .lot-result{
+            // @include one-line(60px);
+            text-align:center;
+            background:#c7e9c4;
+            color:#fff;
+          }
+          .form{
+            @include one-line(80px);
+            text-align: center;
+            input{
+              height:24px;
+              text-align: center;
+              &.error{
+                border:1px solid red;
+              }
+            }
+          }
+          .btn-cont{
+            text-align: center;
+            padding:10px 0px;
+            button{
+              @include one-line(60px);
+              text-align: center;
+              background:#a3b4d2;
+              font-size:14px;
+              color:#fff;
+              @include border-radius(3px);
+              @include box-shadow(0 1px 1px #999);
+              border:0px;
+              width:80%;
+              margin:0px auto;
+              font-weight: bold;
+            }          
+          }
+         
+        }  
+      //------------------------------
+      }
     }
     .stair{
       display:none;
@@ -312,48 +359,48 @@
           }
         }
       }
-      .prize-lottery{
-        display: none;
-        // width:80%;
-        // height:200px;
-        margin:0 auto;
-        background:#d1e6f7;
-        .lot-result{
-          // @include one-line(60px);
-          text-align:center;
-          background:#c7e9c4;
-          color:#fff;
-        }
-        .form{
-          @include one-line(80px);
-          text-align: center;
-          input{
-            height:24px;
-            text-align: center;
-            &.error{
-              border:1px solid red;
-            }
-          }
-        }
-        .btn-cont{
-          text-align: center;
-          padding:10px 0px;
-          button{
-            @include one-line(60px);
-            text-align: center;
-            background:#a3b4d2;
-            font-size:14px;
-            color:#fff;
-            @include border-radius(3px);
-            @include box-shadow(0 1px 1px #999);
-            border:0px;
-            width:80%;
-            margin:0px auto;
-            font-weight: bold;
-          }          
-        }
+      // .prize-lottery{
+      //   display: none;
+      //   // width:80%;
+      //   // height:200px;
+      //   margin:0 auto;
+      //   background:#d1e6f7;
+      //   .lot-result{
+      //     // @include one-line(60px);
+      //     text-align:center;
+      //     background:#c7e9c4;
+      //     color:#fff;
+      //   }
+      //   .form{
+      //     @include one-line(80px);
+      //     text-align: center;
+      //     input{
+      //       height:24px;
+      //       text-align: center;
+      //       &.error{
+      //         border:1px solid red;
+      //       }
+      //     }
+      //   }
+      //   .btn-cont{
+      //     text-align: center;
+      //     padding:10px 0px;
+      //     button{
+      //       @include one-line(60px);
+      //       text-align: center;
+      //       background:#a3b4d2;
+      //       font-size:14px;
+      //       color:#fff;
+      //       @include border-radius(3px);
+      //       @include box-shadow(0 1px 1px #999);
+      //       border:0px;
+      //       width:80%;
+      //       margin:0px auto;
+      //       font-weight: bold;
+      //     }          
+      //   }
        
-      }    
+      // }    
       .do_lottery{
         display:none;
         background: #d1e6f7;

@@ -129,10 +129,6 @@ class Carnival::CampaignsController < Carnival::CarnivalController
       answer_order: @answer_order
     }
 
-    Rails.logger.info('------------------------------------------')
-    Rails.logger.info(@current_carnival_user.inspect)
-    Rails.logger.info('------------------------------------------')
-
     return @obj 
   end
 

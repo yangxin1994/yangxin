@@ -111,25 +111,45 @@
             }
 
             if(t_type == 3){
-              sendAjax(4,null,null)
+              var k = $.inArray(0,window.data.t2_status);  
+              window.location.href = '/s/' + window.data.t2_surveys[k];
+              // $('.do_lottery').show().siblings().hide();
+
+              // $('.do_lottery .note').text('您有' + (window.data.share_num - window.data.share_lottery_num + 1) + '次抽奖机会');
+              // $('.do_lottery .resu').hide();
+
+              // $('.do_lottery button').bind('click',function(){
+              //   if(!$(this).hasClass('disabled')){
+              //     if (parseInt(window.data.lot_status[1]) > 0) {
+              //         var t_type = 2;
+              //     } else {
+              //         var t_type = 1;
+              //     }
+              //     $(this).addClass('disabled');              
+              //     sendAjax(t_type);
+              //   }
+              // })
+
+
+              //sendAjax(4,null,null)
             }
             if(t_type == 4){
-              $('.do_lottery').show().siblings().hide();
+              // $('.do_lottery').show().siblings().hide();
 
-              $('.do_lottery .note').text('您有' + (window.data.share_num - window.data.share_lottery_num + 1) + '次抽奖机会');
-              $('.do_lottery .resu').hide();
+              // $('.do_lottery .note').text('您有' + (window.data.share_num - window.data.share_lottery_num + 1) + '次抽奖机会');
+              // $('.do_lottery .resu').hide();
 
-              $('.do_lottery button').bind('click',function(){
-                if(!$(this).hasClass('disabled')){
-                  if (parseInt(window.data.lot_status[1]) > 0) {
-                      var t_type = 2;
-                  } else {
-                      var t_type = 1;
-                  }
-                  $(this).addClass('disabled');              
-                  sendAjax(t_type);
-                }
-              })
+              // $('.do_lottery button').bind('click',function(){
+              //   if(!$(this).hasClass('disabled')){
+              //     if (parseInt(window.data.lot_status[1]) > 0) {
+              //         var t_type = 2;
+              //     } else {
+              //         var t_type = 1;
+              //     }
+              //     $(this).addClass('disabled');              
+              //     sendAjax(t_type);
+              //   }
+              // })
             }
           }else{
             var code = parseInt(data.value.error_code)
@@ -161,12 +181,13 @@
                         window.location.href='/s/' + window.data.t3_surveys[idx];
                       })
                     }else{
-                      var remain = window.data.share_num - window.data.share_lottery_num;
+                      
                       if (t_type == 1) {
                         window.data.lot_status[1] = 1;
                       } else {
                         window.data.share_lottery_num += 1;
                       }
+                      var remain = window.data.share_num - window.data.share_lottery_num;
 
                       var content = '对不起,您没有抽中任何奖品!'
 
@@ -251,7 +272,27 @@
           }else{
 
             if( $.inArray(0,window.data.t1_status) < 0 ){
-              current_step = 2;
+              if(window.data.rew_1){
+                current_step = 2;
+              }else{
+                current_step = 1;
+                $('.g_order').show().siblings().hide();
+
+                $('.prize-lottery button').bind('click',function(){
+                  var phone = parseInt( $('.prize-lottery input').val() );
+                  if($.regex.isMobile(phone)){
+                    sendAjax(3,phone);
+                  }else{
+                    $('.prize-lottery input').addClass('error')
+                  }
+                  
+                })
+
+
+
+
+              }
+              
             }            
 
             if( $.inArray(0,window.data.t2_status) < 0 ){
@@ -275,44 +316,57 @@
                 if(window.data.own){
                   $('.do-lottery').show().siblings().hide();
                 }else{
-                  if(window.data.rew_3){
-                    $('.do_lottery').show().siblings().hide();
-                    if(window.data.lot_status[1] > 0){
-                      var remain = window.data.share_num - window.data.share_lottery_num;
-                    }else{
-                      var remain = window.data.share_num + 1 - window.data.share_lottery_num;  
-                    }
-                    
-                    $('.do_lottery .resu').hide();
-                    $('.do_lottery .note').text('您有' +  remain + '次抽奖机会');
-
-                    $('.do_lottery button').bind('click',function(){
-                      if(!$(this).hasClass('disabled')){
-                        if (parseInt(window.data.lot_status[1]) > 0) {
-                            var t_type = 2;
-                        } else {
-                            var t_type = 1;
-                        }
-                        $(this).addClass('disabled');              
-                        sendAjax(t_type);
-                      }
-                    })
-
-
+                  $('.do_lottery').show().siblings().hide();
+                  if(window.data.lot_status[1] > 0){
+                    var remain = window.data.share_num - window.data.share_lottery_num;
                   }else{
-                    $('.prize-lottery').show().siblings().hide();
+                    var remain = window.data.share_num + 1 - window.data.share_lottery_num;  
                   }
+                  
+                  $('.do_lottery .resu').hide();
+                  $('.do_lottery .note').text('您有' +  remain + '次抽奖机会');
+
+                  $('.do_lottery button').bind('click',function(){
+                    if(!$(this).hasClass('disabled')){
+                      if (parseInt(window.data.lot_status[1]) > 0) {
+                          var t_type = 2;
+                      } else {
+                          var t_type = 1;
+                      }
+                      $(this).addClass('disabled');              
+                      sendAjax(t_type);
+                    }
+                  })
+
+
+                  //去除了第三关奖励10元话费机制,完成第三关后直接抽奖
+                  // if(window.data.rew_3){
+                  //   $('.do_lottery').show().siblings().hide();
+                  //   if(window.data.lot_status[1] > 0){
+                  //     var remain = window.data.share_num - window.data.share_lottery_num;
+                  //   }else{
+                  //     var remain = window.data.share_num + 1 - window.data.share_lottery_num;  
+                  //   }
+                    
+                  //   $('.do_lottery .resu').hide();
+                  //   $('.do_lottery .note').text('您有' +  remain + '次抽奖机会');
+
+                  //   $('.do_lottery button').bind('click',function(){
+                  //     if(!$(this).hasClass('disabled')){
+                  //       if (parseInt(window.data.lot_status[1]) > 0) {
+                  //           var t_type = 2;
+                  //       } else {
+                  //           var t_type = 1;
+                  //       }
+                  //       $(this).addClass('disabled');              
+                  //       sendAjax(t_type);
+                  //     }
+                  //   })
+                  // }else{
+                  //   $('.prize-lottery').show().siblings().hide();
+                  // }
                 }
               }
-              $('.prize-lottery button').bind('click',function(){
-                var phone = parseInt( $('.prize-lottery input').val() );
-                if($.regex.isMobile(phone)){
-                  sendAjax(3,phone);
-                }else{
-                  $('.prize-lottery input').addClass('error')
-                }
-                
-              })
             }          
 
             if(current_step == 3){
@@ -388,7 +442,20 @@
           <div class='q-r'>
             <a href=''>1</a>
           </div>
-        </div>        
+        </div>  
+        <div class='g_order'>
+          <div class='prize-lottery'>
+            <div>
+              <div class='lot-result'>恭喜您获得了10元话费(问卷审核通过后会发放到您的手机)</div>
+              <div class='form'>
+                <input type='text' name='phone' placeholder="请输入手机号" />
+              </div>
+              <div class='btn-cont'>
+                <button>领取并继续</button>
+              </div>
+            </div>
+          </div>          
+        </div>      
       </div>
       <div class='stair'>
         <div class="congratulation">
@@ -430,8 +497,7 @@
       <div class='ball'>
         <div class="congratulation">
           <div class='desire'>恭喜您完成第二轮问卷</div>
-          <!-- 完成最后一关赢取神秘大奖 -->
-          <div class='detail'>完成以下问卷您将获得10元话费及一次抽大奖机会</div>
+          <div class='detail'>完成最后一关赢取神秘大奖</div>
         </div>  
         <div class="q-list">
           <div class='q-l'>
@@ -444,18 +510,6 @@
           </div>
           <div class='q-r'>
             <a href=''>1</a>
-          </div>
-        </div>
-        <div class='prize-lottery'>
-          <div>
-            <div class='lot-result'>恭喜您获得了10元话费及一次抽大奖机会</div>
-            <div class='form'>
-              <input type='text' name='phone' placeholder="请输入手机号" />
-            </div>
-            <div class='btn-cont'>
-              <button>马上领取</button>
-              <!-- 马上抽奖(您有10次抽奖机会) -->
-            </div>
           </div>
         </div> 
         <div class='do_lottery'>
