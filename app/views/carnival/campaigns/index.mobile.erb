@@ -338,6 +338,14 @@
 
 
                   var mobile = window.location.href.match(/\?c=\d{11}/);
+
+                  if(mobile && mobile.length > 0){
+                    mobile = mobile[0];
+                    mobile = mobile.split(/\?c=/)[1];
+                  }else{
+                    var mobile = window.location.href.match(/\?c=_p_/);
+                  }
+
                   if(!mobile){
                     if(!window.data.rew_3){
                       sendAjax(4,null,null);

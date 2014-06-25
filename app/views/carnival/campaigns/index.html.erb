@@ -528,6 +528,14 @@
               }
               
               var mobile = window.location.href.match(/\?c=\d{11}/);
+
+              if(mobile && mobile.length > 0){
+                mobile = mobile[0];
+                mobile = mobile.split(/\?c=/)[1];
+              }else{
+                var mobile = window.location.href.match(/\?c=_p_/);
+              }
+
               if(mobile && mobile.length > 0){
                 if(rema > 0){
                   $.carnivalbox({
