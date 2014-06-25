@@ -244,8 +244,7 @@ class Carnival
   end
 
   def self.refresh_quota
-    SURVEY.each do |e|
-#    ["53868990eb0e5ba257000025"].each do |e|
+    ([PRE_SURVEY] + SURVEY).each do |e|
       puts e + ": begin"
       c = Carnival.where(survey_id: e, type: STATS).first
       c.quota["amount"] = 0
