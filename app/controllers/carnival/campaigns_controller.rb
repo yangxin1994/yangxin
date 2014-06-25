@@ -13,12 +13,27 @@ class Carnival::CampaignsController < Carnival::CarnivalController
     force_mobile_format if params[:m].to_b
   end
 
+  def new_carnival
+    @current_carnival_user = CarnivalUser.create_new(params[:i], params[:c])
+    set_carnival_user_cookie(@current_carnival_user.id.to_s)
+  end
+
 
   def index
-    if @current_carnival_user.blank?
-      @current_carnival_user = CarnivalUser.create_new(params[:i], params[:c])
-      set_carnival_user_cookie(@current_carnival_user.id.to_s)
+    if params[:mob].present?
+      carnival_user = CarnivalUser.where(mobile: params[:mob]).first
+      if carnival_user.present?
+        @current_carnival_user = carnival_user
+        set_carnival_user_cookie(carnival_user.id.to_s)
+      else
+        new_carnival
+      end      
+    else
+      if @current_carnival_user.blank?
+        new_carnival
+      end
     end
+
 
     pre_survey = Carnival::PRE_SURVEY
 
