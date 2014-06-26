@@ -361,8 +361,17 @@
                   //   var mobile = window.location.href.match(/\?c=_p_/);
                   // }
 
+                  if (window.data.pub_url){
+                    if (window.data.pub_url.match(/\d{11}/){
+                      var skip_ = true;
+                    }
+                    if (window.data.pub_url.match(/\_p_/){
+                      var skip_ = true;
+                    }                
+                  }
+    
 
-                  if(!window.data.pub_url){
+                  if(!skip_){
                     if(!window.data.rew_3){
                       sendAjax(4,null,null);
                     }
