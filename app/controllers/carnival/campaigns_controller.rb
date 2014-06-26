@@ -141,7 +141,8 @@ class Carnival::CampaignsController < Carnival::CarnivalController
       lot_status:@current_carnival_user.lottery_status, 
       mobile:@current_carnival_user.mobile, #手机号
       charged_amount: @charged_amount,
-      answer_order: @answer_order
+      answer_order: @answer_order,
+      pub_url:@current_carnival_user.source
     }
 
     return @obj 
