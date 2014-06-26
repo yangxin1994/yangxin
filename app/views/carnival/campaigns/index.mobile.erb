@@ -126,43 +126,9 @@
             if(t_type == 3){
               var k = $.inArray(0,window.data.t2_status);  
               window.location.href = '/s/' + window.data.t2_surveys[k];
-              // $('.do_lottery').show().siblings().hide();
 
-              // $('.do_lottery .note').text('您有' + (window.data.share_num - window.data.share_lottery_num + 1) + '次抽奖机会');
-              // $('.do_lottery .resu').hide();
-
-              // $('.do_lottery button').bind('click',function(){
-              //   if(!$(this).hasClass('disabled')){
-              //     if (parseInt(window.data.lot_status[1]) > 0) {
-              //         var t_type = 2;
-              //     } else {
-              //         var t_type = 1;
-              //     }
-              //     $(this).addClass('disabled');              
-              //     sendAjax(t_type);
-              //   }
-              // })
-
-
-              //sendAjax(4,null,null)
             }
             if(t_type == 4){
-              // $('.do_lottery').show().siblings().hide();
-
-              // $('.do_lottery .note').text('您有' + (window.data.share_num - window.data.share_lottery_num + 1) + '次抽奖机会');
-              // $('.do_lottery .resu').hide();
-
-              // $('.do_lottery button').bind('click',function(){
-              //   if(!$(this).hasClass('disabled')){
-              //     if (parseInt(window.data.lot_status[1]) > 0) {
-              //         var t_type = 2;
-              //     } else {
-              //         var t_type = 1;
-              //     }
-              //     $(this).addClass('disabled');              
-              //     sendAjax(t_type);
-              //   }
-              // })
             }
           }else{
             var code = parseInt(data.value.error_code)
@@ -352,20 +318,13 @@
                   })
 
 
-                  // var mobile = window.location.href.match(/\?c=\d{11}/);
 
-                  // if(mobile && mobile.length > 0){
-                  //   mobile = mobile[0];
-                  //   mobile = mobile.split(/\?c=/)[1];
-                  // }else{
-                  //   var mobile = window.location.href.match(/\?c=_p_/);
-                  // }
 
                   if (window.data.pub_url){
-                    if (window.data.pub_url.match(/\d{11}/){
+                    if (window.data.pub_url.match(/\d{11}/)){
                       var skip_ = true;
                     }
-                    if (window.data.pub_url.match(/\_p_/){
+                    if (window.data.pub_url.match(/\_p_/)){
                       var skip_ = true;
                     }                
                   }
@@ -376,33 +335,6 @@
                       sendAjax(4,null,null);
                     }
                   }
-
-                  //去除了第三关奖励10元话费机制,完成第三关后直接抽奖
-                  // if(window.data.rew_3){
-                  //   $('.do_lottery').show().siblings().hide();
-                  //   if(window.data.lot_status[1] > 0){
-                  //     var remain = window.data.share_num - window.data.share_lottery_num;
-                  //   }else{
-                  //     var remain = window.data.share_num + 1 - window.data.share_lottery_num;  
-                  //   }
-                    
-                  //   $('.do_lottery .resu').hide();
-                  //   $('.do_lottery .note').text('您有' +  remain + '次抽奖机会');
-
-                  //   $('.do_lottery button').bind('click',function(){
-                  //     if(!$(this).hasClass('disabled')){
-                  //       if (parseInt(window.data.lot_status[1]) > 0) {
-                  //           var t_type = 2;
-                  //       } else {
-                  //           var t_type = 1;
-                  //       }
-                  //       $(this).addClass('disabled');              
-                  //       sendAjax(t_type);
-                  //     }
-                  //   })
-                  // }else{
-                  //   $('.prize-lottery').show().siblings().hide();
-                  // }
                 }
               }
             }          
@@ -418,23 +350,6 @@
         }
       }
 
-
-      // var share = '<p class="share_d">邀请好友参加活动，成功邀请1人，可再抽奖1次</p><p class="so_share">\
-      //               <a id="SinaWeibo" class="sina"></a>\
-      //               <a id="TencentWeibo" class="tencent"></a>\
-      //               <a id="Renren" class="renren"></a>\
-      //               <a id="Douban" class="douban"></a>\
-      //               <a id="QQSpace" class="qzone"></a>\
-      //               </p>';
-
-      // $('.social_share').append(share);
-
-      // var share_href = 'http://wenjuanba.com/carnival/campaigns?i=<%= @current_carnival_user.id.to_s %>'; 
-      // _.each(['SinaWeibo', 'TencentWeibo', 'Renren', 'Douban', 'QQSpace'], $.proxy(function(v ) {
-      //   $('#' + v).live('click',function() {
-      //     $.social['shareTo' + v](share_href + '&c=' + v, '我发现了一个好玩的活动“问卷吧嘉年华”，参  加100%获得手机充值卡，还可以抽红米note、小米盒子、小米电源等大奖哦！你也来参加吧！', ' http://wenjuanba.com/assets/activities/2014-6/carnival.png');
-      //   });
-      // }, this));
   
       })
   </script>
