@@ -102,6 +102,15 @@ class Filler::AnswersController < Filler::FillerController
 
     ensure_spread(@survey, @answer.reward_scheme_id)
 
+    if @answer.carnival_user_id.present?
+      cookies[:carnival_user_id] = {
+        :value => @answer.carnival_user_id,
+        :expires => 12.months.from_now,
+        :domain => :all
+      }
+    end
+
+
     @binded = user_signed_in ? (current_user.email_activation || current_user.mobile_activation) : false
   end
 

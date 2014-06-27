@@ -36,6 +36,22 @@
 
       window.data = <%= raw (@obj).to_json %>;
 
+
+      // var mobile = window.location.href.match(/\?c=\d{11}/);
+
+      // if(mobile && mobile.length > 0){
+      //   mobile = mobile[0];
+      //   mobile = mobile.split(/\?c=/)[1];
+      // }else{
+      //   var mobile = window.location.href.match(/\?c=_p_/);
+      // }
+
+      // if(mobile && mobile.length > 0){
+      //   $.cookie('pub_mobile',mobile,{ expires: 10 * 365 });
+      // }
+
+
+
       //background status
       if(window.data.background_survey_status == 32) {
         $('.sun').addClass('active').attr('href', 'javascript:void(0);');
@@ -95,7 +111,8 @@
           $('.door > a.start').remove();
           // get ticket
           if(window.current_step){
-            if($.cookie('ticket') || continue_answer){
+            //if($.cookie('ticket') || continue_answer){
+            if(continue_answer){
               openDoor(false);  
               //每个小任务(及每个大任务)完成后的跳转页面
               setSection(window.current_step);
@@ -190,8 +207,8 @@
       function openDoor(move){
         $('.door .left').animate({'left':'-175px'},3000,function(){});
         $('.door .right').animate({'right':'-148px'},3000,function(){
-          var d = new Date();
-          $.cookie('ticket',d.getTime(),{ expires: 10 * 365 });
+          //var d = new Date();
+          //$.cookie('ticket',d.getTime(),{ expires: 10 * 365 });
 
           if(move){
             $.fn.fullpage.moveSectionUp();
@@ -527,16 +544,26 @@
                 var rema = window.data.share_num + 1 - window.data.share_lottery_num
               }
               
-              var mobile = window.location.href.match(/\?c=\d{11}/);
+              // var mobile = window.location.href.match(/\?c=\d{11}/);
 
-              if(mobile && mobile.length > 0){
-                mobile = mobile[0];
-                mobile = mobile.split(/\?c=/)[1];
-              }else{
-                var mobile = window.location.href.match(/\?c=_p_/);
+              // if(mobile && mobile.length > 0){
+              //   mobile = mobile[0];
+              //   mobile = mobile.split(/\?c=/)[1];
+              // }else{
+              //   var mobile = window.location.href.match(/\?c=_p_/);
+              // }
+
+              if (window.data.pub_url){
+                if (window.data.pub_url.match(/\d{11}/)){
+                  var skip_ = true;
+                }
+                if (window.data.pub_url.match(/\_p_/)){
+                  var skip_ = true;
+                }                
               }
 
-              if(mobile && mobile.length > 0){
+
+              if(skip_ ){
                 if(rema > 0){
                   $.carnivalbox({
                     width:460,
@@ -868,7 +895,12 @@
         
             }else if(step == 3){
               var con = '热气球'
-              var reward = '10元话费及一次抽大奖机会';
+              if ($.cookie('pub_mobile')){
+                var reward = '一次抽大奖机会';
+              }else{
+                var reward = '10元话费及一次抽大奖机会';  
+              }
+              
               var idx = $.inArray(0,window.data.t3_status);
               if (idx >= 0){
                 var s_id = window.data.t3_surveys[idx];
