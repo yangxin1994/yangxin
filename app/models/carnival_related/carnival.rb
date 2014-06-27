@@ -145,11 +145,15 @@ class Carnival
     # region beijing, shanghai, guangzhou, shenzhen, tianjin, nanjing, wuhan, shenyang, xi'an, chengdu, chongqing, hangzhou, tsingdao,
     # dalian, ningbo, jinan, harbin, changchun, xiamen, zhengzhou, suzhou, wuxi, changsha, fuzhou, lanzhou, urumchi, kunming
     code = ["4096", "36864", "77888", "78016", "8192", "41024", "69696", "24640", "110656", "94272", "90112", "45120", "61568", "24704", "45184", "61504", "32832", "28736", "53376", "65600", "41280", "41088", "73792", "53312", "114752", "127040", "102464"]
+    big_city = false
     code.each_with_index do |c, index|
-      return true if quota_stats.quota["region"][c] < quota_setting.quota["region"][c] && QuillCommon::AddressUtility.satisfy_region_code?(answer.answer_content[region_qid]["address"], c)
+      if QuillCommon::AddressUtility.satisfy_region_code?(answer.answer_content[region_qid]["address"], c)
+        big_city = true
+        return true if quota_stats.quota["region"][c] < quota_setting.quota["region"][c]
+      end
     end
     # other cities
-    return false if code.include?(answer.answer_content[region_qid]["address"].to_s)
+    return false if big_city
     (1..7).to_a.each do |c|
       return true if quota_stats.quota["region"][c.to_s] < quota_setting.quota["region"][c.to_s] && QuillCommon::AddressUtility.satisfy_big_region?(answer.answer_content[region_qid]["address"], c)
     end

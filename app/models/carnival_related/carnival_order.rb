@@ -160,7 +160,7 @@ class CarnivalOrder
   end
 
   def self.recharge_fail_mobile
-    CarnivalOrder.where(esai_status: ESAI_FAIL, status: HANDLE).each_with_index do |order, index|
+    CarnivalOrder.where(esai_status: ESAI_FAIL, status: HANDLE).asc(:created_at).each_with_index do |order, index|
       puts index
       order.update_attributes(status: WAIT)
       order.handle_one_by_one
