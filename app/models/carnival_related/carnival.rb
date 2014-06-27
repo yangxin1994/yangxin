@@ -303,4 +303,17 @@ class Carnival
       puts e + ": end"
     end
   end
+
+  def self.send_invitation_sms
+    CarnivalUser.all.each do |c|
+      next if c.mobile.blank?
+      if c.survey_status.include?(2)
+        # send sms, invite user come back to answer the rejected ones
+        SmsApi.carnival_batch_re_invite_reject("carnival_batch_re_invite_reject", c.mobile, "", "")
+      elsif c.survey_status.include?(0)
+        # send sms, invite user come back to answer the blank ones
+        SmsApi.carnival_batch_re_invite_blank("carnival_batch_re_invite_blank", c.mobile, "", "")
+      end
+    end
+  end
 end
