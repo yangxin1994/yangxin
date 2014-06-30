@@ -227,7 +227,7 @@
           if(window.data.rew_1){
             //已经点击领取了10块钱
             if(parseInt(window.data.charged_amount[0]) > 0){
-              $('#task_one_text').text('恭喜您,我们已将10元话费充值到您的手机('+ window.data.mobile +')中')
+              $('#task_one_text').text('恭喜您,我们已将该摩天轮管卡10元话费充值到您的手机('+ window.data.mobile +')中')
             }else{
               $('#task_one_text').text('恭喜您完成摩天轮关卡,系统会在审核后将10元话费充值到您的手机('+ window.data.mobile + ')');  
             } 
@@ -316,7 +316,7 @@
           if(parseInt(window.data.lot_status[0]) > 0){
             //已经点击领取了
             if(parseInt(window.data.charged_amount[1]) > 0){
-              $('#task_two_text').text('恭喜您,我们已将' + window.data.charged_amount[1] + '元话费充值到您的手机('+ window.data.mobile +')中');
+              $('#task_two_text').text('恭喜您,我们已将跳楼机关卡' + window.data.charged_amount[1] + '元话费充值到您的手机('+ window.data.mobile +')中');
             }else{
               if(window.data.rew_2_name){
                 $('#task_two_text').text('恭喜您完成跳楼机关卡,系统会在审核后将' + window.data.rew_2_name + '元话费充值到您的手机('+ window.data.mobile + ')');
@@ -383,9 +383,9 @@
             if(window.data.rew_3_name){
               //已经点击领取了
               if(parseInt(window.data.charged_amount[2]) > 0){
-                $('#task_three_text').text('恭喜您,我们已将10元话费充值到您的手机('+   window.data.mobile +')中');
+                $('#task_three_text').text('恭喜您,我们已将热气球关卡10元话费充值到您的手机('+ window.data.mobile +')中');
               }else{
-                $('#task_three_text').text('  恭喜您获得了10元话费奖励,系统会在问卷审核通过后将10元话费充值到您的手机('+   window.data.mobile + ')中');  
+                $('#task_three_text').text(' 恭喜您获得了热气球关卡的10元话费奖励,系统会在问卷审核通过后将10元话费充值到您的手机('+ window.data.mobile + ')中');  
               } 
             }  
           }
