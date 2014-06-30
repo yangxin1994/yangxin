@@ -1938,7 +1938,7 @@ class Answer
       end
       # 2. 我比较信任电影院播放的广告选择比较不赞同/非常不赞同、我不太信任影院播放的广告选择比较不赞同/非常不赞同拒绝
       if self.answer_content[q2_id].present?
-        if [6436964890405481, 6436964890405481].include?((self.answer_content[q2_id]["19832762675086484"] || [])[0]) && [6436964890405481, 6436964890405481].include?((self.answer_content[q2_id]["21647195410953130"] || [])[0])
+        if [6436964890405481, 19163865162740040].include?((self.answer_content[q2_id]["19832762675086484"] || [])[0]) && [6436964890405481, 19163865162740040].include?((self.answer_content[q2_id]["21647195410953130"] || [])[0])
           return self.review(false, auditor, "问题我比较信任电影院播放的广告您选择了比较不赞同/非常不赞同，后面问题：我不太信任影院播放的广告您选择了比较不赞同/非常不赞同，前后矛盾。")
         end
       end
@@ -2074,7 +2074,7 @@ class Answer
     # 5385982aeb0e5b7282000022: XFXW-05
     # 53843187eb0e5b2ac8000037: XFXW-06
     # 5384282deb0e5bbcb900002b: XFXW-02
-    ["5385982aeb0e5b7282000022", "53843187eb0e5b2ac8000037", "5384282deb0e5bbcb900002b"].each do |sid|
+    ["53868990eb0e5ba257000025"].each do |sid|
       Survey.find(sid).answers.where(status: Answer::UNDER_REVIEW).each do |a|
         a.check_contradiction
       end
