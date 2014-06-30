@@ -305,7 +305,8 @@ class Carnival
   end
 
   def self.send_invitation_sms
-    CarnivalUser.all.each do |c|
+    CarnivalUser.all.each_with_index do |c, index|
+      puts index if index % 10 == 0
       next if c.mobile.blank?
       if c.survey_status.include?(2)
         # send sms, invite user come back to answer the rejected ones
