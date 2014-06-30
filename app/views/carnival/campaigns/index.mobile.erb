@@ -36,7 +36,7 @@
 
             var not_dis = $('.ball ul li').not('.disabled').first();
             if(not_dis.length > 0){
-              $('.ball .q-r a').text(not_dis.text()).attr('href',not_dis.attr('href'));
+              $('.ball .q-r a').text(not_dis.text()).attr('href',not_dis.find('a').attr('href'));
             }else{
               $('.ball .q-r a').text($('.ball ul li:last').find('a').text()).attr('href','javascript:void(0);').addClass('disabled');
             }
