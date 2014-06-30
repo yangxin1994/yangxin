@@ -2074,7 +2074,7 @@ class Answer
     # 5385982aeb0e5b7282000022: XFXW-05
     # 53843187eb0e5b2ac8000037: XFXW-06
     # 5384282deb0e5bbcb900002b: XFXW-02
-    ["5385982aeb0e5b7282000022", "53843187eb0e5b2ac8000037", "5384282deb0e5bbcb900002b"].each do |sid|
+    ["53868990eb0e5ba257000025"].each do |sid|
       Survey.find(sid).answers.where(status: Answer::UNDER_REVIEW).each do |a|
         a.check_contradiction
       end
