@@ -1,0 +1,173 @@
+<% content_for :head do %>
+  <%= stylesheet_link_tag "pages/carnival/campaigns_proxy-bundle", :media => "all" %>
+  <script type="text/javascript">
+    $(function(){
+      window.prox_data = <%= raw (@prox_obj).to_json %>;
+
+      function sendAjax(phone){
+        var url = '/carnival/users/send_mobile';
+        $.post(url,
+          {mobile: phone
+          },function(data){
+            var notic = $('.carnival-popup .notic');
+            if(data.success){
+              $.each(window.prox_data['surveys'],function(index,v){
+                var  status = parseInt(window.prox_data['survey_status'][index]);
+                if ($.inArray(status,[4,32,64]) >= 0){
+                  if(status == 4){
+                    $('a#' + v ).text('答题完成(等待审核)');
+                  }else if(status == 32){
+                    $('a#' + v ).text('审核已通过');
+                  }else{
+                    $('a#' + v ).text('忽略该题');
+                  }
+                  $('a#' + v ).addClass('disabled').attr('href','javascript:void(0);');
+                }else{
+                  $('a#' + v ).removeClass('disabled').attr('href','/s/' + v).text('点击进行答题');
+                  $.fancybox.close();
+                }
+              })
+            }else{
+              notic.html('该手机已经参与过活动,不能重复参与');
+              notic.show();
+              $('.s_icon a').addClass('disabled');              
+            }
+          })
+      }
+
+
+      if(parseInt(window.prox_data['pre_status']) == 32 ){
+        $('.pre_survey a').addClass('disabled').attr('href','javascript:void(0);').text('审核已通过');
+        if(window.prox_data['mobile']){
+          $.each(window.prox_data['surveys'],function(index,v){
+
+              // var uri = '/a/' + window.data.t1_answers[k];
+              // $(v).attr('href',uri).attr('id',window.data.t1_surveys[k]);
+
+            var  status = parseInt(window.prox_data['survey_status'][index]);
+            var answer_order = window.prox_data['answer_orders'][index]
+            if (answer_order){
+              var uri = '/a/' + answer_order;
+            }
+            if ($.inArray(status,[4,32,64]) >= 0){
+              if(status == 4){
+                $('a#' + v ).text('答题完成(等待审核)');
+              }else if(status == 32){
+                $('a#' + v ).text('审核已通过');
+              }else{
+                $('a#' + v ).text('忽略该题');
+              }
+              $('a#' + v ).addClass('disabled').attr('href','javascript:void(0);');
+            }else{
+              if(status == 2){
+                $('a#' + v ).text('该题被拒绝(请重新答题)');
+              }else{
+                $('a#' + v ).text('点击进行答题');
+              }
+              if(uri){
+                $('a#' + v ).removeClass('disabled').attr('href',uri);
+              }else{
+                $('a#' + v ).removeClass('disabled').attr('href','/s/' + v);
+              }
+              
+            }
+          })
+        }else{
+          $('.s_icon a').addClass('disabled');
+          $.carnivalbox({
+            width:460,
+            title:'恭喜您完成首个问卷',
+            content:'请留下您的联系方式,认真答题获取现金奖励',
+            btnCont:'提交',
+            beforeshow:function(){
+              $('.carnival-popup p').after('<form action=""><input class="phone" type="text"      name="phone" placeholder="请输入手机号码"/></form>');
+            },
+            aftershow:function(){
+              var phone_ipt = $('.carnival-popup form input');
+              var sub_btn   = $('.carnival-popup a.btn');
+              phone_ipt.live('focus',function(){
+                $(this).removeClass('error');
+                sub_btn.removeClass('disabled');
+              });
+              sub_btn.die("click");
+              sub_btn.live('click',function(){
+                if(!sub_btn.hasClass('disabled')){
+                  var phone = phone_ipt.val();
+                  if($.regex.isMobile(phone)){
+                    sub_btn.addClass('disabled');
+                    phone_ipt.removeClass('error');
+                    sub_btn.addClass('disabled');
+                    sendAjax(phone);                   
+                  }else{
+                    phone_ipt.addClass('error');
+                    sub_btn.removeClass('disabled');
+                    return false;
+                  }
+                }
+              });
+            }
+          })             
+        }
+      }else{
+        $.carnivalbox({
+          width:460,
+          title:'欢迎您参与此次调研',
+          content:'如果您已经参与过该活动,请输入您的手机号<b class="go_on">继续参与</b></br>如果您未参与过该活动,请点击<b class="clo">关闭</b>按钮进入答题页面',
+          btnCont:'继续参与',
+          beforeshow:function(){
+            $('.carnival-popup p').after('<form action=""><input class="phone" type="text"      name="phone" placeholder="请输入手机号码"/></form>');
+            $('.carnival-popup a.btn').after('<a class="clos">关闭</a>')
+          },
+          aftershow:function(){
+            var phone_ipt = $('.carnival-popup form input');
+            var sub_btn   = $('.carnival-popup a.btn');
+            var clos_btn = $('.carnival-popup a.clos');
+            clos_btn.live('click',function(){
+              $.fancybox.close();
+            })
+            phone_ipt.live('focus',function(){
+              $(this).removeClass('error');
+              sub_btn.removeClass('disabled');
+            });
+            sub_btn.die("click");
+            sub_btn.live('click',function(){
+              if(!sub_btn.hasClass('disabled')){
+                var phone = phone_ipt.val();
+                if($.regex.isMobile(phone)){
+                  sub_btn.addClass('disabled');
+                  phone_ipt.removeClass('error');
+                  sub_btn.addClass('disabled');
+                  $.postJSON('/carnival/users/login', {mobile: phone}, function(retval) {
+                    if(retval.success && retval.value) {
+                      location.reload(true);
+                    } else {
+                      $('.carnival-popup .notic').text('该手机尚未开始游戏').show();
+                    }
+                  });                                     
+                }else{
+                  phone_ipt.addClass('error');
+                  sub_btn.removeClass('disabled');
+                  return false;
+                }
+              }
+            });
+          }
+        })   
+        $('.pre_survey a').text('点击进行答题');
+        $('.s_icon a').addClass('disabled');
+      }
+    });
+
+  </script>
+<% end %>
+
+<div class='s_content'>
+  <div class='pre_survey'>
+    <a href="/s/<%=@prox_obj[:pre_survey]%>"></a>
+  </div>
+  <% @prox_obj[:surveys].each do |survey|%>
+    <div class='s_icon'>
+      <a href="javascript:void(0);" id="<%=survey%>"></a>  
+    </div>    
+  <% end %>
+</div>

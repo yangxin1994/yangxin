@@ -26,6 +26,7 @@ class CarnivalUser
   UNLUCKY = -5
   MOBILE_EXIST = -6
   ALREADY_HIT = -7
+  MOBILE_NOT_PRESENT = -8
 
 
   field :mobile, type: String, default: ""
