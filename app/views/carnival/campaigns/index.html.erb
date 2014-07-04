@@ -36,6 +36,22 @@
 
       window.data = <%= raw (@obj).to_json %>;
 
+
+      // var mobile = window.location.href.match(/\?c=\d{11}/);
+
+      // if(mobile && mobile.length > 0){
+      //   mobile = mobile[0];
+      //   mobile = mobile.split(/\?c=/)[1];
+      // }else{
+      //   var mobile = window.location.href.match(/\?c=_p_/);
+      // }
+
+      // if(mobile && mobile.length > 0){
+      //   $.cookie('pub_mobile',mobile,{ expires: 10 * 365 });
+      // }
+
+
+
       //background status
       if(window.data.background_survey_status == 32) {
         $('.sun').addClass('active').attr('href', 'javascript:void(0);');
@@ -95,7 +111,8 @@
           $('.door > a.start').remove();
           // get ticket
           if(window.current_step){
-            if($.cookie('ticket') || continue_answer){
+            //if($.cookie('ticket') || continue_answer){
+            if(continue_answer){
               openDoor(false);  
               //每个小任务(及每个大任务)完成后的跳转页面
               setSection(window.current_step);
@@ -190,11 +207,12 @@
       function openDoor(move){
         $('.door .left').animate({'left':'-175px'},3000,function(){});
         $('.door .right').animate({'right':'-148px'},3000,function(){
-          var d = new Date();
-          $.cookie('ticket',d.getTime(),{ expires: 10 * 365 });
+          //var d = new Date();
+          //$.cookie('ticket',d.getTime(),{ expires: 10 * 365 });
 
           if(move){
-            $.fn.fullpage.moveSectionUp();  
+            $.fn.fullpage.moveSectionUp();
+            window.location.href = '/s/' + window.data.t1_surveys[0];    
           }
           setTaskOne(false);
         });
@@ -209,7 +227,7 @@
           if(window.data.rew_1){
             //已经点击领取了10块钱
             if(parseInt(window.data.charged_amount[0]) > 0){
-              $('#task_one_text').text('恭喜您,我们已将10元话费充值到您的手机('+ window.data.mobile +')中')
+              $('#task_one_text').text('恭喜您,我们已将该摩天轮管卡10元话费充值到您的手机('+ window.data.mobile +')中')
             }else{
               $('#task_one_text').text('恭喜您完成摩天轮关卡,系统会在审核后将10元话费充值到您的手机('+ window.data.mobile + ')');  
             } 
@@ -298,7 +316,7 @@
           if(parseInt(window.data.lot_status[0]) > 0){
             //已经点击领取了
             if(parseInt(window.data.charged_amount[1]) > 0){
-              $('#task_two_text').text('恭喜您,我们已将' + window.data.charged_amount[1] + '元话费充值到您的手机('+ window.data.mobile +')中');
+              $('#task_two_text').text('恭喜您,我们已将跳楼机关卡' + window.data.charged_amount[1] + '元话费充值到您的手机('+ window.data.mobile +')中');
             }else{
               if(window.data.rew_2_name){
                 $('#task_two_text').text('恭喜您完成跳楼机关卡,系统会在审核后将' + window.data.rew_2_name + '元话费充值到您的手机('+ window.data.mobile + ')');
@@ -365,9 +383,9 @@
             if(window.data.rew_3_name){
               //已经点击领取了
               if(parseInt(window.data.charged_amount[2]) > 0){
-                $('#task_three_text').text('恭喜您,我们已将10元话费充值到您的手机('+   window.data.mobile +')中');
+                $('#task_three_text').text('恭喜您,我们已将热气球关卡10元话费充值到您的手机('+ window.data.mobile +')中');
               }else{
-                $('#task_three_text').text('  恭喜您获得了10元话费奖励,系统会在问卷审核通过后将10元话费充值到您的手机('+   window.data.mobile + ')中');  
+                $('#task_three_text').text(' 恭喜您获得了热气球关卡的10元话费奖励,系统会在问卷审核通过后将10元话费充值到您的手机('+ window.data.mobile + ')中');  
               } 
             }  
           }
@@ -397,42 +415,40 @@
             }
           }
         })
+
         if(show_percent){
           percentNotice(window.current_step,window.data.t3_surveys,window.data.t3_status);  
         }
-        
 
-        if(window.data.rew_3){
-          //第三个大任务充值话费已经领取
-          
-
-          if(window.data.lot_status[1] > 0 ){
-            var remain = window.data.share_num -  window.data.share_lottery_num;  
-            if($.inArray(2,window.data.t3_status) < 0){
-              $('.umbrella').addClass('act');
-              makeFire();
-              //已经参加了转盘抽奖
-
-              var share = '<p class="share_d">邀请好友参加活动，成功邀请1人，可再抽奖1次</p><p class="so_share">\
-                  <a id="SinaWeibo" class="sina"></a>\
-                  <a id="TencentWeibo" class="tencent"></a>\
-                  <a id="Renren" class="renren"></a>\
-                  <a id="Douban" class="douban"></a>\
-                  <a id="QQSpace" class="qzone"></a>\
-                  </p><p class="share_d">点击参与以下问卷,获得更多积分:</p>\
-                  <p>\
-                    <a href="/s/5389855ceb0e5b7781000003" target="_blank">问卷吧嘉年华之月度活动（5月任务2）</a><br />\
-                    <a href="/s/5389497eeb0e5b2b55000283" target="_blank">问卷吧嘉年华之月度活动（5月任务1）</a>\
-                  </p>';
-
-              if(remain <= 0){
-                //首次完成全部任务后并已经抽奖，再次来到页面
-                $("#lotteryBtn").addClass('disabled');
-                if(window.data.own){
+        if($.inArray(2,tmp_all_status) < 0){
+          if(window.data.rew_3){
+            //第三个大任务充值话费已经领取
+            if(window.data.lot_status[1] > 0 ){
+              var remain = parseInt(window.data.share_num) -  parseInt(window.data.share_lottery_num);  
+              if($.inArray(2,window.data.t3_status) < 0){
+                $('.umbrella').addClass('act');
+                makeFire();
+                //已经参加了转盘抽奖
+    
+                var share = '<p class="share_d">邀请好友参加活动，成功邀请1人，可再抽奖1次</p><p class="so_share">\
+                    <a id="SinaWeibo" class="sina"></a>\
+                    <a id="TencentWeibo" class="tencent"></a>\
+                    <a id="Renren" class="renren"></a>\
+                    <a id="Douban" class="douban"></a>\
+                    <a id="QQSpace" class="qzone"></a>\
+                    </p><p class="share_d">点击参与以下问卷,获得更多积分:</p>\
+                    <p>\
+                      <a href="/s/5389855ceb0e5b7781000003" target="_blank">    问卷吧嘉年华之月度活动（5月任务2）</a>\
+                    </p>';
+    
+                if(remain <= 0){
+                  //首次完成全部任务后并已经抽奖，再次来到页面
+                  $("#lotteryBtn").addClass('disabled');
+                  if(window.data.own){
                   var title ='恭喜您,中奖了';
-                  var cont = '您已经抽中奖品' +  window.data.prize_name + '  我们会在审核后联系您!'  ;
+                  var cont = '您已经抽中奖品' +  window.data.prize_name + '  我们会在审核后联系您!'    ;
                   var btn_cont = '我知道了';
-
+  
                   $.carnivalbox({
                     width:460,
                     title:title,
@@ -449,8 +465,7 @@
                       });
                     }
                   });
-                }else{
-
+                  }else{
                   $.carnivalbox({
                     width:460,
                     title:'抱歉,您没有抽到任何奖品,感谢您的参与',
@@ -467,79 +482,139 @@
                       });
                     }
                   });
+                  }
+                }else{
+                  //已经完成了转盘抽奖,但是可以重复抽奖
+                  if(window.data.own){
+                    //已经抽中奖品,不允许再次抽奖
+                    $("#lotteryBtn").addClass('disabled');
+                    //$('.ly-plate .draw_remain').text('剩余0次抽奖机会')
+                    var title ='恭喜您,中奖了';
+                    var cont = '您已经抽中奖品' +  window.data.prize_name + '      我们会在审核后联系您!'  ;
+                    var btn_cont = '我知道了';
+                    var show = false;
+                    //$('.ly-plate').show();
+                  }else{
+                    //分享抽奖情况
+                    var title ='欢迎您再次抽奖';
+                    var cont = '您共有' + (window.data.share_num + 1) + '次抽奖机会,还剩余'
+                  + remain + '次抽奖机会';
+                    var btn_cont = '继续抽奖';
+                    var show = true;
+                  }
+      
+                  $.carnivalbox({
+                    width:460,
+                    title:title,
+                    content:cont,
+                    btnCont:btn_cont,
+                    beforeshow:function(){},
+                    aftershow:function(){
+                      var sub_btn   = $('.carnival-popup a.btn');
+                      sub_btn.live('click',function(){
+                        $.fancybox.close();
+                        get_remain();
+                        if(show){
+                          $('.ly-plate').show();  
+                        }
+                        
+                      });
+                    }
+                  });
+                  if( $('.carnival-popup p.share_d').length < 1 ){
+                    $(share).insertBefore('a.submit');  
+                  }
+                }
+              }
+            }else{
+              //第三关的话费领取完成但是还未抽奖
+              get_remain();
+              if($.inArray(2,window.data.t3_status) < 0 && $.inArray(0,window.data. t3_status) <   0){
+                $('.ball-cont').hide();
+                $('.ly-plate').show();
+              }
+            } 
+          }else{
+            //第三个大任务充值话费尚未领取
+            if($.inArray(0,window.data.t3_status) < 0 && $.inArray(2,window.data. t3_status) < 0){
+              if(window.data.lot_status[1] > 0){
+                var rema = window.data.share_num - window.data.share_lottery_num
+              }else{
+                var rema = window.data.share_num + 1 - window.data.share_lottery_num
+              }
+              
+              // var mobile = window.location.href.match(/\?c=\d{11}/);
+
+              // if(mobile && mobile.length > 0){
+              //   mobile = mobile[0];
+              //   mobile = mobile.split(/\?c=/)[1];
+              // }else{
+              //   var mobile = window.location.href.match(/\?c=_p_/);
+              // }
+
+              if (window.data.pub_url){
+                if (window.data.pub_url.match(/\d{11}/)){
+                  var skip_ = true;
+                }
+                if (window.data.pub_url.match(/\_p_/)){
+                  var skip_ = true;
+                }                
+              }
+
+
+              if(skip_ ){
+                if(rema > 0){
+                  if (window.data.rew_2_name){
+                    var lot_num =  parseInt(window.data.rew_2_name)
+                  }else{
+                    var lot_num = 0
+                  }                  
+                  $.carnivalbox({
+                    width:460,
+                    title:'您已完成全部关卡',
+                    content:'系统奖励您一次<b>抽奖机会</b>(您目前共获得' + (lot_num + 10 ) +'元话费)',
+                    btnCont:'马上去抽奖',
+                    beforeshow:function(){},
+                    aftershow:function(){
+                      var sub_btn   = $('.carnival-popup a.btn');
+                      sub_btn.live('click',function(){
+                        $.fancybox.close();
+                        makeFire();
+                        flyBalloon();
+                      });
+                    }
+                  })                
                 }
               }else{
-                //已经完成了转盘抽奖,但是可以重复抽奖
-                if(window.data.own){
-                  //已经抽中奖品,不允许再次抽奖
-                  $("#lotteryBtn").addClass('disabled');
-                  //$('.ly-plate .draw_remain').text('剩余0次抽奖机会')
-                  var title ='恭喜您,中奖了';
-                  var cont = '您已经抽中奖品' +  window.data.prize_name + '  我们会在审核后联系您!'  ;
-                  var btn_cont = '我知道了';
-                  var show = false;
-                  //$('.ly-plate').show();
+                if (window.data.rew_2_name){
+                  var lot_num =  parseInt(window.data.rew_2_name)
                 }else{
-                  //分享抽奖情况
-                  var title ='欢迎您再次抽奖';
-                  var cont = '您共有' + (window.data.share_num + 1) + '次抽奖机会,还剩余'
-                + remain + '次抽奖机会';
-                  var btn_cont = '继续抽奖';
-                  var show = true;
+                  var lot_num = 0
                 }
-  
+
                 $.carnivalbox({
                   width:460,
-                  title:title,
-                  content:cont,
-                  btnCont:btn_cont,
+                  title:'您已完成全部关卡',
+                  content:'系统在该关卡励您<b>10元话费</b>,并且赠送您一次<b>抽奖机会</b>(您目前共获得' + ( lot_num + 20 ) + '元话费)',
+                  btnCont:'马上领取',
                   beforeshow:function(){},
                   aftershow:function(){
                     var sub_btn   = $('.carnival-popup a.btn');
                     sub_btn.live('click',function(){
-                      $.fancybox.close();
-                      get_remain();
-                      if(show){
-                        $('.ly-plate').show();  
+                      if(!sub_btn.hasClass('disabled')){
+                          sub_btn.addClass('disabled');
+                          sendAjax(4,null,null);
                       }
-                      
                     });
                   }
-                });
-                if( $('.carnival-popup p.share_d').length < 1 ){
-                  $(share).insertBefore('a.submit');  
-                }
+                })
               }
             }
-          }else{
-            //第三关的话费领取完成但是还未抽奖
-            get_remain();
-            if($.inArray(2,window.data.t3_status) < 0 && $.inArray(0,window.data.t3_status) < 0){
-              $('.ball-cont').hide();
-              $('.ly-plate').show();
-            }
-          } 
-        }else{
-          //第三个大任务充值话费尚未领取
-          if($.inArray(0,window.data.t3_status) < 0 && $.inArray(2,window.data.t3_status) < 0){
-            $.carnivalbox({
-              width:460,
-              title:'您已完成全部关卡',
-              content:'系统奖励您<b>10元话费</b>,并且赠送您一次<b>抽奖机会</b>',
-              btnCont:'马上领取',
-              beforeshow:function(){},
-              aftershow:function(){
-                var sub_btn   = $('.carnival-popup a.btn');
-                sub_btn.live('click',function(){
-                  if(!sub_btn.hasClass('disabled')){
-                      sub_btn.addClass('disabled');
-                      sendAjax(4,null,null);
-                  }
-                });
-              }
-            })
           }
         }
+
+
+
       }
       // 获取剩余抽奖机会
       function get_remain(){
@@ -602,6 +677,8 @@
                   $.fancybox.close();
                   $.fn.fullpage.moveSectionUp()
                   setTaskTwo(false);
+                  var idx = $.inArray(0,window.data.t2_status);
+                  window.location.href = '/s/' + window.data.t2_surveys[idx];
                 })
               }else if(t_type == 0){
                 window.data.lot_status[0] = 1; //表示第二关已经抽过奖
@@ -614,6 +691,8 @@
                   $.fancybox.close();
                   $.fn.fullpage.moveTo(1);
                   setTaskThree();
+                  var idx = $.inArray(0,window.data.t3_status);
+                  window.location.href = '/s/' + window.data.t3_surveys[idx];                  
                 })                           
               }else if(t_type == 4){//第三关 10块钱手机话费
                 notic.html('获得了10元手机充值奖励,系统会在审核后充值到您的手机!');
@@ -678,6 +757,8 @@
                       rebind_click('我知道了');
                       $.fn.fullpage.moveTo(1);
                       setTaskThree();
+                      var idx = $.inArray(0,window.data.t3_status);
+                      window.location.href = '/s/' + window.data.t3_surveys[idx];
                     }else{
                       rebind_click('我知道了');  
                     }
@@ -810,12 +891,31 @@
             if(step == 1){
               var con = '摩天轮';
               var reward = '10元话费';
+              var idx = $.inArray(0,window.data.t1_status);
+              if (idx >= 0){
+                var s_id = window.data.t1_surveys[idx];
+              }
             }else if(step == 2){
               var con = '跳楼机';
               var reward = '10(50或100)元话费抽奖机会';
+              var idx = $.inArray(0,window.data.t2_status);
+              if (idx >= 0){
+                var s_id = window.data.t2_surveys[idx];
+              }
+        
             }else if(step == 3){
               var con = '热气球'
-              var reward = '10元话费及一次抽大奖机会';
+              if ($.cookie('pub_mobile')){
+                var reward = '一次抽大奖机会';
+              }else{
+                var reward = '10元话费及一次抽大奖机会';  
+              }
+              
+              var idx = $.inArray(0,window.data.t3_status);
+              if (idx >= 0){
+                var s_id = window.data.t3_surveys[idx];
+              }
+          
             }
 
             var answered = $.grep(status_arr, function( ele, i ) {
@@ -836,6 +936,7 @@
                 $('.carnival-popup a.btn').die('click');
                 $('.carnival-popup a.btn').live('click',function(){
                   $.fancybox.close();
+                  window.location.href = '/s/' + s_id ;
                 })
               }
             })

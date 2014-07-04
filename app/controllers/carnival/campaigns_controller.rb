@@ -1,10 +1,39 @@
 # encoding: utf-8
 class Carnival::CampaignsController < Carnival::CarnivalController
+
+  before_filter :force_tablet_html, :check_mobile_param
+  has_mobile_fu
+
+  # Continue rendering HTML for tablet
+  def force_tablet_html
+    session[:tablet_view] = false
+  end
+
+  def check_mobile_param
+    force_mobile_format if params[:m].to_b
+  end
+
+  def new_carnival
+    @current_carnival_user = CarnivalUser.create_new(params[:i], params[:c])
+    set_carnival_user_cookie(@current_carnival_user.id.to_s)
+  end
+
+
   def index
-    if @current_carnival_user.blank?
-      @current_carnival_user = CarnivalUser.create_new(params[:i], params[:c])
-      set_carnival_user_cookie(@current_carnival_user.id.to_s)
+    if params[:mob].present?
+      carnival_user = CarnivalUser.where(mobile: params[:mob]).first
+      if carnival_user.present?
+        @current_carnival_user = carnival_user
+        set_carnival_user_cookie(carnival_user.id.to_s)
+      else
+        new_carnival
+      end      
+    else
+      if @current_carnival_user.blank?
+        new_carnival
+      end
     end
+
 
     pre_survey = Carnival::PRE_SURVEY
 
@@ -36,15 +65,6 @@ class Carnival::CampaignsController < Carnival::CarnivalController
       step = 3
     end
 
-    # step = 0
-    # #根据status的的数据情况来判断是第几关
-    # if (step_arr[2].include?(CarnivalUser::UNDER_REVIEW) || step_arr[2].include?(CarnivalUser::HIDE) || step_arr[2].include?(CarnivalUser::FINISH) )
-    #   step = 3
-    # elsif (step_arr[1].include?(CarnivalUser::UNDER_REVIEW) || step_arr[1].include?(CarnivalUser::HIDE) || step_arr[1].include?(CarnivalUser::FINISH) )  
-    #   step = 2
-    # elsif (step_arr[0].include?(CarnivalUser::UNDER_REVIEW) || step_arr[0].include?(CarnivalUser::HIDE) || step_arr[0].include?(CarnivalUser::FINISH) )
-    #   step = 1
-    # end
 
     #抽中大奖的奖品名称
     @lot = @current_carnival_user.carnival_orders.where(:type.in => [CarnivalOrder::STAGE_3_LOTTERY, CarnivalOrder::SHARE]).first 
@@ -121,8 +141,10 @@ class Carnival::CampaignsController < Carnival::CarnivalController
       lot_status:@current_carnival_user.lottery_status, 
       mobile:@current_carnival_user.mobile, #手机号
       charged_amount: @charged_amount,
-      answer_order: @answer_order
+      answer_order: @answer_order,
+      pub_url:@current_carnival_user.source
     }
+
     return @obj 
   end
 

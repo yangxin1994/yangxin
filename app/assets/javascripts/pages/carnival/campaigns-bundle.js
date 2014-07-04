@@ -112,16 +112,11 @@ jQuery(function($) {
                     var lotteryBtn = $("#lotteryBtn");
 
                     $("#lotteryBtn").addClass('disabled');
-                    //var t_type = 1; //抽奖
+                    //t_type = 1; //抽奖
+                    //t_type = 2; //分享抽奖
 
-                    // if (window.data.share_num > 0) {
-                    //     t_type = 2; //分享抽奖
-                    // }
-
-                    if (window.data.lot_status[1] > 0) {
-                        if (window.data.share_num > window.data.share_lottery_num) {
-                            var t_type = 2;
-                        }
+                    if (parseInt(window.data.lot_status[1]) > 0) {
+                        var t_type = 2;
                     } else {
                         var t_type = 1;
                     }
@@ -157,8 +152,7 @@ jQuery(function($) {
                                 <a id="QQSpace" class="qzone"></a>\
                                </p><p class="share_d">点击参与以下问卷,获得更多积分:</p>\
                                <p>\
-                               <a href="/s/5389855ceb0e5b7781000003" target="_blank">问卷吧嘉年华之月度活动（5月任务2）</a><br />\
-                               <a href="/s/5389497eeb0e5b2b55000283" target="_blank">问卷吧嘉年华之月度活动（5月任务1）</a>\
+                               <a href="/s/5389855ceb0e5b7781000003" target="_blank">问卷吧嘉年华之月度活动（5月任务2）</a>\
                                </p>';
 
                             if (data.success) {

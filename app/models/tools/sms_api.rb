@@ -244,6 +244,26 @@ class SmsApi # 短信接口
     self.send_sms(type, mobile, text)
   end
 
+  def self.carnival_batch_re_invite_reject(type, mobile, callback, opt)
+    @answer_link = "#{Rails.application.config.quillme_host}/carnival/campaigns?mob=#{mobile}"
+    @answer_link = Rails.application.config.quillme_host + "/" + MongoidShortener.generate(@answer_link)
+
+    text_template_file_name = "#{Rails.root}/app/views/sms_text/carnival_batch_re_invite_reject.text.erb"
+    text_template = ERB.new(File.new(text_template_file_name).read, nil, "%")
+    text = text_template.result(binding)
+    self.send_sms(type, mobile, text)
+  end
+
+  def self.carnival_batch_re_invite_blank(type, mobile, callback, opt)
+    @answer_link = "#{Rails.application.config.quillme_host}/carnival/campaigns?mob=#{mobile}"
+    @answer_link = Rails.application.config.quillme_host + "/" + MongoidShortener.generate(@answer_link)
+
+    text_template_file_name = "#{Rails.root}/app/views/sms_text/carnival_batch_re_invite_blank.text.erb"
+    text_template = ERB.new(File.new(text_template_file_name).read, nil, "%")
+    text = text_template.result(binding)
+    self.send_sms(type, mobile, text)
+  end
+
   def self.send_massive_sms(mobile_list, sms_text)
     group_size = 100
     groups = []

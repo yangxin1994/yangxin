@@ -14,7 +14,7 @@ class CarnivalPrize
 
   def self.draw
     tot_number = (self.all.map { |e| e.amount }).sum
-    p = tot_number / 20000
+    p = tot_number / 20000.0
     return nil if rand > p
     v = rand
     p1 = CarnivalPrize.where(name: "红米note").first

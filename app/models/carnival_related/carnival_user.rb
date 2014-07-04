@@ -35,7 +35,7 @@ class CarnivalUser
 
   # 0 for not exist, 2 for reject, 32 for finish
   field :pre_survey_status, type: Integer, default: 0
-  field :background_survey_status, type: Integer, default: 0
+  field :background_survey_status, type: Integer, default: 32
   field :survey_order, type: Array
   field :reward_scheme_order, type: Array
   field :survey_status, type: Array, default: Array.new(14) { 0 }
@@ -44,12 +44,14 @@ class CarnivalUser
   field :share_num, type: Integer, default: 0
   field :share_lottery_num, type: Integer, default: 0
 
+  field :no_reward, type: Boolean, default: false
+
   has_many :answers
   has_many :carnival_orders
   has_many :carnival_logs
 
-  def self.create_new(introducer_id, source)
-    u = CarnivalUser.create(introducer_id: introducer_id, source: source)
+  def self.create_new(introducer_id, source, no_reward = false)
+    u = CarnivalUser.create(introducer_id: introducer_id, source: source, no_reward: no_reward)
     u.survey_order = Carnival::SURVEY.shuffle
     u.reward_scheme_order = u.survey_order.map do |e|
       s = Survey.find(e)
@@ -130,6 +132,7 @@ class CarnivalUser
     self.survey_status[index] = UNDER_REVIEW
     self.save
 
+    return if self.no_reward == true
     # handle order
     if index <= 4
       order = self.carnival_orders.where(type: CarnivalOrder::STAGE_1).first
@@ -178,6 +181,7 @@ class CarnivalUser
       Carnival.update_survey_quota(pre_survey_answer, answer.survey_id.to_s, false)
     end
 
+    return if self.no_reward == true
     # handle order
     if index <= 4
       order = self.carnival_orders.where(type: CarnivalOrder::STAGE_1).first
@@ -347,6 +351,7 @@ class CarnivalUser
   end
 
   def draw_second_stage_lottery(amount)
+    return "" if self.no_reward == true
     if (self.survey_status[5..9] & [NOT_EXIST, REJECT]).present?
       return SURVEY_NOT_FINISHED
     end
@@ -381,6 +386,7 @@ class CarnivalUser
 
   def create_first_stage_order(mobile)
     u = CarnivalUser.where(mobile: mobile).first
+    return "" if u.no_reward == true
     if u.present? && u.id.to_s != self.id.to_s
       return MOBILE_EXIST
     else
@@ -445,6 +451,7 @@ class CarnivalUser
   end
 
   def create_third_stage_mobile_order
+    return "" if self.no_reward == true
     if (self.survey_status[10..13] & [NOT_EXIST, REJECT]).present?
       return SURVEY_NOT_FINISHED
     end
@@ -469,6 +476,7 @@ class CarnivalUser
   end
 
   def draw_third_stage_lottery
+    return "" if self.no_reward == true
     if (self.survey_status[10..13] & [NOT_EXIST, REJECT]).present?
       return SURVEY_NOT_FINISHED
     end
