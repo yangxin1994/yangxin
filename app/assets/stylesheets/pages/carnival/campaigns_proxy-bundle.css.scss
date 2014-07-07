@@ -1,4 +1,5 @@
 //=require jquery.fancybox
+//=require ui/widgets/od_progressbar
 @import "common";
 @import "compass/css3/border-radius";
 @import "compass/utilities/general/clearfix";
@@ -8,53 +9,107 @@
   height:20px;
 }
 
-.process{
-  position: relative;
+
+
+.box{
   width:1000px;
-  margin:0 auto;  
-  border:1px solid red;
-  @include one-line(50px);
+  margin: 0 auto;
+  @include border-radius(3px);
+  border:1px solid #dbdbdb;
   text-align: center;
-  .percent{
-    
-    background:yellow;
-    height:inherit;
+  padding:40px 20px;
+  .title{
+    @include one-line(24px);
+    font-size: 24px;
+    font-weight:bold;
+    color:#666;
   }
-  .text{
-    position: absolute;
-    top:0px;
-    left:40%;
+  .describe{
+    color:#666;
+    font-size:16px;
+    margin: 30px 0;
+    line-height: 1.8em;
+    text-align: center;
+
+  }
+
+  .btn-container{
+    width:500px;
+    margin:0 auto;    
+    text-align: center;
+    cursor: pointer;
+    color: #fff;
+    display: block;
+    margin: 20px auto 40px auto;
+    @include one-line(54px);
+    font-size: 16px;
+    font-weight: bold;
+    background: #5691f0;
+    @include border-radius(3px);
+    .pre_survey{
+      a{
+        color: #fff;  
+        text-decoration: none;
+      }
+    }
+
+    
+    
+
   }
 }
 
-.s_content{
-  @include clearfix;
-  width:1000px;
-  margin:0 auto;
-  >div{
-    margin-right:20px;
-    margin-bottom:20px;
-    float:left;
-    width:inherit;
-    height:100px;
-    a{
-      display:inline-block;
-      width:100%;
-      @include one-line(100px);
-      text-align: center;
-      cursor: pointer;
-      background:green;
-      text-decoration: none;
-      &.disabled{
-        cursor:default;
-        background: grey;
-      }
-    }
-  }
-}
-.footer{
-  text-align: center;
-}
+
+
+
+// .process{
+//   position: relative;
+//   width:1000px;
+//   margin:0 auto;  
+//   border:1px solid red;
+//   @include one-line(50px);
+//   text-align: center;
+//   .percent{
+    
+//     background:yellow;
+//     height:inherit;
+//   }
+//   .text{
+//     position: absolute;
+//     top:0px;
+//     left:40%;
+//   }
+// }
+
+// .s_content{
+//   @include clearfix;
+//   width:1000px;
+//   margin:0 auto;
+//   >div{
+//     margin-right:20px;
+//     margin-bottom:20px;
+//     float:left;
+//     width:inherit;
+//     height:100px;
+//     a{
+//       color:#fff;
+//       display:inline-block;
+//       width:100%;
+//       @include one-line(100px);
+//       text-align: center;
+//       cursor: pointer;
+//       background:green;
+//       text-decoration: none;
+//       &.disabled{
+//         cursor:default;
+//         background: grey;
+//       }
+//     }
+//   }
+// }
+// .footer{
+//   text-align: center;
+// }
 
 
 .carnival-popup{

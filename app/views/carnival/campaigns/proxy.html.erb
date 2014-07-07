@@ -1,8 +1,22 @@
 <% content_for :head do %>
   <%= stylesheet_link_tag "pages/carnival/campaigns_proxy-bundle", :media => "all" %>
+
+  <script src="/assets/ui/widgets/od_progressbar.js" type="text/javascript"></script>
+
+
   <script type="text/javascript">
     $(function(){
+
       window.prox_data = <%= raw (@prox_obj).to_json %>;
+
+      var pb = $.od.odProgressbar({
+        color: "#6D91A9",
+        width: 400,
+        value: 0
+      });
+      pb.appendTo('#progressbar');
+
+
 
       function sendAjax(phone){
         var url = '/carnival/users/send_mobile';
@@ -19,7 +33,6 @@
             }
           })
       }
-
 
       if(parseInt(window.prox_data['pre_status']) == 32){
         if(window.prox_data['mobile']){
@@ -38,9 +51,13 @@
           });
 
 
-          var percent = Math.round((1 + len.length) / 15 * 100) + '%';
-          $('.text span').text(percent);
-          $('.percent').css('width',percent);
+          if(len.length == 14){
+            $('.pre_survey a').attr('href','/').text('答题完成');  
+          }
+
+
+          pb.odProgressbar('option', 'value', (1 + len.length) / 15);
+          // $('.percent').css('width',percent);
         }else{
           $.carnivalbox({
             width:460,
@@ -142,7 +159,25 @@
   </script>
 <% end %>
 
-<div class='process'>
+
+<div class='box'>
+  <div class='title'>
+   问卷吧大调查
+  </div>
+  <div class='describe'>
+      问卷吧大调查来袭!完成参与问卷吧嘉年华活动就能获得现金奖励,名额有限,赶快动动鼠标发表您的个人观点赢取现金奖励
+  </div>
+  <div id="progressbar"></div>
+  <div class='btn-container'>
+    <div class='pre_survey'>
+      <a href="/s/<%=@prox_obj[:pre_survey]%>">点击进行答题</a>
+    </div>    
+  </div>
+</div>
+
+
+
+<!-- <div class='process'>
   <div class='percent'></div>
   <div class='text'>
     恭喜您已经答题完成
@@ -151,6 +186,6 @@
 </div>
 <div class='s_content'>
   <div class='pre_survey'>
-    <a href="/s/<%=@prox_obj[:pre_survey]%>"></a>
+    <a href="/s/<%#=@prox_obj[:pre_survey]%>"></a>
   </div>
-</div>
+</div> -->
