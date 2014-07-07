@@ -124,6 +124,7 @@
             var clos_btn = $('.carnival-popup a.clos');
             clos_btn.live('click',function(){
               $.fancybox.close();
+              window.location.href = '/s/' + window.prox_data['pre_survey'];
             })
             phone_ipt.live('focus',function(){
               $(this).removeClass('error');

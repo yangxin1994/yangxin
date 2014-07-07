@@ -153,6 +153,9 @@ class Carnival::CampaignsController < Carnival::CarnivalController
   end
 
   def proxy
+
+    redirect_to carnival_campaigns_path  and return  if @current_carnival_user.present? && !@current_carnival_user.no_reward
+
     if params[:mob].present?
       carnival_user = CarnivalUser.where(mobile: params[:mob]).first
       if carnival_user.present?
