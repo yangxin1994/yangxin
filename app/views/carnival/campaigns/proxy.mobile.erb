@@ -1,5 +1,5 @@
 <% content_for :head do %>
-  <%= stylesheet_link_tag "pages/carnival/campaigns_proxy-bundle", :media => "all" %>
+  <%= stylesheet_link_tag "pages/carnival/campaigns_proxy_mobile-bundle", :media => "all" %>
   <script type="text/javascript">
     $(function(){
       window.prox_data = <%= raw (@prox_obj).to_json %>;
@@ -15,7 +15,8 @@
               window.location.href = '/s/' + window.prox_data['surveys'][idx];
             }else{
               notic.html('该手机已经参与过活动,不能重复参与');
-              notic.show();            
+              notic.show();
+              $('.s_icon a').addClass('disabled');              
             }
           })
       }
@@ -31,7 +32,6 @@
           if(reject >= 0){
             $('.pre_survey a').attr('href','/s/' + window.prox_data['surveys'][reject]).text('点击进行答题');            
           }
-
 
           var len = $.grep(window.prox_data.survey_status,function(value){
             return value > 0 && value != 2;
