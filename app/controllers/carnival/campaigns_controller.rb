@@ -191,7 +191,8 @@ class Carnival::CampaignsController < Carnival::CarnivalController
       surveys:surveys,
       survey_status:@current_carnival_user.survey_status,
       mobile:@current_carnival_user.mobile,
-      answer_orders:@answer_order
+      answer_orders:@answer_order,
+      pre_reject_count: CarnivalUser.where(pre_survey_status: 2).length
     }
     return @prox_obj
   end

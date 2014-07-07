@@ -7,6 +7,26 @@
 .header{
   height:20px;
 }
+
+.process{
+  position: relative;
+  width:1000px;
+  margin:0 auto;  
+  border:1px solid red;
+  @include one-line(50px);
+  text-align: center;
+  .percent{
+    
+    background:yellow;
+    height:inherit;
+  }
+  .text{
+    position: absolute;
+    top:0px;
+    left:40%;
+  }
+}
+
 .s_content{
   @include clearfix;
   width:1000px;
@@ -15,7 +35,7 @@
     margin-right:20px;
     margin-bottom:20px;
     float:left;
-    width:300px;
+    width:inherit;
     height:100px;
     a{
       display:inline-block;
