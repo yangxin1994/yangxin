@@ -1,0 +1,191 @@
+<% content_for :head do %>
+  <%= stylesheet_link_tag "pages/carnival/campaigns_proxy-bundle", :media => "all" %>
+
+  <script src="/assets/ui/widgets/od_progressbar.js" type="text/javascript"></script>
+
+
+  <script type="text/javascript">
+    $(function(){
+
+      window.prox_data = <%= raw (@prox_obj).to_json %>;
+
+      var pb = $.od.odProgressbar({
+        color: "#6D91A9",
+        width: 400,
+        value: 0
+      });
+      pb.appendTo('#progressbar');
+
+
+
+      function sendAjax(phone){
+        var url = '/carnival/users/send_mobile';
+        $.post(url,
+          {mobile: phone
+          },function(data){
+            var notic = $('.carnival-popup .notic');
+            if(data.success){
+              var idx = $.inArray(0,window.prox_data['survey_status']);
+              window.location.href = '/s/' + window.prox_data['surveys'][idx];
+            }else{
+              notic.html('该手机已经参与过活动,不能重复参与');
+              notic.show();            
+            }
+          })
+      }
+
+      if(parseInt(window.prox_data['pre_status']) == 32){
+        if(window.prox_data['mobile']){
+          var ida = $.inArray(0,window.prox_data['survey_status']);
+          $('.pre_survey a').attr('href','/s/' + window.prox_data['surveys'][ida]).text('点击进行答题');
+
+          var reject = $.inArray(2,window.prox_data['survey_status']);
+
+          if(reject >= 0){
+            $('.pre_survey a').attr('href','/s/' + window.prox_data['surveys'][reject]).text('点击进行答题');            
+          }
+
+
+          var len = $.grep(window.prox_data.survey_status,function(value){
+            return value > 0 && value != 2;
+          });
+
+
+          if(len.length == 14){
+            $('.pre_survey a').attr('href','/').text('答题完成');  
+          }
+
+
+          pb.odProgressbar('option', 'value', (1 + len.length) / 15);
+          // $('.percent').css('width',percent);
+        }else{
+          $.carnivalbox({
+            width:460,
+            title:'恭喜您完成首个问卷',
+            content:'请留下您的联系方式,认真答题获取现金奖励',
+            btnCont:'提交',
+            beforeshow:function(){
+              $('.carnival-popup p').after('<form action=""><input class="phone" type="text"      name="phone" placeholder="请输入手机号码"/></form>');
+            },
+            aftershow:function(){
+              var phone_ipt = $('.carnival-popup form input');
+              var sub_btn   = $('.carnival-popup a.btn');
+              phone_ipt.live('focus',function(){
+                $(this).removeClass('error');
+                sub_btn.removeClass('disabled');
+              });
+              sub_btn.die("click");
+              sub_btn.live('click',function(){
+                if(!sub_btn.hasClass('disabled')){
+                  var phone = phone_ipt.val();
+                  if($.regex.isMobile(phone)){
+                    sub_btn.addClass('disabled');
+                    phone_ipt.removeClass('error');
+                    sub_btn.addClass('disabled');
+                    sendAjax(phone);                   
+                  }else{
+                    phone_ipt.addClass('error');
+                    sub_btn.removeClass('disabled');
+                    return false;
+                  }
+                }
+              });
+            }
+          })             
+        }
+      }else if(parseInt(window.prox_data['pre_status']) == 2){
+          $.carnivalbox({
+            width:460,
+            title:'呃..您不符合本次活动要求',
+            content:'有<b>' + window.prox_data.pre_reject_count + '</b>个小盆友和您一样挂在了这条路上..',
+            btnCont:'我知道了',
+            aftershow:function(){
+              $('.carnival-popup a.btn').live('click',function(){
+                $.fancybox.close();
+                window.location.href = '/';
+              })
+            }
+          })  
+      }else{
+        $.carnivalbox({
+          width:460,
+          title:'欢迎您参与此次调研',
+          content:'如果您已经参与过该活动,请输入您的手机号<b class="go_on">继续参与</b></br>如果您未参与过该活动,请点击<b class="clo">关闭</b>按钮进入答题页面',
+          btnCont:'继续参与',
+          beforeshow:function(){
+            $('.carnival-popup p').after('<form action=""><input class="phone" type="text"      name="phone" placeholder="请输入手机号码"/></form>');
+            $('.carnival-popup a.btn').after('<a class="clos">关闭</a>')
+          },
+          aftershow:function(){
+            var phone_ipt = $('.carnival-popup form input');
+            var sub_btn   = $('.carnival-popup a.btn');
+            var clos_btn = $('.carnival-popup a.clos');
+            clos_btn.live('click',function(){
+              $.fancybox.close();
+              window.location.href = '/s/' + window.prox_data['pre_survey'];
+            })
+            phone_ipt.live('focus',function(){
+              $(this).removeClass('error');
+              sub_btn.removeClass('disabled');
+            });
+            sub_btn.die("click");
+            sub_btn.live('click',function(){
+              if(!sub_btn.hasClass('disabled')){
+                var phone = phone_ipt.val();
+                if($.regex.isMobile(phone)){
+                  sub_btn.addClass('disabled');
+                  phone_ipt.removeClass('error');
+                  sub_btn.addClass('disabled');
+                  $.postJSON('/carnival/users/login', {mobile: phone}, function(retval) {
+                    if(retval.success && retval.value) {
+                      location.reload(true);
+                    } else {
+                      $('.carnival-popup .notic').text('该手机尚未开始游戏').show();
+                    }
+                  });                                     
+                }else{
+                  phone_ipt.addClass('error');
+                  sub_btn.removeClass('disabled');
+                  return false;
+                }
+              }
+            });
+          }
+        })
+        $('.pre_survey a').text('点击进行答题');           
+      }
+    });
+
+  </script>
+<% end %>
+
+
+<div class='box'>
+  <div class='title'>
+   问卷吧有奖答题
+  </div>
+  <div class='describe'>
+      问卷吧大调查来袭!完成参与问卷吧有奖问答活动就能获得现金奖励,名额有限,赶快动动鼠标发表您的个人观点赢取现金奖励
+  </div>
+  <div id="progressbar"></div>
+  <div class='btn-container'>
+    <div class='pre_survey'>
+      <a href="/s/<%=@prox_obj[:pre_survey]%>">点击进行答题</a>
+    </div>    
+  </div>
+</div>
+
+
+
+<!-- <div class='process'>
+  <div class='percent'></div>
+  <div class='text'>
+    恭喜您已经答题完成
+    <span>0%</span>
+  </div>
+</div>
+<div class='s_content'>
+  <div class='pre_survey'>
+    <a href="/s/<%#=@prox_obj[:pre_survey]%>"></a>
+  </div>
+</div> -->

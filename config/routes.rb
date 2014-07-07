@@ -628,9 +628,15 @@ OopsData::Application.routes.draw do
       collection do
         post :login, :draw_lottery, :update
         get :draw_lottery
+        post :send_mobile
       end
     end
-    resources :campaigns, :only => [:index]
+    resources :campaigns do 
+      collection do 
+        get :index
+        get :proxy
+      end
+    end
   end
 
   # Root: different roots for diffent hosts

@@ -45,4 +45,11 @@ class Carnival::UsersController < Carnival::CarnivalController
     end
     render_json_auto retval and return
   end
+
+  def send_mobile
+    render_json_auto CarnivalUser::MOBILE_NOT_PRESENT and return  unless params[:mobile].present?
+    mobile = CarnivalUser.where(mobile:params[:mobile]).first
+    render_json_auto CarnivalUser::MOBILE_EXIST and return if mobile.present?
+    render_json_auto current_carnival_user.update_attributes(mobile:params[:mobile])
+  end
 end
