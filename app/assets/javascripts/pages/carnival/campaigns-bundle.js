@@ -150,9 +150,6 @@ jQuery(function($) {
                                 <a id="Renren" class="renren"></a>\
                                 <a id="Douban" class="douban"></a>\
                                 <a id="QQSpace" class="qzone"></a>\
-                               </p><p class="share_d">点击参与以下问卷,获得更多积分:</p>\
-                               <p>\
-                               <a href="/s/5389855ceb0e5b7781000003" target="_blank">问卷吧嘉年华之月度活动（5月任务2）</a>\
                                </p>';
 
                             if (data.success) {
