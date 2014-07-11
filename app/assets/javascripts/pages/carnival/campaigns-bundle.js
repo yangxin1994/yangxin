@@ -150,7 +150,7 @@ jQuery(function($) {
                                 <a id="Renren" class="renren"></a>\
                                 <a id="Douban" class="douban"></a>\
                                 <a id="QQSpace" class="qzone"></a>\
-                               </p><p class="share_d">点击参与以下问卷,获得更多积分:</p>';
+                               </p>';
 
                             if (data.success) {
                                 if (t_typ == 1) {

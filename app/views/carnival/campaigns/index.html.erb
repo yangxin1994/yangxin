@@ -37,19 +37,6 @@
       window.data = <%= raw (@obj).to_json %>;
 
 
-      // var mobile = window.location.href.match(/\?c=\d{11}/);
-
-      // if(mobile && mobile.length > 0){
-      //   mobile = mobile[0];
-      //   mobile = mobile.split(/\?c=/)[1];
-      // }else{
-      //   var mobile = window.location.href.match(/\?c=_p_/);
-      // }
-
-      // if(mobile && mobile.length > 0){
-      //   $.cookie('pub_mobile',mobile,{ expires: 10 * 365 });
-      // }
-
 
 
       //background status
@@ -436,7 +423,7 @@
                     <a id="Renren" class="renren"></a>\
                     <a id="Douban" class="douban"></a>\
                     <a id="QQSpace" class="qzone"></a>\
-                    </p><p class="share_d">点击参与以下问卷,获得更多积分:</p>';
+                    </p>';
     
                 if(remain <= 0){
                   //首次完成全部任务后并已经抽奖，再次来到页面
@@ -487,15 +474,14 @@
                     $("#lotteryBtn").addClass('disabled');
                     //$('.ly-plate .draw_remain').text('剩余0次抽奖机会')
                     var title ='恭喜您,中奖了';
-                    var cont = '您已经抽中奖品' +  window.data.prize_name + '      我们会在审核后联系您!'  ;
+                    var cont = '您已经抽中奖品' +  window.data.prize_name + '我们会在审核后联系您!'  ;
                     var btn_cont = '我知道了';
                     var show = false;
                     //$('.ly-plate').show();
                   }else{
                     //分享抽奖情况
                     var title ='欢迎您再次抽奖';
-                    var cont = '您共有' + (window.data.share_num + 1) + '次抽奖机会,还剩余'
-                  + remain + '次抽奖机会';
+                    var cont = '您共有' + (window.data.share_num + 1) + '次抽奖机会,还剩余' + remain + '次抽奖机会';
                     var btn_cont = '继续抽奖';
                     var show = true;
                   }
@@ -540,14 +526,6 @@
                 var rema = window.data.share_num + 1 - window.data.share_lottery_num
               }
               
-              // var mobile = window.location.href.match(/\?c=\d{11}/);
-
-              // if(mobile && mobile.length > 0){
-              //   mobile = mobile[0];
-              //   mobile = mobile.split(/\?c=/)[1];
-              // }else{
-              //   var mobile = window.location.href.match(/\?c=_p_/);
-              // }
 
               if (window.data.pub_url){
                 if (window.data.pub_url.match(/\d{11}/)){
