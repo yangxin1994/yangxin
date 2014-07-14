@@ -1,13 +1,13 @@
 = form_tag(carnival_agents_path, method: "get", multipart: true) do
-  = label_tag :daili, "daili"
+  = label_tag :daili, "代理"
   = text_field_tag "daili", "", autofocus: true
-  = submit_tag "search"
+  = submit_tag "查询"
 
 %p
-  %span= "daili: #{params[:daili]}"
+  %span= "代理： #{params[:daili]}"
 
 %p
-  %span= "canyu:"
+  %span= "参与数量："
   %br
   %span= "#{@sample_num}"
 %p
