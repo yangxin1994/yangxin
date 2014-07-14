@@ -7,18 +7,18 @@
   %span= "代理： #{params[:daili]}"
 
 %p
-  %span= "参与数量："
+  %span= "参与数量：（有完成、待审和或者被拒绝问卷的样本数量）"
   %br
   %span= "#{@sample_num}"
 %p
-  %span= "wancheng:"
+  %span= "完成数量：（完成全部问卷的样本数量）"
   %br
   %span= "#{@finish_num}"
 %p
-  %span= "hege:"
+  %span= "合格电话号码：（全部问卷通过审核的样本电话号码）"
   %br
   %span= "#{@finish_mobile}"
 %p
-  %span= "buhege:"
+  %span= "不合格电话号码：（有问卷被拒绝的样本电话号码）"
   %br
   %span= "#{@reject_mobile}"

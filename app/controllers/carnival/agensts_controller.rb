@@ -2,7 +2,11 @@ class Carnival::AgentsController < Carnival::CarnivalController
 
   def index
     agent_name = params[:daili]
-    cs = CarnivalUser.where(source: agent_name)
+    if agent_name.blank?
+      cs = []
+    else
+      cs = CarnivalUser.where(source: agent_name)
+    end
 
     @sample_num = cs.select { |e| e.survey_status.include?(32) || e.survey_status.include?(4) || e.survey_status.include?(2) } .length
     @finish_num = cs.select { |e| !e.survey_status.include?(0) && !e.survey_status.include?(4) && !e.survey_status.include?(2) } .length
