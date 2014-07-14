@@ -631,6 +631,8 @@ OopsData::Application.routes.draw do
         post :send_mobile
       end
     end
+    resources :agents do
+    end
     resources :campaigns do 
       collection do 
         get :index

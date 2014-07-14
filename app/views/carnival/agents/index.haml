@@ -1,0 +1,24 @@
+= form_tag(carnival_agents_path, method: "get", multipart: true) do
+  = label_tag :daili, "daili"
+  = text_field_tag "daili", "", autofocus: true
+  = submit_tag "search"
+
+%p
+  %span= "daili: #{params[:daili]}"
+
+%p
+  %span= "canyu:"
+  %br
+  %span= "#{@sample_num}"
+%p
+  %span= "wancheng:"
+  %br
+  %span= "#{@finish_num}"
+%p
+  %span= "hege:"
+  %br
+  %span= "#{@finish_mobile}"
+%p
+  %span= "buhege:"
+  %br
+  %span= "#{@reject_mobile}"
