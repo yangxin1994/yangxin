@@ -387,7 +387,7 @@ class CarnivalUser
 
   def create_first_stage_order(mobile)
     u = CarnivalUser.where(mobile: mobile).first
-    return "" if u.no_reward == true
+    return "" if self.no_reward == true
     if u.present? && u.id.to_s != self.id.to_s
       return MOBILE_EXIST
     else
