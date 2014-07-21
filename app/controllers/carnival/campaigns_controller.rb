@@ -21,6 +21,7 @@ class Carnival::CampaignsController < Carnival::CarnivalController
 
 
   def index
+    redirect_to root_path and return
 
     redirect_to proxy_carnival_campaigns_path  and return  if @current_carnival_user.present? && @current_carnival_user.no_reward
 
@@ -153,7 +154,7 @@ class Carnival::CampaignsController < Carnival::CarnivalController
   end
 
   def proxy
-
+    redirect_to root_path and return 
     redirect_to carnival_campaigns_path  and return  if @current_carnival_user.present? && !@current_carnival_user.no_reward
 
     if params[:mob].present?
