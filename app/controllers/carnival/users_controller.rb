@@ -25,9 +25,6 @@ class Carnival::UsersController < Carnival::CarnivalController
     if current_carnival_user.blank?
       render_json_auto CarnivalUser::USER_NOT_EXIST and return
     end
-    if current_carnival_user.mobile.blank?
-      current_carnival_user.update_attributes(mobile: params[:mobile])
-    end
     if current_carnival_user.background_survey_status != CarnivalUser::FINISH
       render_json_auto CarnivalUser::BACKGROUND_SURVEY_NOT_FINISHED and return
     end
