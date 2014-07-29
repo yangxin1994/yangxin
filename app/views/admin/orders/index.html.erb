@@ -117,10 +117,8 @@
         <li><a class="querilayer" href="?date=365">一年内</a></li>             
         <li><a href="javascript:;" id="date_btn">自定义</a></li>             
       </ul>
-      <% if params[:type].to_i == Order::MOBILE_CHARGE %>
-        <a class="btn" href="/admin/orders/recharge_fail_mobile">失败易赛订单再充值</a>
-      <% end %>
-    </div>    
+      <!--<a class="btn" href="/admin/orders/recharge_fail_mobile">失败易赛订单再充值</a>-->
+    </div>
   </span>
 </div>
 
@@ -132,12 +130,10 @@
       <td width="8%">数量</td>
       <td width="8%">用户</td>
       <td><%= order_label(params["type"]) %></td>
-      <td width="#{params[:type].to_i == Order::MOBILE_CHARGE ? '10%' : '15%'}">创建时间</td>
-      <td width="#{params[:type].to_i == Order::MOBILE_CHARGE ? '10%' : '15%'}"><%= order_time_label(params["status"]) %></td>
+      <td width="10%">创建时间</td>
+      <td width="10%"><%= order_time_label(params["status"]) %></td>
       <td width="15%">操作</td>
-      <% if params[:type].to_i == Order::MOBILE_CHARGE %>
-        <td width="10%">易赛状态</td>
-      <% end %>
+      <td width="10%">易赛状态</td>
     </tr>
   </thead>
   <tbody>
@@ -146,7 +142,7 @@
       <td><%= order['gift_name'] || order['prize_name'] %></td>
       <td><%= order['amount'] %></td>
       <td><a href="/admin/samples/<%= order['user_id'] %>"><%= order['user_email_mobile'] %></a></td>
-      <% if params[:type].to_i == Order::MOBILE_CHARGE && order.esai_order_id.present? %>
+      <% if order.esai_order_id.present? %>
         <td title="订单号: <%= order['code'] %>; 易赛订单号: <%= order.esai_order_id %>" data-content="<%= order['address_str'] %>" class="o-detail"><%= "#{order['mobile']} #{order['qq']} #{order['email']} #{ "支付宝: " + order['alipay_account'] if order['alipay_account'].present? }" %></td>
       <% else %>
         <td title="订单号: <%= order['code'] %>" data-content="<%= order['address_str'] %>" class="o-detail"><%= "#{order['mobile']} #{order['qq']} #{order['email']} #{ "支付宝: " + order['alipay_account'] if order['alipay_account'].present? }" %></td>
@@ -183,14 +179,12 @@
           </ul>
         </div>
       </td>
-      <% if params[:type].to_i == Order::MOBILE_CHARGE %>
-        <td>
-          <span><%= esai_order_status_tag(order.esai_status) %></span>
-          <% if order.esai_status == Order::ESAI_HANDLE %>
-            <a class="refresh_esai" href="javascript:void()", data-id="<%= order.id.to_s %>">刷新</a>
-          <% end %>
-        </td>
-      <% end %>
+      <td>
+        <span><%= esai_order_status_tag(order.esai_status) %></span>
+        <% if order.esai_status == Order::ESAI_HANDLE %>
+          <a class="refresh_esai" href="javascript:void()", data-id="<%= order.id.to_s %>">刷新</a>
+        <% end %>
+      </td>
     </tr>
     <% end -%>
   </tbody>

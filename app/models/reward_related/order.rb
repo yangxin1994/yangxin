@@ -67,6 +67,7 @@ class Order
   belongs_to :gift
   belongs_to :answer
   belongs_to :sample, :class_name => "User", :inverse_of => :orders
+  belongs_to :movie_activity
 
   index({ code: 1 }, { background: true } )
   index({ status: 1 }, { background: true } )
@@ -235,20 +236,30 @@ class Order
     self.handled_at = Time.now
     self.save
     ChargeWorker.perform_async(self.id.to_s, self.mobile, self.amount)
-=begin
+  end
+
+  def auto_handle_one_by_one
+    return false if self.status != WAIT
+    return false if self.type != MOBILE_CHARGE
+    self.status = HANDLE
+    self.esai_status = ESAI_HANDLE
+    self.handled_at = Time.now
+    self.save
+
+    retval = EsaiApi.new.charge_phone(self.mobile, self.amount, "None")
     if retval.nil?
-      self.esai_status = ESAI_FAIL
+      self.esai_status = Order::ESAI_FAIL
     else
-      self.esai_status = ESAI_HANDLE
+      self.esai_status = Order::ESAI_HANDLE
       self.esai_order_id = retval
     end
-=end
+    self.save
   end
 
   def self.recharge_fail_mobile
     Order.where(esai_status: ESAI_FAIL, status: HANDLE, type: MOBILE_CHARGE).each do |order|
       order.update_attributes(status: WAIT)
-      order.auto_handle
+      order.auto_handle_one_by_one
     end
   end
 

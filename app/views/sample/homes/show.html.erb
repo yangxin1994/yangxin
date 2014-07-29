@@ -4,7 +4,15 @@
     <% if user_signed_in %>
       window.current_user_id = "<%= current_user.id %>"
     <% end %>   
-    // jQuery(function(){
+    jQuery(function(){
+      // carnival
+      setTimeout(function() {
+        $('#carnival').slideDown(1500);
+        setTimeout(function() {
+          $('#carnival').slideUp(1500);
+        }, 15000);
+      }, 500);
+      
     //     var paidSlider = $('.paid-survey');
     //     var content = $('.paid-survey ul')[0];
     //     var oLi = content.children;
@@ -76,7 +84,7 @@
     //         sliderDown();
     //       };
     //      };
-    //   });
+      });
   </script>
 <% end %>
 <% if @data[:hot_survey].present? %>
@@ -118,7 +126,8 @@
       </div>
       <div class="bd">
         <ul>
-          <li><img src="/assets/od-quillme/banner/banner_1.jpg" /></li>
+          <li><a href="javascript:void(0);"><img src="/assets/od-quillme/banner/banner_carnival.jpg" /></a></li>
+          <!-- <li><img src="/assets/od-quillme/banner/banner_1.png" /></li> -->
           <li><img src="/assets/od-quillme/banner/banner_2.png" /></li>
           <li><img src="/assets/od-quillme/banner/banner_3.png" /></li>
         </ul>
@@ -286,6 +295,8 @@
   </div>
 </div>
 
+<% if Rails.env.production? %>
 <div style='display:none;'><script type="text/javascript"> var _bdhmProtocol = (("https:" == document.location.protocol) ? " https://" : " http://"); document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3Fb54732309180d2feab954364fdebf7f2' type='text/javascript'%3E%3C/script%3E")) </script>
 </div>
+<% end %>
 

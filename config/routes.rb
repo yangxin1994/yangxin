@@ -1,6 +1,8 @@
 require 'sidekiq/web'
 OopsData::Application.routes.draw do
 
+  mount Sidekiq::Web, at: "/sidekiq"
+
   # match '*path' => 'welcome#index'
   # get '/:unique_key' => 'utility/short_urls#show', :constraints => { :unique_key => /~.+/ }
   match '/:unique_key' => 'mongoid_shortener/shortened_urls#translate', :via => :get, :constraints => { :unique_key => /~.+/ }
@@ -141,10 +143,13 @@ OopsData::Application.routes.draw do
       end
     end
     
-    resources :public_notices, :only => [:index,:show]      
+    resources :public_notices, :only => [:index,:show]
+
+    resources :campaigns, :only => [:index]      
   end
 
   resources :realogs
+
 
   # surveys, pages and questions
   scope :module => "quill" do
@@ -258,6 +263,17 @@ OopsData::Application.routes.draw do
     put "sample_attributes/bind_question/:id" => "sample_attributes#bind_question"
     delete "sample_attributes/bind_question/:id" => "sample_attributes#bind_question", as: :sample_attribute_bind
 
+    resources :carnivals do
+      collection do
+        get :pre_surveys, :surveys, :orders, :region_quota, :recharge_fail_mobile, :check_order_result
+        post :update_quota
+      end
+
+      member do
+        put :handle, :finish, :update_express_info, :update_remark
+      end
+    end
+
     resources :reviews do
       member do
         put 'publish', 'close', 'pause', 'reject'
@@ -326,7 +342,7 @@ OopsData::Application.routes.draw do
 
     resources :surveys, :as => :s do
       member do
-        get :reward_schemes, :promote, :more_info, :bind_question, :cost_info, :promote_info, :sample_attributes, :interviewer_task, :new_interviewer, :questions
+        get :reward_schemes, :promote, :more_info, :bind_question, :cost_info, :promote_info, :sample_attributes, :interviewer_task, :new_interviewer, :questions, :presurvey, :prequestions
         post :update_promote, :create_interviewer
         put :update_promote, :set_info, :bind_question, :star, :update_sample_attribute_for_promote, :update_amount
         delete :destroy_attributes, :bind_question, :remove_sample_attribute_for_promote
@@ -335,8 +351,13 @@ OopsData::Application.routes.draw do
       collection do
 
       end
+      resources :pre_surveys do
+        collection do
+          get :questions
+        end
+      end      
     end
-
+    
     resources :survey_tasks do
       member do
         get :task_info
@@ -600,6 +621,24 @@ OopsData::Application.routes.draw do
       end
     end
     resource :bind_sample, :only => [:show]
+  end
+
+  namespace :carnival do
+    resources :users do
+      collection do
+        post :login, :draw_lottery, :update
+        get :draw_lottery
+        post :send_mobile
+      end
+    end
+    resources :agents do
+    end
+    resources :campaigns do 
+      collection do 
+        get :index
+        get :proxy
+      end
+    end
   end
 
   # Root: different roots for diffent hosts

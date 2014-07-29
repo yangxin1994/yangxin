@@ -53,7 +53,7 @@ class Survey
   #  2 for inserting randomly
   field :quality_control_questions_type, :type => Integer, default: 0
   field :quality_control_questions_ids, :type => Array, default: []
-  field :max_num_per_ip, :type => Integer, default: 3
+  field :max_num_per_ip, :type => Integer, default: 10
   field :deadline, :type => Integer
   field :is_star, :type => Boolean, :default => false
   field :publish_result, :type => Boolean, :default => false
@@ -109,6 +109,7 @@ class Survey
   has_many :report_results
   has_many :interviewer_tasks
   has_many :agent_tasks
+  has_many :pre_surveys
   has_and_belongs_to_many :answer_auditors, class_name: "User", inverse_of: :answer_auditor_allocated_surveys
   belongs_to :user, class_name: "User", inverse_of: :surveys
   belongs_to :client
@@ -577,6 +578,9 @@ class Survey
 
   def spss_header
     headers =[
+      {"spss_name" => "user_id",
+       "spss_type" => "String",
+       "spss_label" => "用户ID"},
       {"spss_name" => "answer_id",
        "spss_type" => "String",
        "spss_label" => "答案ID"},
@@ -592,6 +596,9 @@ class Survey
       {"spss_name" => "IP",
        "spss_type" => "String",
        "spss_label" => "IP"},
+      {"spss_name" => "location",
+       "spss_type" => "String",
+       "spss_label" => "地点"},
       {"spss_name" => "time",
        "spss_type" => "String",
        "spss_label" => "答题时长"}
@@ -603,7 +610,7 @@ class Survey
   end
 
   def excel_header
-    headers =["answer_id", "is_agent", "email", "mobile", "IP", "地点", "答题时长"]
+    headers =["user_id", "answer_id", "is_agent", "email", "mobile", "IP", "地点", "答题时长"]
     self.all_questions(false).each_with_index do |e, i|
       headers += e.excel_header("q#{i+1}")
     end
@@ -658,7 +665,14 @@ class Survey
       else
         answer_time = 0      
       end
-      line_answer = [answer._id, answer.agent_task.present?.to_s, answer.user.try(:email), answer.user.try(:mobile), answer.ip_address, "#{answer_time} 分"]
+      if answer.carnival_user.present?
+        user_id = answer.carnival_user.id.to_s
+      elsif answer.user.present?
+        user_id = answer.user.id.to_s
+      else
+        user_id = ""
+      end
+      line_answer = [user_id, answer._id, answer.agent_task.present?.to_s, answer.user.try(:email), answer.user.try(:mobile), answer.ip_address, QuillCommon::AddressUtility.find_province_city_town_by_code(answer.region), "#{answer_time} 分"]
       begin
         all_questions_id(false).each_with_index do |question, index|
           qindex = index
@@ -679,11 +693,18 @@ class Survey
   end
 
   def admin_to_csv(answers)
+    answers ||= []
     formated_error = []
     qindex = 0
     q = self.all_questions_type(false)
     csv_string = CSV.generate(:headers => true) do |csv|
-      csv << excel_header
+      break if answers.blank?
+      carnival_answer = (Carnival::SURVEY + [Carnival::PRE_SURVEY]).include?(answers[0].survey_id.to_s)
+      if carnival_answer
+        csv << ["mobile"] + excel_header
+      else
+        csv << excel_header
+      end
       answers.each_with_index do |answer, index|
         if answer.finished_at.present?
           answer_time = Time.at(answer.finished_at) - answer.created_at
@@ -691,7 +712,10 @@ class Survey
         else
           answer_time = 0      
         end
-        line_answer = [answer._id, answer.agent_task.present?.to_s, answer.user.try(:email), answer.user.try(:mobile), answer.remote_ip, QuillCommon::AddressUtility.find_province_city_town_by_code(answer.region), "#{answer_time} 分"]
+        line_answer = [answer.carnival_user.try(:id) || answer.user.try(:id) || "", answer._id, answer.agent_task.present?.to_s, answer.user.try(:email), answer.user.try(:mobile), answer.remote_ip, QuillCommon::AddressUtility.find_province_city_town_by_code(answer.region), "#{answer_time} 分"]
+        if carnival_answer
+          line_answer.insert(0, answer.carnival_user.try(:mobile).to_s)
+        end
         begin
           all_questions_id(false).each_with_index do |question, index|
             qindex = index

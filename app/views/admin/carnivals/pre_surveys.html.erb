@@ -1,0 +1,141 @@
+<!-- content for head -->
+<% content_for :head do %>
+  <!--<%= javascript_include_tag "pages/admin/carnival/index-bundle" %>-->
+<% end %>
+
+<% content_for :sidebar do %>
+  <ul class="nav nav-list flowy-admin-sidenav">
+    <li class="active">
+      <a href="/admin/carnivals/pre_surveys">
+        <i class="icon-chevron-right"></i>
+        预调研配额
+      </a>
+    </li>
+    <li>
+      <a href="/admin/carnivals/surveys">
+        <i class="icon-chevron-right"></i>
+        调研回收
+      </a>
+    </li>
+    <li>
+      <a href="/admin/carnivals/orders">
+        <i class="icon-chevron-right"></i>
+        订单
+      </a>
+    </li>    
+  </ul>
+<% end %>
+
+<div>
+    <form controller="admin/carnivals" action="update_quota" method="post">
+      <label><%= "男性（已回收" + @quota_stats.quota["gender"][0].to_s + "）" %></label>
+      <input type="text" name="gender[0]" value="<%= @quota_setting.quota["gender"][0] %>">
+      <label><%= "女性（已回收" + @quota_stats.quota["gender"][1].to_s + "）" %></label>
+      <input type="text" name="gender[1]" value="<%= @quota_setting.quota["gender"][1] %>">
+      <label><%= "18岁以下（已回收" + @quota_stats.quota["age"][0].to_s + "）" %></label>
+      <input type="text" name="age[0]" value="<%= @quota_setting.quota["age"][0] %>">
+      <label><%= "19岁-24岁（已回收" + @quota_stats.quota["age"][1].to_s + "）" %></label>
+      <input type="text" name="age[1]" value="<%= @quota_setting.quota["age"][1] %>">
+      <label><%= "25岁-30岁（已回收" + @quota_stats.quota["age"][2].to_s + "）" %></label>
+      <input type="text" name="age[2]" value="<%= @quota_setting.quota["age"][2] %>">
+      <label><%= "31岁-35岁（已回收" + @quota_stats.quota["age"][3].to_s + "）" %></label>
+      <input type="text" name="age[3]" value="<%= @quota_setting.quota["age"][3] %>">
+      <label><%= "36岁-40岁（已回收" + @quota_stats.quota["age"][4].to_s + "）" %></label>
+      <input type="text" name="age[4]" value="<%= @quota_setting.quota["age"][4] %>">
+      <label><%= "41岁-50岁（已回收" + @quota_stats.quota["age"][5].to_s + "）" %></label>
+      <input type="text" name="age[5]" value="<%= @quota_setting.quota["age"][5] %>">
+      <label><%= "50岁以上（已回收" + @quota_stats.quota["age"][6].to_s + "）" %></label>
+      <input type="text" name="age[6]" value="<%= @quota_setting.quota["age"][6] %>">
+      <label><%= "月收入2000元以下（已回收" + @quota_stats.quota["income"][0].to_s + "）" %></label>
+      <input type="text" name="income[0]" value="<%= @quota_setting.quota["income"][0] %>">
+      <label><%= "月收入2000元-3000元（已回收" + @quota_stats.quota["income"][1].to_s + "）" %></label>
+      <input type="text" name="income[1]" value="<%= @quota_setting.quota["income"][1] %>">
+      <label><%= "月收入3000元-6000元（已回收" + @quota_stats.quota["income"][2].to_s + "）" %></label>
+      <input type="text" name="income[2]" value="<%= @quota_setting.quota["income"][2] %>">
+      <label><%= "月收入6000元-8000元（已回收" + @quota_stats.quota["income"][3].to_s + "）" %></label>
+      <input type="text" name="income[3]" value="<%= @quota_setting.quota["income"][3] %>">
+      <label><%= "月收入8000元-10000元（已回收" + @quota_stats.quota["income"][4].to_s + "）" %></label>
+      <input type="text" name="income[4]" value="<%= @quota_setting.quota["income"][4] %>">
+      <label><%= "月收入10000元以上（已回收" + @quota_stats.quota["income"][5].to_s + "）" %></label>
+      <input type="text" name="income[5]" value="<%= @quota_setting.quota["income"][5] %>">
+      <label><%= "初中及以下（已回收" + @quota_stats.quota["education"][0].to_s + "）" %></label>
+      <input type="text" name="education[0]" value="<%= @quota_setting.quota["education"][0] %>">
+      <label><%= "高中/中专/技校（已回收" + @quota_stats.quota["education"][1].to_s + "）" %></label>
+      <input type="text" name="education[1]" value="<%= @quota_setting.quota["education"][1] %>">
+      <label><%= "大专/高职（已回收" + @quota_stats.quota["education"][2].to_s + "）" %></label>
+      <input type="text" name="education[2]" value="<%= @quota_setting.quota["education"][2] %>">
+      <label><%= "大学本科（已回收" + @quota_stats.quota["education"][3].to_s + "）" %></label>
+      <input type="text" name="education[3]" value="<%= @quota_setting.quota["education"][3] %>">
+      <label><%= "硕士及以上（已回收" + @quota_stats.quota["education"][4].to_s + "）" %></label>
+      <input type="text" name="education[4]" value="<%= @quota_setting.quota["education"][4] %>">
+      <label><%= "北京（已回收" + @quota_stats.quota["region"]["4096"].to_s + "）" %></label>
+      <input type="text" name="region[4096]" value="<%= @quota_setting.quota["region"]["4096"] %>">
+      <label><%= "上海（已回收" + @quota_stats.quota["region"]["36864"].to_s + "）" %></label>
+      <input type="text" name="region[36864]" value="<%= @quota_setting.quota["region"]["36864"] %>">
+      <label><%= "广州（已回收" + @quota_stats.quota["region"]["77888"].to_s + "）" %></label>
+      <input type="text" name="region[77888]" value="<%= @quota_setting.quota["region"]["77888"] %>">
+      <label><%= "深圳（已回收" + @quota_stats.quota["region"]["78016"].to_s + "）" %></label>
+      <input type="text" name="region[78016]" value="<%= @quota_setting.quota["region"]["78016"] %>">
+      <label><%= "天津（已回收" + @quota_stats.quota["region"]["8192"].to_s + "）" %></label>
+      <input type="text" name="region[8192]" value="<%= @quota_setting.quota["region"]["8192"] %>">
+      <label><%= "南京（已回收" + @quota_stats.quota["region"]["41024"].to_s + "）" %></label>
+      <input type="text" name="region[41024]" value="<%= @quota_setting.quota["region"]["41024"] %>">
+      <label><%= "武汉（已回收" + @quota_stats.quota["region"]["69696"].to_s + "）" %></label>
+      <input type="text" name="region[69696]" value="<%= @quota_setting.quota["region"]["69696"] %>">
+      <label><%= "沈阳（已回收" + @quota_stats.quota["region"]["24640"].to_s + "）" %></label>
+      <input type="text" name="region[24640]" value="<%= @quota_setting.quota["region"]["24640"] %>">
+      <label><%= "西安（已回收" + @quota_stats.quota["region"]["110656"].to_s + "）" %></label>
+      <input type="text" name="region[110656]" value="<%= @quota_setting.quota["region"]["110656"] %>">
+      <label><%= "成都（已回收" + @quota_stats.quota["region"]["94272"].to_s + "）" %></label>
+      <input type="text" name="region[94272]" value="<%= @quota_setting.quota["region"]["94272"] %>">
+      <label><%= "重庆（已回收" + @quota_stats.quota["region"]["90112"].to_s + "）" %></label>
+      <input type="text" name="region[90112]" value="<%= @quota_setting.quota["region"]["90112"] %>">
+      <label><%= "杭州（已回收" + @quota_stats.quota["region"]["45120"].to_s + "）" %></label>
+      <input type="text" name="region[45120]" value="<%= @quota_setting.quota["region"]["45120"] %>">
+      <label><%= "青岛（已回收" + @quota_stats.quota["region"]["61568"].to_s + "）" %></label>
+      <input type="text" name="region[61568]" value="<%= @quota_setting.quota["region"]["61568"] %>">
+      <label><%= "大连（已回收" + @quota_stats.quota["region"]["24704"].to_s + "）" %></label>
+      <input type="text" name="region[24704]" value="<%= @quota_setting.quota["region"]["24704"] %>">
+      <label><%= "宁波（已回收" + @quota_stats.quota["region"]["45184"].to_s + "）" %></label>
+      <input type="text" name="region[45184]" value="<%= @quota_setting.quota["region"]["45184"] %>">
+      <label><%= "济南（已回收" + @quota_stats.quota["region"]["61504"].to_s + "）" %></label>
+      <input type="text" name="region[61504]" value="<%= @quota_setting.quota["region"]["61504"] %>">
+      <label><%= "哈尔滨（已回收" + @quota_stats.quota["region"]["32832"].to_s + "）" %></label>
+      <input type="text" name="region[32832]" value="<%= @quota_setting.quota["region"]["32832"] %>">
+      <label><%= "长春（已回收" + @quota_stats.quota["region"]["28736"].to_s + "）" %></label>
+      <input type="text" name="region[28736]" value="<%= @quota_setting.quota["region"]["28736"] %>">
+      <label><%= "厦门（已回收" + @quota_stats.quota["region"]["53376"].to_s + "）" %></label>
+      <input type="text" name="region[53376]" value="<%= @quota_setting.quota["region"]["53376"] %>">
+      <label><%= "郑州（已回收" + @quota_stats.quota["region"]["65600"].to_s + "）" %></label>
+      <input type="text" name="region[65600]" value="<%= @quota_setting.quota["region"]["65600"] %>">
+      <label><%= "苏州（已回收" + @quota_stats.quota["region"]["41280"].to_s + "）" %></label>
+      <input type="text" name="region[41280]" value="<%= @quota_setting.quota["region"]["41280"] %>">
+      <label><%= "无锡（已回收" + @quota_stats.quota["region"]["41088"].to_s + "）" %></label>
+      <input type="text" name="region[41088]" value="<%= @quota_setting.quota["region"]["41088"] %>">
+      <label><%= "长沙（已回收" + @quota_stats.quota["region"]["73792"].to_s + "）" %></label>
+      <input type="text" name="region[73792]" value="<%= @quota_setting.quota["region"]["73792"] %>">
+      <label><%= "福州（已回收" + @quota_stats.quota["region"]["53312"].to_s + "）" %></label>
+      <input type="text" name="region[53312]" value="<%= @quota_setting.quota["region"]["53312"] %>">
+      <label><%= "兰州（已回收" + @quota_stats.quota["region"]["114752"].to_s + "）" %></label>
+      <input type="text" name="region[114752]" value="<%= @quota_setting.quota["region"]["114752"] %>">
+      <label><%= "乌鲁木齐（已回收" + @quota_stats.quota["region"]["127040"].to_s + "）" %></label>
+      <input type="text" name="region[127040]" value="<%= @quota_setting.quota["region"]["127040"] %>">
+      <label><%= "昆明（已回收" + @quota_stats.quota["region"]["102464"].to_s + "）" %></label>
+      <input type="text" name="region[102464]" value="<%= @quota_setting.quota["region"]["102464"] %>">
+      <label><%= "三线华东（已回收" + @quota_stats.quota["region"]["1"].to_s + "）" %></label>
+      <input type="text" name="region[1]" value="<%= @quota_setting.quota["region"]["1"] %>">
+      <label><%= "三线华南（已回收" + @quota_stats.quota["region"]["2"].to_s + "）" %></label>
+      <input type="text" name="region[2]" value="<%= @quota_setting.quota["region"]["2"] %>">
+      <label><%= "三线华中（已回收" + @quota_stats.quota["region"]["3"].to_s + "）" %></label>
+      <input type="text" name="region[3]" value="<%= @quota_setting.quota["region"]["3"] %>">
+      <label><%= "三线华北（已回收" + @quota_stats.quota["region"]["4"].to_s + "）" %></label>
+      <input type="text" name="region[4]" value="<%= @quota_setting.quota["region"]["4"] %>">
+      <label><%= "三线西北（已回收" + @quota_stats.quota["region"]["5"].to_s + "）" %></label>
+      <input type="text" name="region[5]" value="<%= @quota_setting.quota["region"]["5"] %>">
+      <label><%= "三线西南（已回收" + @quota_stats.quota["region"]["6"].to_s + "）" %></label>
+      <input type="text" name="region[6]" value="<%= @quota_setting.quota["region"]["6"] %>">
+      <label><%= "三线东北（已回收" + @quota_stats.quota["region"]["7"].to_s + "）" %></label>
+      <input type="text" name="region[7]" value="<%= @quota_setting.quota["region"]["7"] %>">
+      <button type="submit" class="btn">更新</button>
+    </form>
+</div>
