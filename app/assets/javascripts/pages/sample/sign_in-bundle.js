@@ -63,7 +63,7 @@ $(function() {
                 err_notice = "<span class='faild'></span><span class='notice'>密码错误</span>"
                 break;
             case 'error_24':
-                err_notice = "<span class='faild'></span><span class='notice'>账户未激活,您可以<a href='/account/sign_up'>重新激活</a></span>"
+                err_notice = "<span class='faild'></span><span class='notice'>账户未注册,<a href='/account/sign_up'>立即注册</a></span>"
                 break;
         }
         if (error_type == 'error_11') {

@@ -26,81 +26,14 @@
 /*    .section.a {filter:progid:DXImageTransform.Microsoft.BasicImage(grayscale=1);-webkit-filter: grayscale(100%);}*/
   </style>
 
-  <script type="text/javascript">
-
-  <% if @obj[:pre_status].to_i > 0 %>
-  window.show_ad = false;
-  <% else %>
-  window.show_ad = true;
-  <% end %>
-
-  $(function () {
-    // social share
-    var share_href = 'http://wenjuanba.com/carnival/campaigns?i=<%= @current_carnival_user.id.to_s %>'; 
-    _.each(['SinaWeibo', 'TencentWeibo', 'Renren', 'Douban', 'QQSpace'], $.proxy(function(v) {
-      $('#' + v).live('click',function() {
-        $.social['shareTo' + v](share_href + '&c=' + v, '我发现了一个好玩的活动“问卷吧嘉年华”，参加100%获得手机充值卡，还可以抽红米note、小米盒子、小米电源等大奖哦！你也来参加吧！', 'http://wenjuanba.com/assets/activities/2014-6/carnival.png');
-      });
-    }, this));
-    $('#QQ').live('click',function() {
-      $.carnivalbox({
-        width:460,
-        title:'分享活动链接',
-        content:'复制以下链接邀请好友参加活动，每成功邀请 1 位好友，可获得 1 次小米大奖抽奖机会。',
-        btnCont:'关闭窗口',
-        beforeshow:function(){
-          $('.carnival-popup p').after('<p style="color: #E75C72">' + share_href + '&c=QQ</p>');
-        },
-        aftershow:function(){
-          $('.carnival-popup a.btn').click(function() {
-            $.fancybox.close();
-          });
-        }
-      });
-    });
-  });
-  </script>
-
   <%= yield :head %>
 
 </head>
 <body>
 
   <div class="header">
-  	<div id="ad" <% if @obj[:pre_status].to_i <= 0 %> style='top:0px;' <% end %> >
-  		<div class="gifts">
-  			<a class="gift-a" target="_blank" rel="nofollow" href="http://www.mi.com/note"></a>
-  			<a class="gift-b" target="_blank" rel="nofollow" href="http://www.mi.com/hezis"></a>
-  			<a class="gift-c" target="_blank" rel="nofollow" href="http://www.mi.com/item/1135000430"></a>
-  		</div>
-  		<div class="statistic">
-  			<span class="yjsc"></span>
-  			<b><%= CarnivalOrder.all.length %></b>
-  			<span class="gjp"></span>
-  		</div>
-  		<a href="javascript:;" class="drag"></a>
-  	</div>
-  	
     <div class="page">
       <div class="header-box">
-        <div class="bulletin">
-          <ul>
-            <% CarnivalLog.recent_logs.each do |log| %>
-              <li>
-                <span><%= ch_time(log.created_at) %></span>
-                <span><%= log.carnival_user.mobile[0..2].to_s + "****" + log.carnival_user.mobile[7..10].to_s %></span>
-                <% if [CarnivalLog::STAGE_1, CarnivalLog::STAGE_3].include?(log.type) %>
-                  <span>获得了</span>
-                <% elsif log.type == CarnivalLog::SHARE %>
-                  <span>分享成功，获得了</span>
-                <% else %>
-                  <span>抽到了</span>
-                <% end %>
-                <span><%= log.prize_name %></span>
-              </li>
-            <% end %>
-          </ul>
-        </div>
 				<a href="/s/53858ff3eb0e5b3366000024" class="sun" id="sun"></a>
 				<div id='light_sun' class="tooltip ty"><a href='/s/53858ff3eb0e5b3366000024'>跪求点亮Orz</a></div>
          <div class="questions">
@@ -118,20 +51,13 @@
          	
          		<span class="save-box">
          			<form action="">
-                <% if @current_carnival_user.mobile.blank? %>
-                <!-- <p><input id='save_mobile_ipt' type="text" placeholder="输入手机号保存进度"><a class="save-btn" href="javascript:void(0);">提交</a></p> -->
-                <% else %>
-                <!-- <p style='color:#000;'>当前登录：<%= @current_carnival_user.mobile %></p> -->
-                <% end %>
          				<!-- <div style="clear:both;padding:5px 0;"></div> -->
          				<p><a class="favorite" href="javascript:void(0)" onClick="return BookmarkApp.addBookmark(this)">将本活动放入收藏夹</a></p>
          				
          			</form>
          		</span>
-
         </div>
 				
-
         <div class="share">
           <a class="link" href="javascript:void(0);">分享拿大奖<b></b></a>
           <div class="share-box">
@@ -151,7 +77,7 @@
             <div class="share-lottery">
               <a style='display:none;' class="disabled" href="javascript:void(0);">抽奖（通关后开启）</a>
               <p>
-                已获得 <b><%=@obj[:share_num]%></b> 次抽大奖机会
+                已获得 <b><%#=@obj[:share_num]%></b> 次抽大奖机会
               </p>
               <p>（通关后可开始抽奖）</p>
             </div>
