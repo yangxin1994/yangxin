@@ -19,7 +19,7 @@ class Filler::FillerController < ApplicationController
 
   def ensure_survey(survey_id)
     @survey = Survey.find(survey_id)
-    if !@survey.nil? and survey_id == '53e1da56eb0e5b56f50000fa'
+    if !@survey.nil? and @survey.id.to_s == '53e1da56eb0e5b56f50000fa'
       @survey[:lang] = 'en'
     end
     @survey

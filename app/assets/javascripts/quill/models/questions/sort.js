@@ -62,11 +62,11 @@ $(function(){
       if(lang=='en') {
         if(this.issue.min <= 0) {
           if(this.issue.max <= 0) return 'Drag to sort';
-          else return 'Drag to sort no more than ' + this.issue.max + ' items.';
+          else return 'Drag to sort no more than ' + this.issue.max + ' items';
         } else {
-          if(this.issue.max <= 0) return 'Drag to sort at least the first ' + this.issue.min + ' items.';
-          else if(this.issue.max == this.issue.min) return 'Drag to sort the first ' + this.issue.min + ' items.';
-          else return 'Drag to sort ' + this.issue.min + ' to ' + this.issue.max + ' items.';
+          if(this.issue.max <= 0) return 'Drag to sort at least ' + this.issue.min + ' items';
+          else if(this.issue.max == this.issue.min) return 'Drag to sort ' + this.issue.min + ' items';
+          else return 'Drag to sort ' + this.issue.min + ' to ' + this.issue.max + ' items';
         }
       } else {
         if(this.issue.min <= 0) {
