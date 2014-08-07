@@ -1,0 +1,30 @@
+<div id='sf_main'>
+	<div class='welcome no_reward'>
+		<div class='inner'>
+			<h1>{{title}}</h1>
+			<div class='msg green'>
+				<em></em>
+				<span>
+					<b>Finished! {{#if publish_result}}<a href='/surveys/{{survey_id}}/result'>View report</a>{{/if}}</b><br />
+          Click the blue button below to draw a lottery
+					{{#if spreadable}}
+					<a id='start_spread' href='javascript:void(0);'>Invite friends</a> to get <em>{{spread_point}}</em> more points.
+					{{/if}}
+				</span>
+			</div>
+			<div class='award_lottery'>
+				<ul>
+					{{#each prizes}}
+					<li>
+						<img src="{{photo_url}}" />
+						<span>{{title}}(count {{amount}})</span>
+					</li>
+					{{/each}}
+				</ul>
+			</div>
+			<div class='form'>
+				<button id='ok_btn'>Start lottery</button>
+			</div>
+		</div>
+	</div>
+</div>

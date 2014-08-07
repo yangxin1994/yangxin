@@ -73,7 +73,7 @@ $(function(){
 
 			this.$el.addClass('q-' + quill.helpers.QuestionType.getName(this.model.get('question_type')).toLowerCase());
 
-			var info = this.model.getInfo();
+			var info = this.model.getInfo(this.options.lang);
 			if(!info)
 				this.$('.q-info').hide();
 			else
@@ -102,7 +102,7 @@ $(function(){
     },
 		getAnswer: function() {
 			var answer = this._getAnswer();
-			var error = this.model.checkAnswer(answer);
+			var error = this.model.checkAnswer(answer, this.options.lang);
 			this.$el.removeClass('error');
 			this.$('.q-error').text('');
 			if(error) {

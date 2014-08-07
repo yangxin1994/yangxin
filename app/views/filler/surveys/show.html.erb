@@ -15,12 +15,20 @@
 
 		// set start button text
 		<% if @percentage > 0 %>
-		$('#start_btn').text('继续答题（已完成' + Math.round(<%= @percentage * 100 %>) + '%）');
+    <% if @survey[:lang] == 'en' %>
+		$('#start_btn').text('Continue ( ' + Math.round(<%= @percentage * 100 %>) + '% finished )');
+    <% else %>
+    $('#start_btn').text('继续答题（已完成' + Math.round(<%= @percentage * 100 %>) + '%）');
+    <% end %>
 		<% else %>
 		<% if !["533bc7c6eb0e5badf200001d", "53191980eb0e5b99ea000020", "52a156f0eb0e5b697800000b", "52a59fc6eb0e5bb2c5000007"].include?(@survey['_id'].to_s) %>
 		// hack renmin
 		var left_time = <%=@survey.estimate_answer_time %>;
-		$('#start_btn').text('开始答题' + (left_time > 0 ? '（耗时' + $.util.printTimeFriendly(left_time) + '）' : ''));
+    <% if @survey[:lang] == 'en' %>
+		$('#start_btn').text('Start Survey');
+    <% else %>
+    $('#start_btn').text('开始答题' + (left_time > 0 ? '（耗时' + $.util.printTimeFriendly(left_time) + '）' : ''));
+    <% end %>
 		<% end %>
 		<% end %>
 	});
@@ -37,29 +45,49 @@
 			<div class='msg purple'>
 				<em></em>
 				<span>
-					<b>该问卷已经关闭！</b><br />
-					该问卷已经达到回收数量并关闭，下次记得早点来哦~
+          <% if @survey[:lang] == 'en' %>
+          <b>Survey closed.</b>
+          <% else %>
+          <b>该问卷已经关闭！</b><br />
+          该问卷已经达到回收数量并关闭，下次记得早点来哦~
+          <% end %>
 				</span>
 			</div>
 			<div class='follow-con'>	
-				<h3>您可以通过以下方式及时获得调查通知：</h3>
+        <% if @survey[:lang] == 'en' %>
+        <h3>You can get survey notification by:</h3>
+        <% else %>
+        <h3>您可以通过以下方式及时获得调查通知：</h3>
+        <% end %>
 				<ul>
 					<li>
 						<a href="/surveys">
 							<em class='wenjuanba'></em>
-							<span>问卷吧官网</span>
+              <% if @survey[:lang] == 'en' %>
+              <span>Wenjuanba.com</span>
+              <% else %>
+              <span>问卷吧官网</span>
+              <% end %>
 						</a>
 					</li>
 					<li>
 						<a href="http://weibo.com/u/3676626710">
 							<em class='weibo'></em>
-							<span>新浪微博</span>
+              <% if @survey[:lang] == 'en' %>
+              <span>Weibo</span>
+              <% else %>
+              <span>新浪微博</span>
+              <% end %>
 						</a>
 					</li>
 					<li>
 						<a href="http://t.qq.com/wenjuanba">
 							<em class='tencent'></em>
-							<span>腾讯微博</span>
+              <% if @survey[:lang] == 'en' %>
+              <span>Tencent Weibo</span>
+              <% else %>
+              <span>腾讯微博</span>
+              <% end %>
 						</a>
 					</li>
 				</ul>
@@ -73,13 +101,21 @@
 					<li>
 						<a href="/surveys#subscribe">	<!-- TODO: subscribe plugin -->
 							<em class='email'></em>
-							<span>邮件订阅</span>
+              <% if @survey[:lang] == 'en' %>
+              <span>Email</span>
+              <% else %>
+              <span>邮件订阅</span>
+              <% end %>
 						</a>
 					</li>
 					<li>
 						<a href="/surveys#subscribe">	<!-- TODO: subscribe plugin -->
 							<em class='sms'></em>
-							<span>短信订阅</span>
+              <% if @survey[:lang] == 'en' %>
+              <span>SMS</span>
+              <% else %>
+              <span>短信订阅</span>
+              <% end %>
 						</a>
 					</li>
 				</ul>
@@ -91,14 +127,20 @@
 			<h1 id='survey_title'><%= @survey['title'] %></h1>
 			<div class='msg purple'>
 				<em></em>
-				<span>
-					<b>本问卷只面向未参加过<%= corp_name %>调研的用户</b><br />
-					<% if @survey['spread_point'] > 0 %>
-					<%= corp_name %>会员每成功邀请一位好友答题可获<em id='spread_point'><%= @survey['spread_point'] %></em>积分。<a id='start_invite' href='javascript:void(0);'>开始邀请</a>
-					<% else %>
-					您已经参加过<%= corp_name %>其他调研，不能参加本次调研。
-					<% end %>
-				</span>
+        <% if @survey[:lang] == 'en' %>
+        <span>
+          Sorry, your are not in the survey candidates.
+        </span>
+        <% else %>
+        <span>
+          <b>本问卷只面向未参加过<%= corp_name %>调研的用户</b><br />
+          <% if @survey['spread_point'] > 0 %>
+          <%= corp_name %>会员每成功邀请一位好友答题可获<em id='spread_point'><%= @survey['spread_point'] %></em>积分。<a id='start_invite' href='javascript:void(0);'>开始邀请</a>
+          <% else %>
+          您已经参加过<%= corp_name %>其他调研，不能参加本次调研。
+          <% end %>
+        </span>
+        <% end %>
 			</div>
 
 			<% else %>
@@ -107,25 +149,48 @@
 			<h2><%= @survey['subtitle'] %></h2>
 			<div class='desc'><%= raw @survey['welcome'] %></div>
 			<% if @survey['quillme_hot'] && @reward_scheme_type > 0 %>
-			<div class='quillme_hot_note'>注意：本问卷仅面向未参加过<%= corp_name %>调研的用户，已参加过其他调研的用户将无法提交奖励申请。</div>
+        <% if @survey[:lang] == 'en' %>
+        <% else %>
+      <div class='quillme_hot_note'>注意：本问卷仅面向未参加过<%= corp_name %>调研的用户，已参加过其他调研的用户将无法提交奖励申请。</div>
+        <% end %>
 			<% end %>
 			<div class='form'>
         <% if @percentage < 0 %>
 				<% password_type = @survey['access_control_setting']['password_control']['password_type'] %>
 				<% if password_type == 2 %>
+          <% if @survey[:lang] == 'en' %>
+          <input id='username_ipt' type="text" class='username' placeholder="Input username" autofocus />
+          <% else %>
 					<input id='username_ipt' type="text" class='username' placeholder="输入答题用户名" autofocus />
+          <% end %>
 				<% end %>
 				<% if password_type >= 0 %>
-					<input id='password_ipt' type="password" placeholder="输入答题密码" autofocus />
+          <% if @survey[:lang] == 'en' %>
+					<input id='password_ipt' type="password" placeholder="Input password" autofocus />
+          <% else %>
+          <input id='password_ipt' type="password" placeholder="输入答题密码" autofocus />
+          <% end %>
 				<% end %>
         <% end %>
 				<% if @forbidden_ip %>
-				<button disabled>您所在的IP地址答题次数超过限制</button>
+          <% if @survey[:lang] == 'en' %>
+        <button disabled>Your IP address exceeds answer count limitation.</button>
+          <% else %>
+        <button disabled>您所在的IP地址答题次数超过限制</button>
+          <% end %>
 				<% else %>
-				<button id='start_btn' >开始答题</button>
+          <% if @survey[:lang] == 'en' %>
+				<button id='start_btn' >Start Survey</button>
+          <% else %>
+        <button id='start_btn' >开始答题</button>
+          <% end %>
 				<% end %>
 				<% if @survey['publish_result'] %>
-				<div class='view-result-text'>（完成答题后可查看问卷结果报告）</div>
+          <% if @survey[:lang] == 'en' %>
+        <div class='view-result-text'>(You can view the survey report after submit your answer)</div>
+          <% else %>
+        <div class='view-result-text'>（完成答题后可查看问卷结果报告）</div>
+          <% end %>
 				<% end %>
 			</div>
 			

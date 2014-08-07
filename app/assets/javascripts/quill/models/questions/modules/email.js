@@ -10,12 +10,12 @@ $(function(){
 		var handler = {
 			target: issue,
 
-			_getInfo: function() {
-				return '请输入有效邮箱';
+			_getInfo: function(lang) {
+				return lang == 'en' ? 'Email' : '请输入有效邮箱';
 			},
 
-			_checkAnswer: function(answer) {
-				return $.regex.isEmail(answer) ? null : '请输入有效邮箱';
+			_checkAnswer: function(answer, lang) {
+				return $.regex.isEmail(answer) ? null : (lang=='en' ? 'Email is invalid' : '请输入有效邮箱');
 			}
 		};
 

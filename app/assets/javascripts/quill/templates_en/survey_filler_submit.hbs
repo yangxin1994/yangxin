@@ -1,0 +1,25 @@
+<div>
+	<div id='sf_main'>
+		<div class='welcome no_reward'>
+			<div class='inner'>
+				<h1>{{title}}</h1>
+				<div class='msg purple'>
+					<em></em>
+					<span>
+						<b>Submit answers</b><br />
+						You have finished the survey. Submit the answers now?{{#if allow_pageup}}You can not modify the answers after submitting.{{/if}}
+					</span>
+				</div>
+			</div>
+		</div>
+	</div>
+	{{#if remind}}
+	<div id='remind'>Notice: Please re-answer the questions seriously.</div>
+	{{/if}}
+	<div id='page_buttons'>
+		{{#if allow_pageup}}
+		<button id='check_btn' class='light'>Return to check answers</button>
+		{{/if}}
+		<button id='submit_btn'>Submit</button>
+	</div>
+</div>

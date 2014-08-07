@@ -22,6 +22,7 @@ $(function(){
 			question_class: 0,	//0为普通问题，1为模板题，2为质控题
 			reference_id: -1,
 			issue: null,
+      lang: null,
 
 			//temp parameters. Delete after initialize
 			_surveyModel: null
@@ -109,26 +110,26 @@ $(function(){
 
 		/* Get info
 		 * =========================== */
-		getInfo: function() {
-			var info = this._getInfo();
-			return info ? info : quill.helpers.QuestionType.getLabel(this.get('question_type'));
+		getInfo: function(lang) {
+			var info = this._getInfo(lang);
+			return info ? info : quill.helpers.QuestionType.getLabel(this.get('question_type'), lang);
 		},
-		_getInfo: function() {
+		_getInfo: function(lang) {
 			// to be overrided
 			return null;
 		},
 
 		/* Check whether a answer is legal
 		 * =========================== */
-		checkAnswer: function(answer) {
+		checkAnswer: function(answer, lang) {
 			if(answer == null)
-				return '答案不能为空';
+				return lang=='en' ? 'Answer should not be empty' : '答案不能为空';
 			else if(!this.get('is_required')) 
 				return null;
 			else
-				return this._checkAnswer(answer);
+				return this._checkAnswer(answer, lang);
 		},
-		_checkAnswer: function(answer) {
+		_checkAnswer: function(answer, lang) {
 			throw 'You should override checkAnswer method!';
 		}
 

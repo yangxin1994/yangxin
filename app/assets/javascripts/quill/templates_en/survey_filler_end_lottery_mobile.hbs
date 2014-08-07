@@ -1,0 +1,16 @@
+<div class="page">
+	<div class="describe">
+		<div class="answer_finish">
+			<b><i></i>Finished!</b>
+			<div>Congratulations! You can draw a lottery.</div>
+		</div>
+	</div>
+	<div class="free_form">
+		<button class="rew_next" id="rew_next" >Do it now</button>
+		{{#if spreadable}}
+    	<button id="socal_share">Share to get {{spread_point}} points</button>
+    {{else}}
+    	<button id="socal_share">Share survey</button>
+    {{/if}}
+	</div>		
+</div>

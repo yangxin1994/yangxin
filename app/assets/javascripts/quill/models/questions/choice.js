@@ -97,38 +97,72 @@ $(function(){
 			this.trigger('change:issue:exclusive');
 		},
 		
-		_getInfo: function() {
-			switch(this.issue.option_type) {
-				case 0: case 1: return '单选题';
-				case 2: return '多选题';
-				case 3: return '请选择 ' + this.issue.min_choice + ' 项';
-				case 4: return '最多选择 ' + this.issue.max_choice + ' 项';
-				case 5: return '至少选择 ' + this.issue.min_choice + ' 项';
-				case 6: return '请选择 ' + this.issue.min_choice + ' 到 ' + this.issue.max_choice + ' 项';
-			}
-			return null;
+		_getInfo: function(lang) {
+      if(lang=='en') {
+        switch(this.issue.option_type) {
+          case 0: case 1: return 'Single Choice';
+          case 2: return 'Multiple Choice';
+          case 3: return 'Choose ' + this.issue.min_choice + ' options';
+          case 4: return 'Choose no more than ' + this.issue.max_choice + ' options';
+          case 5: return 'Choose at least ' + this.issue.min_choice + ' options';
+          case 6: return 'Choose ' + this.issue.min_choice + ' to ' + this.issue.max_choice + ' options';
+        }
+        return null;
+      } else {
+        switch(this.issue.option_type) {
+          case 0: case 1: return '单选题';
+          case 2: return '多选题';
+          case 3: return '请选择 ' + this.issue.min_choice + ' 项';
+          case 4: return '最多选择 ' + this.issue.max_choice + ' 项';
+          case 5: return '至少选择 ' + this.issue.min_choice + ' 项';
+          case 6: return '请选择 ' + this.issue.min_choice + ' 到 ' + this.issue.max_choice + ' 项';
+        }
+        return null;
+      }
 		},
 
-		_checkAnswer: function(answer) {
-			if(!answer.selection) return '答案不能为空';
-			switch(this.issue.option_type) {
-				// TODO: If survey editor remove an item (whose id is in answer.selection) after the answer is created,
-				// using answer.selection.length to check answer will be incorrect.
-				// MatrixChoice has the same problem
-				case 0: case 1: case 3:
-					if(answer.selection.length != this.issue.min_choice) return '请选择 ' + this.issue.min_choice + ' 项';
-					break;
-				default:
-					if(answer.selection.length < this.issue.min_choice) return '至少选择 ' + this.issue.min_choice + ' 项';
-					if(answer.selection.length > this.issue.max_choice) return '最多选择 ' + this.issue.max_choice + ' 项';
-					break;
-			}
-			if(this.issue.other_item && this.issue.other_item.has_other_item) {
-				if(_.contains(answer.selection, this.issue.other_item.id)) {
-					if(!answer.text_input) return '请填写内容';
-				}
-			}
-			return null;
+		_checkAnswer: function(answer, lang) {
+      if(lang=='en') {
+        if(!answer.selection) return  'Answer should not be empty';
+        switch(this.issue.option_type) {
+          // TODO: If survey editor remove an item (whose id is in answer.selection) after the answer is created,
+          // using answer.selection.length to check answer will be incorrect.
+          // MatrixChoice has the same problem
+          case 0: case 1: case 3:
+            if(answer.selection.length != this.issue.min_choice) return 'Please choose ' + this.issue.min_choice + ' options';
+            break;
+          default:
+            if(answer.selection.length < this.issue.min_choice) return 'Choose at least ' + this.issue.min_choice + ' options';
+            if(answer.selection.length > this.issue.max_choice) return 'Choose no more than ' + this.issue.max_choice + ' options';
+            break;
+        }
+        if(this.issue.other_item && this.issue.other_item.has_other_item) {
+          if(_.contains(answer.selection, this.issue.other_item.id)) {
+            if(!answer.text_input) return 'Please input content';
+          }
+        }
+        return null;
+      } else {
+        if(!answer.selection) return '答案不能为空';
+        switch(this.issue.option_type) {
+          // TODO: If survey editor remove an item (whose id is in answer.selection) after the answer is created,
+          // using answer.selection.length to check answer will be incorrect.
+          // MatrixChoice has the same problem
+          case 0: case 1: case 3:
+            if(answer.selection.length != this.issue.min_choice) return '请选择 ' + this.issue.min_choice + ' 项';
+            break;
+          default:
+            if(answer.selection.length < this.issue.min_choice) return '至少选择 ' + this.issue.min_choice + ' 项';
+            if(answer.selection.length > this.issue.max_choice) return '最多选择 ' + this.issue.max_choice + ' 项';
+            break;
+        }
+        if(this.issue.other_item && this.issue.other_item.has_other_item) {
+          if(_.contains(answer.selection, this.issue.other_item.id)) {
+            if(!answer.text_input) return '请填写内容';
+          }
+        }
+        return null;
+      }
 		}
 
 	});

@@ -1,0 +1,29 @@
+<div class="page">
+	<div class="finished-page">
+		<div id="sf_main">
+
+			{{#if quality}}
+      Your are forbidden to answer the survey
+			{{/if}}
+
+			{{#if filter}}
+      Sorry, your are not our survey candidate.
+			{{/if}}
+
+			{{#if timeout}}
+      Time expired. You must finish the survey in less then 48 hours.
+			{{/if}}
+
+			{{#if review_failed}}
+			Your answer failed to pass the review: {{reject_reason}}
+			{{/if}}
+			<a class="edit-finish" href="javascript:void(0);" id="close_btn">Return</a>
+		</div>
+	</div>
+</div>
+
+{{#if show_restart}}
+<div class="footer">
+	<a href="javascript:void(0)" class="resume" id="restart_btn">Re-answer</a>
+</div>
+{{/if}}

@@ -16,6 +16,16 @@
 //=require ../templates/survey_filler_end_money
 //=require ../templates/survey_filler_end_money_finish
 //=require ../templates/survey_filler_end_lottery
+//=require ../templates_en/survey_filler_qs
+//=require ../templates_en/survey_filler_submit
+//=require ../templates_en/survey_filler_redo
+//=require ../templates_en/survey_filler_reject
+//=require ../templates_en/survey_filler_end_free
+//=require ../templates_en/survey_filler_end_point_finish
+//=require ../templates_en/survey_filler_end_point_review
+//=require ../templates_en/survey_filler_end_money
+//=require ../templates_en/survey_filler_end_money_finish
+//=require ../templates_en/survey_filler_end_lottery
 
 $(function() {
 
@@ -38,9 +48,12 @@ $(function() {
     quill.quillClass('quill.views.SurveyFiller', quill.views.Base, {
 
         _initialize: function() {
-            // spread point
-            if (this.options.spread_point == undefined)
-                this.options.spread_point = 0;
+          // en
+          if(this.options.lang == 'en')
+            this._template_path = 'templates_en';
+          // spread point
+          if (this.options.spread_point == undefined)
+              this.options.spread_point = 0;
         },
 
         _uri: function(path) {
@@ -85,7 +98,7 @@ $(function() {
                     if (retval.success)
                         location.href = (this.options.is_preview ? '/p/' : '/s/') + this.options.reward.id
                     else
-                        this._error('操作失败，请刷新页面重试。');
+                        this._error(this.options.lang == 'en' ? 'Error. Please refresh page' : '操作失败，请刷新页面重试。');
                 }, this));
             }, this));
 
@@ -109,8 +122,8 @@ $(function() {
         _setup: function(data) {
             // If not success
             if (data == null || !data.success) {
-                this._error('加载问题出错，请刷新页面重试。');
-                return;
+              this._error(this.options.lang == 'en' ? 'Failed to load question. Please refresh page.' : '加载问题出错，请刷新页面重试。');
+              return;
             }
 
             // If success, setup page
@@ -149,17 +162,17 @@ $(function() {
                     // check answer from page one when click on check button
                     check_btn.click($.proxy(function() {
                         $.util.disable(check_btn, submit_btn);
-                        check_btn.text('正在加载问题...');
+                        check_btn.text(this.options.lang == 'en' ? 'Loading...' : '正在加载问题...');
                         this.load_questions(-1, true);
                     }, this));
 
                     // submit answer when click on submit button
                     submit_btn.click($.proxy(function() {
-                        $.util.disable(check_btn, submit_btn);
-                        submit_btn.text('正在提交答案...');
-                        $.postJSON(this._uri('/finish'), $.proxy(function(retval) {
-                            this.load_questions(-1, true);
-                        }, this));
+                      $.util.disable(check_btn, submit_btn);
+                      submit_btn.text(this.options.lang == 'en' ? 'Submitting...' : '正在提交答案...');
+                      $.postJSON(this._uri('/finish'), $.proxy(function(retval) {
+                          this.load_questions(-1, true);
+                      }, this));
                     }, this));
 
                 } else {
@@ -182,7 +195,8 @@ $(function() {
                         if (quill.helpers.QuestionType.getName(model.get('question_type')) == 'Paragraph') idx--;
                         var filler = new quill.views.fillers[quill.helpers.QuestionType.getName(questions[i].question_type)]({
                             model: model,
-                            index: idx++
+                            index: idx++,
+                            lang: this.options.lang
                         }).appendTo($('#questions_con'));
                         filler.$('.q-render-btns').remove();
                         filler.setAnswer(answers[model.id]);
@@ -238,13 +252,13 @@ $(function() {
                             $.util.enable(prev_btn, next_btn);
                         } else {
                             // 3. submit answers
-                            next_btn.text('正在提交答案...');
+                            next_btn.text(this.options.lang == 'en' ? 'Submtting...' : '正在提交答案...');
                             $.util.disable(prev_btn, next_btn);
                             $.putJSON(this._uri(), {
                                 answer_content: answer_content
                             }, $.proxy(function(retval) {
                                 if (retval && retval.success) {
-                                    next_btn.text('正在加载问题...');
+                                    next_btn.text(this.options.lang == 'en' ? 'Loading...' : '正在加载问题...');
                                     this.load_questions((questions.length > 0) ?
                                         questions[questions.length - 1]['_id'] : -1, true);
                                 } else {
@@ -256,7 +270,7 @@ $(function() {
                     prev_btn.click($.proxy(function() {
                         $.util.disable(next_btn, prev_btn);
                         // load prev page questions
-                        prev_btn.text('正在加载上一页问题...');
+                        prev_btn.text(this.options.lang == 'en' ? 'Loading...' : '正在加载上一页问题...');
                         this.load_questions((questions.length > 0) ? questions[0]['_id'] : -1, false);
                     }, this));
                     if (answer_index_all == 0) prev_btn.hide();
@@ -358,7 +372,7 @@ $(function() {
                                 // setup award info
                                 if (award_type == null) {
                                     $('.award_money_info').hide();
-                                    $.util.disable(ok_btn.text('请选择奖励兑换方式'));
+                                    $.util.disable(ok_btn.text(this.options.lang == 'en' ? 'Choose method' : '请选择奖励兑换方式'));
                                     return;
                                 }
                                 $('.award_money_info').show();
@@ -388,7 +402,7 @@ $(function() {
                         ok_btn.click($.proxy(function() {
                             var award_type = _get_award_type();
                             ok_btn.odButtonText({
-                                text: '正在提交订单...'
+                                text: this.options.lang == 'en' ? 'Submitting...' : '正在提交订单...'
                             });
                             $.util.disable(ok_btn, account_ipt);
                             $.putJSON(this._uri('/select_reward'), {
@@ -404,7 +418,7 @@ $(function() {
                                         $.util.enable(ok_btn, account_ipt);
                                         error_con.text(error_msg);
                                     } else {
-                                        this._error('订单提交失败，请刷新页面重试');
+                                        this._error(this.options.lang == 'en' ? 'Failed to submit order. Please refresh page.' : '订单提交失败，请刷新页面重试');
                                     }
                                 }
                             }, this));
@@ -432,7 +446,7 @@ $(function() {
                             location.href = '/users/orders';
                         });
                         var signin_btn = $('#signin_btn').click($.proxy(function() {
-                            $.util.disable(signin_btn.text('正在跳转...'));
+                            $.util.disable(signin_btn.text(this.options.lang == 'en' ? 'Redirecting...' : '正在跳转...'));
                             $.postJSON(this._uri('/start_bind'), function(retval) {
                                 location.href = '/account/sign_in?ref=' + encodeURIComponent('/users/orders');
                             });
@@ -463,7 +477,7 @@ $(function() {
                         location.href = '/users/points';
                     });
                     var signin_btn = $('#signin_btn').click($.proxy(function() {
-                        $.util.disable(signin_btn.text('正在跳转...'));
+                        $.util.disable(signin_btn.text(this.options.lang == 'en' ? 'Redirecting...' : '正在跳转...'));
                         $.postJSON(this._uri('/start_bind'), function(retval) {
                             location.href = '/account/sign_in?ref=' + encodeURIComponent('/users/points');
                         });
@@ -494,7 +508,7 @@ $(function() {
                     audit_message: value.answer_audit_message
                 }, 'survey_filler_redo').appendTo($('#f_body'));
                 var redo_btn = $('#redo_btn').click($.proxy(function() {
-                    redo_btn.attr('disabled', 'disabled').text('正在准备重新答题...');
+                    redo_btn.attr('disabled', 'disabled').text(this.options.lang == 'en' ? 'Loading...' : '正在准备重新答题...');
                     $.postJSON(this._uri('/clear'), $.proxy(function(retval) {
                         this.load_questions(-1, true);
                     }, this));
