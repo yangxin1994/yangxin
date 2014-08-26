@@ -618,6 +618,8 @@ OopsData::Application.routes.draw do
         post :select_reward_for_mobile
         post :start_bind
         post :update_for_mobile
+        get :ask_for_mobile
+        post :submit_mobile
       end
     end
     resource :bind_sample, :only => [:show]

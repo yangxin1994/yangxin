@@ -15,6 +15,8 @@ class Agent
   # 1 for normal, 2 for deleted
   field :status, :type => Integer, default: NORMAL
   field :auth_key, :type => String
+  field :api_url,  :type => String
+  field :key,      :type => String
 
   has_many :agent_tasks
 

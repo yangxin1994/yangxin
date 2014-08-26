@@ -127,7 +127,7 @@ OopsData::Application.configure do
 	config.quillme_host = 'http://wenjuanba.com'
 
 	# configuration for roadie
-	config.action_mailer.default_url_options = {:host => 'res.oopsdata.com'}
+	config.action_mailer.default_url_options = {:host => 'wenjuanba.com'}
 
   config.mailgun_api_key = 'key-9zcv6-e7j8aratn9viu3unvbn2zc92j3'
   config.survey_email_domain = 'wenjuanba.net'
