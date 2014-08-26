@@ -82,7 +82,7 @@ class Filler::AnswersController < Filler::FillerController
 
     # if the sample is from an agent, check whether the mobile has been submitted
     if @answer.agent_user_id.present? && @answer.mobile.blank?
-      redirect_to ask_for_mobile_answer(:id => params[:id]) and return
+      redirect_to ask_for_mobile_answer_path(:id => params[:id]) and return
     end
 
     # load data
