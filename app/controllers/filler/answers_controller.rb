@@ -69,6 +69,9 @@ class Filler::AnswersController < Filler::FillerController
     render_json_auto answer.id.to_s and return
   end
 
+  def ask_for_mobile
+  end
+
   def show
     # get answer
     @answer = Answer.find_by_id(params[:id])
@@ -76,10 +79,9 @@ class Filler::AnswersController < Filler::FillerController
     redirect_to "/" and return if @answer.is_a? AnswerTask
 
     # if the sample is from an agent, check whether the mobile has been submitted
-    if @answer.agent_user_id.present? && @answer.mobile.blank?
-      # redirect_to
-      return
-    end
+    # if @answer.agent_user_id.present? && @answer.mobile.blank?
+    #   redirect_to action: :ask_for_mobile and return
+    # end
 
     # load data
     redirect_to sign_in_account_path({ref: request.url}) and return if @answer.user.present? && @answer.user != current_user
