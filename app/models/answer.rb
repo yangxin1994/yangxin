@@ -181,7 +181,7 @@ class Answer
     self.send_agent_notification
   end
 
-  def self.create_answer(survey_id, reward_scheme_id, introducer_id, agent_task_id, answer_obj, agent_user_id)
+  def self.create_answer(survey_id, reward_scheme_id, introducer_id, agent_task_id, agent_user_id, answer_obj)
     answer = self.create(answer_obj)
     Survey.normal.find(survey_id).answers << answer
     # AgentTask.find_by_id(agent_task_id).try(:new_answer, answer)

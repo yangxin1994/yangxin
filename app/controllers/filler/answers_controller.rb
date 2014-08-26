@@ -10,7 +10,7 @@ class Filler::AnswersController < Filler::FillerController
     end
 
     if params[:agent_task_id] && params[:agent_user_id].present?
-      agent_task = AgentTask.find(agent_task_id)
+      agent_task = AgentTask.find(params[:agent_task_id])
       answer = agent_task.answers.where(agent_user_id: params[:agent_user_id]).first
       render_json_auto answer.id.to_s and return if answer.present?
     end
