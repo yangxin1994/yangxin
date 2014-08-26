@@ -1056,7 +1056,7 @@ class ScaleQuestionIo < QuestionIo
       #   @csv_header << header_prefix + "_c#{i + 1}" + UNKNOW
       # end
     end
-    return @retval
+    return @csv_header
   end
   #TODO spss_value_labels
   def spss_header(header_prefix)
