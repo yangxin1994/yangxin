@@ -60,16 +60,18 @@ class Filler::AnswersController < Filler::FillerController
     render_404 if @answer.nil?
     survey = @answer.survey
     agent_answers = survey.answers.select { |e| e.agent_user_id.present? }
-    existing_mobiles = agent_answer.map { |e| e.mobile }
+    existing_mobiles = agent_answers.map { |e| e.mobile }
     if existing_mobiles.include?(params[:mobile])
-      return_json_auto ErrorEnum::MOBILE_EXIST and return
+      render_json_auto ErrorEnum::MOBILE_EXIST and return
     end
     @answer.mobile = params[:mobile]
     @answer.save
-    render_json_auto answer.id.to_s and return
+    render_json_auto @answer.id.to_s and return
   end
 
   def ask_for_mobile
+    @answer = Answer.find_by_id(params[:id])
+    ensure_survey(@answer.survey_id)
   end
 
   def show
@@ -79,9 +81,9 @@ class Filler::AnswersController < Filler::FillerController
     redirect_to "/" and return if @answer.is_a? AnswerTask
 
     # if the sample is from an agent, check whether the mobile has been submitted
-    # if @answer.agent_user_id.present? && @answer.mobile.blank?
-    #   redirect_to action: :ask_for_mobile and return
-    # end
+    if @answer.agent_user_id.present? && @answer.mobile.blank?
+      redirect_to ask_for_mobile_answer(:id => params[:id]) and return
+    end
 
     # load data
     redirect_to sign_in_account_path({ref: request.url}) and return if @answer.user.present? && @answer.user != current_user

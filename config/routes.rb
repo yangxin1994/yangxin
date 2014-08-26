@@ -619,7 +619,7 @@ OopsData::Application.routes.draw do
         post :start_bind
         post :update_for_mobile
         get :ask_for_mobile
-        get :submit_mobile
+        post :submit_mobile
       end
     end
     resource :bind_sample, :only => [:show]
