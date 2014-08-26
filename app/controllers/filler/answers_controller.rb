@@ -9,6 +9,12 @@ class Filler::AnswersController < Filler::FillerController
       render_json_auto answer_id and return if answer_id.present?
     end
 
+    if params[:agent_task_id] && params[:agent_user_id].present?
+      agent_task = AgentTask.find(agent_task_id)
+      answer = agent_task.answers.where(agent_user_id: params[:agent_user_id]).first
+      render_json_auto answer.id.to_s and return if answer.present?
+    end
+
     survey = Survey.normal.find_by_id(params[:survey_id])
     answer = Answer.find_by_survey_id_sample_id_is_preview(params[:survey_id], current_user.try(:_id), params[:is_preview] || false)
     answer ||= Answer.find_by_survey_id_carnival_user_id_is_preview(params[:survey_id], current_carnival_user.try(:_id), params[:is_preview] || false)
@@ -28,6 +34,7 @@ class Filler::AnswersController < Filler::FillerController
       params[:reward_scheme_id],
       params[:introducer_id],
       params[:agent_task_id],
+      params[:agent_user_id],
       answer )
     if Carnival::ALL_SURVEY.include?(params[:survey_id])
       current_carnival_user.answers << answer if current_carnival_user.present?
@@ -48,14 +55,32 @@ class Filler::AnswersController < Filler::FillerController
     render_json_auto answer.id.to_s
   end
 
+  def submit_mobile
+    @answer = Answer.find_by_id(params[:id])
+    render_404 if @answer.nil?
+    survey = @answer.survey
+    agent_answers = survey.answers.select { |e| e.agent_user_id.present? }
+    existing_mobiles = agent_answer.map { |e| e.mobile }
+    if existing_mobiles.include?(params[:mobile])
+      return_json_auto ErrorEnum::MOBILE_EXIST and return
+    end
+    @answer.mobile = params[:mobile]
+    @answer.save
+    render_json_auto answer.id.to_s and return
+  end
+
   def show
     # get answer
     @answer = Answer.find_by_id(params[:id])
     render_404 if @answer.nil?
-    if @answer.is_a? AnswerTask
-      redirect_to "/"
+    redirect_to "/" and return if @answer.is_a? AnswerTask
+
+    # if the sample is from an agent, check whether the mobile has been submitted
+    if @answer.agent_user_id.present? && @answer.mobile.blank?
+      # redirect_to
       return
     end
+
     # load data
     redirect_to sign_in_account_path({ref: request.url}) and return if @answer.user.present? && @answer.user != current_user
     @answer.update_status # check whether it is time out

@@ -20,6 +20,7 @@ module ErrorEnum
 	REWARD_NOT_SELECTED = "error__7"
 	AGENT_NOT_EXIST = "error__8"
 	MOBILE_NOT_EXIST = "error__9"
+	MOBILE_EXIST = "error__10"
 
 	
 	ANSWER_BOUND = "error__11"
