@@ -1445,7 +1445,7 @@ class Answer
 
   def send_agent_notification
     agent_api_url = self.agent_task.try(:agent).try(:api_url)
-    return if url.blank?
+    return if agent_api_url.blank?
     key = self.agent_task.try(:agent).try(:key)
     params = {
       status: self.status,
