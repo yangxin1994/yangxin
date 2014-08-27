@@ -1445,6 +1445,7 @@ class Answer
 
   def send_agent_notification
     agent_api_url = self.agent_task.try(:agent).try(:api_url)
+    agent_api_address = self.agent_task.try(:agent).try(:api_address)
     return if agent_api_url.blank?
     key = self.agent_task.try(:agent).try(:key)
     params = {
@@ -1452,16 +1453,15 @@ class Answer
       reject_type: self.reject_type.to_i,
       user_id: agent_user_id
     }
-    digest = Digest::MD5.hexdigest("#{self.status},#{self.reject_type.to_j},#{agent_user_id},#{key}")
+    digest = Digest::MD5.hexdigest("#{self.status},#{self.reject_type.to_i},#{agent_user_id},#{key}")
     params[:digest] = digest
 
     url = URI.parse(agent_api_url)
     begin
       Net::HTTP.start(url.host, url.port) do |http|
-        r = Net::HTTP::Post.new(post_to)
+        r = Net::HTTP::Post.new(agent_api_address)
         r.set_form_data(params)
         retval = http.request(r)
-        return retval
       end
     rescue
     end

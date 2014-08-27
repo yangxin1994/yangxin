@@ -25,9 +25,20 @@
       </div>
     </div>   
     <div class="control-group">
-      <label class="control-label">地区代码:</label>
+      <label class="control-label">回调主机:</label>
       <div class="controls">
-        <input type="text" class="input-large" name="agent[region]" value="<%= @agent['region'] %>"/>
+        <input type="text" class="input-large" name="agent[api_url]" value="<%= @agent['api_url'] %>"/>
+      </div>
+    <div class="control-group">
+      <label class="control-label">回调地址:</label>
+      <div class="controls">
+        <input type="text" class="input-large" name="agent[api_address]" value="<%= @agent['api_address'] %>"/>
+      </div>
+    </div>   
+    <div class="control-group">
+      <label class="control-label">密钥:</label>
+      <div class="controls">
+        <input type="text" class="input-large" name="agent[key]" value="<%= @agent['key'] %>"/>
       </div>
     </div>   
     <div class="control-group">
