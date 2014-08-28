@@ -82,7 +82,7 @@ class Filler::AnswersController < Filler::FillerController
     redirect_to "/" and return if @answer.is_a? AnswerTask
 
     # if the sample is from an agent, check whether the mobile has been submitted
-    if @answer.agent_user_id.present? && @answer.mobile.blank?
+    if @answer.agent_task.present? && @answer.mobile.blank?
       redirect_to ask_for_mobile_answer_path(:id => params[:id]) and return
     end
 
