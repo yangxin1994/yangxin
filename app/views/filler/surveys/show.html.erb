@@ -15,20 +15,26 @@
 
 		// set start button text
 		<% if @percentage > 0 %>
+
     <% if @survey[:lang] == 'en' %>
 		$('#start_btn').text('Continue ( ' + Math.round(<%= @percentage * 100 %>) + '% finished )');
     <% else %>
     $('#start_btn').text('继续答题（已完成' + Math.round(<%= @percentage * 100 %>) + '%）');
     <% end %>
+
 		<% else %>
+
 		<% if !["533bc7c6eb0e5badf200001d", "53191980eb0e5b99ea000020", "52a156f0eb0e5b697800000b", "52a59fc6eb0e5bb2c5000007"].include?(@survey['_id'].to_s) %>
-		// hack renmin
-		var left_time = <%=@survey.estimate_answer_time %>;
+
     <% if @survey[:lang] == 'en' %>
 		$('#start_btn').text('Start Survey');
+    <% elsif @survey['_id'].to_s == '53faa7ddeb0e5b58bc000039' %>
+    $('#start_btn').text('开始答题（耗时30-45分钟）');
     <% else %>
+    var left_time = <%=@survey.estimate_answer_time %>;
     $('#start_btn').text('开始答题' + (left_time > 0 ? '（耗时' + $.util.printTimeFriendly(left_time) + '）' : ''));
     <% end %>
+
 		<% end %>
 		<% end %>
 	});
