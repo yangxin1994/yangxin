@@ -35,6 +35,7 @@ class Filler::AnswersController < Filler::FillerController
       params[:introducer_id],
       params[:agent_task_id],
       params[:agent_user_id],
+      params[:task_id],
       answer )
     if Carnival::ALL_SURVEY.include?(params[:survey_id])
       current_carnival_user.answers << answer if current_carnival_user.present?

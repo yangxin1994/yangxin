@@ -73,6 +73,7 @@ class Answer
   field :agent_feedback_email
   field :agent_feedback_mobile
   field :agent_user_id, :type => String
+  field :task_id, :type => String
   field :mobile, :type => String
   field :sample_attributes_updated, :type => Boolean, default: false
   field :suspected, :type => Boolean
@@ -181,13 +182,14 @@ class Answer
     self.send_agent_notification
   end
 
-  def self.create_answer(survey_id, reward_scheme_id, introducer_id, agent_task_id, agent_user_id, answer_obj)
+  def self.create_answer(survey_id, reward_scheme_id, introducer_id, agent_task_id, agent_user_id, task_id, answer_obj)
     answer = self.create(answer_obj)
     Survey.normal.find(survey_id).answers << answer
     # AgentTask.find_by_id(agent_task_id).try(:new_answer, answer)
     if agent_task_id.present?
       AgentTask.find(agent_task_id).new_answer(answer)
       answer.agent_user_id = agent_user_id
+      answer.task_id = task_id
       answer.save
     end
     RewardScheme.find(reward_scheme_id).new_answer(answer)
@@ -1451,9 +1453,10 @@ class Answer
     params = {
       status: self.status,
       reject_type: self.reject_type.to_i,
-      user_id: agent_user_id
+      user_id: self.agent_user_id,
+      task_id: self.task_id
     }
-    digest = Digest::MD5.hexdigest("#{self.status},#{self.reject_type.to_i},#{agent_user_id},#{key}")
+    digest = Digest::MD5.hexdigest("#{self.status},#{self.reject_type.to_i},#{self.agent_user_id},#{self.task_id.to_s},#{key}")
     params[:digest] = digest
 
     url = URI.parse(agent_api_url)
