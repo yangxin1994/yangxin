@@ -278,6 +278,13 @@ class Order
     return self.esai_status
   end
 
+  def self.refresh_esai_orders
+    orders = Order.where(status: HANDLE, esai_status: ESAI_HANDLE)
+    orders.each do |e|
+      e.check_result
+    end
+  end
+
   def send_mobile_charge_success_message
     SmsWorker.perform_async("charge_notification", self.mobile, "", gift_name: "#{self.amount}元话费")
   end
