@@ -84,6 +84,7 @@
       <tr>
         <th width="20%">答案创建者</th>
         <th >状态</th>
+        <th >代理信息</th>
         <th >创建时间</th>
         <th >操作</th>
       </tr>
@@ -104,6 +105,16 @@
           <td></td>
         <% end  %>
         <td><%= answer_type_tag answer["status"] %></td>
+        <% if answer.agent_task.present? %>
+          <td>
+            <span><%= answer.agent_task.try(:agent).try(:name) %></span>
+            <% if answer.mobile.present? %>
+              <span><%= "(#{answer.mobile})" %></span>
+            <% end %>
+          </td>
+        <% else %>
+          <td></td>
+        <% end %>
         <td><%= answer["created_at"].strftime('%F %R') %></td>
         <td>
           <a class="btn handle" href="<%= answer["_id"] %>/review" ><i class="icon-list-alt"></i>查看详细</a>
