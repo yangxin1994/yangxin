@@ -5,7 +5,10 @@ $(function(){
 			mobile: mob
 		}, function(retval) {
 			if(retval.success){
-				window.location.href = '/a/' + aid;
+				console.log('--------------------')
+				console.log(retval)
+				console.log('--------------------')
+				//window.location.href = '/a/' + aid;
 			}else{
 				if('error__10' == retval.value.error_code){
 					btn.addClass('error').text('该手机已经参与过答题');
