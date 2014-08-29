@@ -286,9 +286,6 @@ $(function() {
                     }
                     // end hack
                     // free, show message
-                    console.log('----------------------')
-                    console.log(value.is_agent)
-                    console.log('----------------------')
                     this.hbs({
                         title: this.model.get('title'),
                         survey_id: this.model.get('_id'),
