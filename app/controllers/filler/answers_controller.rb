@@ -60,7 +60,7 @@ class Filler::AnswersController < Filler::FillerController
     @answer = Answer.find_by_id(params[:id])
     render_404 if @answer.nil?
     survey = @answer.survey
-    agent_answers = survey.answers.select { |e| e.agent_user_id.present? }
+    agent_answers = survey.answers.select { |e| e.agent_task.present? }
     existing_mobiles = agent_answers.map { |e| e.mobile }
     if existing_mobiles.include?(params[:mobile])
       render_json_auto ErrorEnum::MOBILE_EXIST and return
