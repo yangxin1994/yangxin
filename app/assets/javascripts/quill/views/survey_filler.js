@@ -291,7 +291,7 @@ $(function() {
                         survey_id: this.model.get('_id'),
                         publish_result: this.model.get('publish_result'),
                         spreadable: this.options.spread_point > 0,
-                        agent: $.util.param('ati').length > 0,
+                        agent: value.is_agent,
                         spread_point: this.options.spread_point,
                         show_subscribe: !this.options.binded && this.model.get('_id') != gonganbu
                     }, 'survey_filler_end_free').appendTo('#f_body');
