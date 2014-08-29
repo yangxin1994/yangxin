@@ -122,7 +122,6 @@ class Filler::AnswersController < Filler::FillerController
         "order_code" => @answer.order.try(:code),
         "order_status" => @answer.order.try(:status)}
     end
-    retval['is_agent'] = @answer.agent_task.present?
     @data = {:success => true, :value => retval}
 
     ensure_preview(@answer.is_preview)

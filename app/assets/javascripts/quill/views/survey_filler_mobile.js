@@ -348,7 +348,7 @@ $(function() {
                     }
                     this.hbs({
                         spreadable: this.options.spread_point > 0,
-                        agent: value.is_agent,
+                        agent: this.options.is_agent,
                         spread_point: this.options.spread_point
                     }, 'survey_filler_end_free_mobile').appendTo('#f_body');
 
