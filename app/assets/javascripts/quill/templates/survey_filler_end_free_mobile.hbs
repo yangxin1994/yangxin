@@ -5,12 +5,12 @@
 		</span>
 	</div>
 	<div class='free_form'>
-		{{#unless agent}}
+		{{#if agent}}
 		{{#if spreadable}}
 			<button id="socal_share" class="single">分享问卷得{{spread_point}}积分</button>
 		{{else}}
 		  <button id="socal_share" class="single">分享问卷</button>
 		{{/if}}
-		{{/unless}}
+		{{/if}}
 	</div>	
 </div>

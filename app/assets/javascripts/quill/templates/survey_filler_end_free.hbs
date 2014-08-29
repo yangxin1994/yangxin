@@ -7,14 +7,14 @@
 				<span>
 					<b>答题完成啦！{{#if publish_result}}<a href='/surveys/{{survey_id}}/result'>查看问卷报告</a>{{/if}}</b>
 					<br />您的观点对我们很重要，感谢您参加本次调研。
-					{{#unless agent}}
+					{{#if agent}}
 					{{#if spreadable}}
 					<a id='start_spread' href='javascript:void(0);'>邀请好友答题</a> 获取<em>{{spread_point}}</em>积分奖励。
 					{{/if}}
 					{{#if show_subscribe}}
 					<br />（<a id='subscribe_btn' href='/surveys#subscribe' target='_blank'>订阅</a>问卷提醒，不错过任何问卷）
 					{{/if}}
-					{{/unless}}
+					{{/if}}
 				</span>
 			</div>
 			<div class='form'>
