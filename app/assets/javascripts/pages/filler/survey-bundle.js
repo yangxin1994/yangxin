@@ -56,6 +56,7 @@ jQuery(function($) {
 			introducer_id: $.util.param('i'),
 			agent_task_id: $.util.param('ati'),
 			agent_user_id: $.util.param('agent_user_id'),
+			task_id: $.util.param('task_id'),
 			channel: window.channel,
 			referer: window.referer,
 			username: username_ipt.val(),

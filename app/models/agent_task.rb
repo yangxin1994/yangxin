@@ -1,6 +1,6 @@
 require 'tool'
 class AgentTask
-  
+
   include Mongoid::Document
   include Mongoid::Timestamps
   include FindTool
@@ -112,6 +112,9 @@ class AgentTask
       when Answer::UNDER_REVIEW
         self.under_review_count += 1
       end
+    end
+    if self.finished_count + self.under_review_count >= self.count
+      self.close
     end
     return self.save
   end

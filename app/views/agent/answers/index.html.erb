@@ -57,6 +57,7 @@
       <tr>
         <th width="20%">答案创建者</th>
         <th>代理用户id</th>
+        <th>代理任务id</th>
         <th >状态</th>
         <th >创建时间</th>
         <th >操作</th>
@@ -72,6 +73,7 @@
       <tr>
         <td><%= answer["sample_name"] %></td>
         <td><%= answer["agent_user_id"] %></td>
+        <td><%= answer["task_id"] %></td>
         <td><%= answer_type_tag answer["status"], true%></td>
         <td><%= answer["created_at"].strftime('%F %R') %></td>
         <td>
