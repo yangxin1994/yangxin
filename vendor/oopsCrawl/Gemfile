@@ -1,0 +1,20 @@
+source 'http://ruby.taobao.org/'
+ruby '2.1.2'
+
+gem 'mongoid', " ~> 3.0"
+gem 'sidekiq'
+gem 'pry'
+
+gem 'rtesseract'
+gem 'mini_magick'
+
+gem "capybara"
+gem "capybara-mechanize"
+gem "enumerable-lazy"
+gem "mechanize"
+gem "sidekiq-cron", "~> 0.2.0"
+
+gem "yard"
+gem "rake"
+gem "turn"
+gem "sinatra"
