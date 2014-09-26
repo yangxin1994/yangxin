@@ -1,5 +1,5 @@
 require File.expand_path("../spider", __FILE__) 
-s = OopSpider.new('7046723')
+s = OopSpider.new()
 # s = OopSpider.new('25713408')
 # # ============================
 # s.crawl_weibos(线程数)

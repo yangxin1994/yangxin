@@ -36,7 +36,7 @@ class MicroSpider
     Capybara.configure do |config|
       config.run_server = false
       config.ignore_hidden_elements = false
-      Capybara.current_session.driver.browser.agent.user_agent_alias = 'Mac Safari'
+      #Capybara.current_session.driver.browser.agent.user_agent_alias = 'Mac Safari'
       # Capybara.current_session.driver.browser.agent.set_proxy(@proxy.ip, @proxy.port) if @proxy
       # config.default_driver = :mechanize
       # if proxy = ENV['PROXY']

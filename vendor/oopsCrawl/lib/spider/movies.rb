@@ -161,6 +161,7 @@ module Spider
       @nowplaying_spider.crawl
     end
 
+
     def crawl_movie(subject_id)
       movie = Movie.find_or_create_by(:subject_id => subject_id)
       @movie_spider.reset
@@ -169,7 +170,6 @@ module Spider
     end
 
     def learn_nowplaying(is_weibo)
-      # @nowplaying_spider.skip_followers = Movie.all.map{|movie| movie.subject_url + "?from=playing_poster"}
       @nowplaying_spider.learn do
         site 'http://movie.douban.com/'
         entrance "nowplaying"
@@ -181,7 +181,6 @@ module Spider
         end
 
         follow '.stitle .ticket-btn' do
-          # skip_followers = Movie.all.map{|movie| (movie.subject_url)}
           create_action :save do |cresult| self.save_movies(cresult, true, is_weibo) end
           self.get_content
           save
@@ -189,8 +188,9 @@ module Spider
       end
     end
 
+
+    #即将上映
     def learn_later(is_weibo)
-      # @nowplaying_spider.skip_followers = Movie.all.map{|movie| movie.subject_url + "?from=playing_poster"}
       @nowplaying_spider.learn do
         site 'http://movie.douban.com/'
         entrance "later"
@@ -202,7 +202,6 @@ module Spider
         end
 
         follow '.stitle .ticket-btn' do
-          # skip_followers = Movie.all.map{|movie| (movie.subject_url)}
           create_action :save do |cresult| self.save_movies(cresult, true, is_weibo) end
           self.get_content
           save

@@ -16,12 +16,12 @@ class ApplicationController < ActionController::Base
     # Use param value to override cookies value
     # _flashes = flash.instance_variable_get('@flashes').dup
     refresh_session(params[:auth_key] || cookies[:auth_key])
-
     # flash.instance_variable_set('@flashes', _flashes)
     if cookies[:carnival_user_id].present?
       @current_carnival_user = CarnivalUser.where(id: cookies[:carnival_user_id]).first
     end
   end
+
 
   # =============================
   # Get current user and refresh a user's status by setting cookies or deleting cookies

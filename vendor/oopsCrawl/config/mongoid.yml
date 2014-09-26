@@ -2,7 +2,7 @@ development:
   sessions:
     default:
       # database: spiderman_2
-      database: inke_production
+      database: oops_data_production
       # username: oopsdata
       # password: o2psllyscdata
       hosts:
