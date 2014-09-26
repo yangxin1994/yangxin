@@ -85,8 +85,8 @@ $(function(){
 				quill.helpers.QuestionType.getLabel(quill.helpers.QuestionType.getValue(sub_q.data_type + 'Blank'));
 		},
 
-		_checkAnswer: function(answer) {
-			if(answer.length != this.issue.items.length) return {index: 0, text:'请完成所有子题目'};
+		_checkAnswer: function(answer, lang) {
+			if(answer.length != this.issue.items.length) return {index: 0, text: lang=='en' ? 'Please finish all sub questions' : '请完成所有子题目' };
 			for (var i = 0; i < this.issue.items.length; i++) {
 				var item = this.issue.items[i];
 				if(answer[i] == null)

@@ -193,4 +193,23 @@ class CarnivalOrder
       return 0
     end
   end
+
+  def self.combine
+    record = {}
+    CarnivalOrder.where(status: 2).each do |e|
+      next if e.amount < 10 || e.amount > 30
+      if record[e.mobile].blank?
+        record[e.mobile] = e.amount
+      else
+        record[e.mobile] += e.amount
+      end
+    end
+
+    CarnivalOrder.where(status: 2).each do |e|
+      next if e.amount < 10 || e.amount > 30
+      amount = record.delete(e.mobile).to_i
+      e.amount = amount
+      e.save
+    end
+  end
 end

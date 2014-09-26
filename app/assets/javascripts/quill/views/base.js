@@ -67,13 +67,14 @@ $(function(){
 		
 		/* handlebars helper
 		 * =========================== */
+    _template_path: 'templates',
 		hbs: function(context, name, absolute) {
 			if(absolute) {
-				return $(HandlebarsTemplates['quill/templates' + name](context));
+				return $(HandlebarsTemplates['quill/' + this._template_path + name](context));
 			} else {
 				name = name || this._ns[this._ns.length - 1];
 				var names = this._ns.slice(0, this._ns.length);
-				names[1] = 'templates';		//change views to templates;
+				names[1] = this._template_path;		//change views to templates;
 				names[names.length - 1] = name.uncamel();
 				return $(HandlebarsTemplates[names.join('/')](context));
 			}

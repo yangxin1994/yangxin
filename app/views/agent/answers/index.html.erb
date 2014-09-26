@@ -25,15 +25,12 @@
   </span>
   <span class="btn-group">
     <div class="btn-group">
-      <a class="btn handle" href="/agent/answers/<%= params[:agent_task_id] %>/to_csv?status=8">导出待审核数据</a>
+      <a class="btn handle" href="/agent/answers/<%= params[:agent_task_id] %>/to_csv">导出全部</a>
       <button class="btn dropdown-toggle" data-toggle="dropdown">
         <span class="caret"></span>
       </button>    
       <ul class="dropdown-menu">
-        <li><a href="/agent/answers/<%= params[:agent_task_id] %>/to_csv">导出全部</a></li>
-        <li class="divider"></li>
         <li><a href="/agent/answers/<%= params[:agent_task_id] %>/to_csv" class="querilayer">导当前条件下所有数据</a></li>
-        <li><a href="/agent/answers/<%= params[:agent_task_id] %>/to_csv?status=32">导出审核完毕的数据</a></li>
       </ul>
     </div>
   </span>  
@@ -59,6 +56,8 @@
     <thead>
       <tr>
         <th width="20%">答案创建者</th>
+        <th>代理用户id</th>
+        <th>代理任务id</th>
         <th >状态</th>
         <th >创建时间</th>
         <th >操作</th>
@@ -73,6 +72,8 @@
       <% @answers['data'].each do |answer| %>
       <tr>
         <td><%= answer["sample_name"] %></td>
+        <td><%= answer["agent_user_id"] %></td>
+        <td><%= answer["task_id"] %></td>
         <td><%= answer_type_tag answer["status"], true%></td>
         <td><%= answer["created_at"].strftime('%F %R') %></td>
         <td>
@@ -82,5 +83,4 @@
       <% end %>
     </tbody>
   </table>
-
 </div>

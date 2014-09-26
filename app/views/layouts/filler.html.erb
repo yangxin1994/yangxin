@@ -11,6 +11,7 @@
 		window.is_preview = <%= @is_preview.blank? ? 'false' : @is_preview %>;
 		window.spread_url = <%= raw @spread_url.to_json %>;	//TODO: spread url is not used
 		window.current_user_id = <%=  raw (current_user.nil? ? nil.to_json : current_user._id.to_s.to_json) %>;
+    window.survey_lang = <%= raw @survey[:lang].to_json %>;
 	</script>
 
 	<% if @survey['_id'].to_s == '52a59fc6eb0e5bb2c5000007' %>
@@ -41,7 +42,11 @@
 	</div>
 	<% elsif @survey['style_setting']['allow_replay'] %>
 	<div id='pv_bar'>
+    <% if @survey[:lang] == 'en' %>
+    <span>Please answer seriously. </span><button>Re-answer</button>
+    <% else %>
 		<span>请认真答题</span><button>重新开始</button>
+    <% end %>
 	</div>
 	<% end %>
   <!-- hack for trip survey -->
@@ -92,7 +97,11 @@
 
 <div id='sf_footer'>
 	<% if @survey['style_setting']['has_oopsdata_link'] %>
-	<a href='/' target="_blank">技术支持 <%= corp_name %></a>
+    <% if @survey[:lang] == 'en' %>
+	<a href='/' target="_blank">Tech Support: http://wenjuanba.com</a>
+    <% else %>
+  <a href='/' target="_blank">技术支持 <%= corp_name %></a>
+    <% end %>
 	<% end %>
 	<% if @survey['style_setting']['has_advertisement'] %>
 	<div class='ad'></div>

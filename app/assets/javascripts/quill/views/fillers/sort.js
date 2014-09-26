@@ -151,7 +151,6 @@ $(function(){
 			if(this.model.hasOther())
 				answer.text_input = $.trim(this.$('input:text').val());
 
-			console.log(answer);
 			return answer;
 		}
 		

@@ -21,13 +21,15 @@
 				<% end %>
 			},
 			answer_id: '<%="#{params[:id]}" %>',
+			is_agent:<%= @answer.agent_task.present? %>,
 			data: <%=@data ? (raw @data.to_json) : 'null' %>,
 			signin: <%= user_signed_in %>,
 			email: <%= raw current_user.try(:email).to_json %>,
 			mobile: <%= raw current_user.try(:mobile).to_json %>,
 			spread_point: <%= raw @survey['spread_point'] %>,
 			spread_url: window.spread_url,
-			binded: <%= raw @binded %>
+			binded: <%= raw @binded %>,
+      lang: <%= raw @survey[:lang].to_json %>
 		});
 	});
 	</script>

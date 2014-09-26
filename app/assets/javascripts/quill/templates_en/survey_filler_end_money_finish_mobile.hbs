@@ -1,0 +1,44 @@
+<div class="page">
+	<div class="describe">
+		<div class="answer_finish">
+			{{#if failed}}
+				<b>Your answer failed to pass the review.</b>
+			{{else}}
+				<b><i></i>Order finished!</b>
+			{{/if}}
+	
+			{{#if waiting}}
+				<div>
+				Order is submitted. Order id is: <em>{{order_code}}</em><br />
+				</div>
+			{{/if}}
+	
+			{{#if success}}
+				<div>
+					You have gained <em>{{reward_money}}</em> Yuan.
+				</div>
+			{{/if}}
+		
+			{{#if failed}}
+				<div>
+					Sorry, your answer failed to pass the review.
+				</div>
+			{{/if}}	
+		</div>	
+	</div>
+
+	
+		<div class="share">
+			{{#if signin}}		
+				<button id="get_order" ref="/users/orders">View detail</button>
+			{{else}}
+				<button id="get_order" >Sign in</button>
+			{{/if}}
+			{{#if spreadable}}
+			  <button id="socal_share">Share to gain {{spread_point}} more points</button>
+			{{else}}
+				<button id="socal_share">Share survey</button>
+			{{/if}}				
+		</div>			
+	
+</div>

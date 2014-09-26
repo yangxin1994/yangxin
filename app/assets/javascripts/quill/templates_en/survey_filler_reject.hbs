@@ -1,0 +1,55 @@
+<div id='sf_main'>
+	<div class='welcome no_reward'>
+		<div class='inner'>
+			<h1>{{title}}</h1>
+
+			{{#if filter}}
+			<div class='msg red'>
+				<em></em>
+				<span>
+					<b>Sorry, your are not our survey candidate. </b>{{#if publish_result}}<a href='/surveys/{{../survey_id}}/result'>View report</a>{{/if}}
+					{{#if spreadable}}
+					<br /><a id='start_spread' href='javascript:void(0);'>Invite friends</a> to get <em>{{spread_point}}</em> points.
+					{{/if}}
+					{{#if show_subscribe}}
+					<br />(<a id='subscribe_btn' href='/surveys#subscribe' target='_blank'>Subscribe</a> survey notification)
+					{{/if}}
+				</span>
+			</div>
+			{{/if}}
+
+			{{#if quality}}
+			<div class='msg red'>
+				<em></em>
+				<span>
+					<b>Your are forbidden to answer the survey</b><br />
+				</span>
+			</div>
+			{{/if}}
+
+			{{#if timeout}}
+			<div class='msg time'>
+				<em></em>
+				<span>
+					<b>Time expired.</b><br />
+          You must finish the survey in less then 48 hours.
+				</span>
+			</div>
+			{{/if}}
+
+			{{#if review_failed}}
+			<div class='msg red'>
+				<em></em>
+				<span>
+					<b>Your answer failed to pass the review: </b><br />
+					“{{reject_reason}}”
+				</span>
+			</div>
+			{{/if}}
+
+			<div class='form'>
+				<button id='close_btn'>Close</button>
+			</div>
+		</div>
+	</div>
+</div>

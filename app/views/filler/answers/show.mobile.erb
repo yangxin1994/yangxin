@@ -31,6 +31,7 @@
 				<% end %>
 			},
 			answer_id: '<%="#{params[:id]}" %>',
+			is_agent:<%= @answer.agent_task.present? %>,
 			data: <%=@data ? (raw @data.to_json) : 'null' %>,
 			signin: <%= user_signed_in %>,
 			email: <%= raw current_user.try(:email).to_json %>,

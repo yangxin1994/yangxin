@@ -1,6 +1,6 @@
 require 'tool'
 class AgentTask
-  
+
   include Mongoid::Document
   include Mongoid::Timestamps
   include FindTool
@@ -44,8 +44,6 @@ class AgentTask
     return agent_tasks
   end  
 
-
-
   # Instance Methods
   def update_agent_task(agent_task)
     reward_scheme_id  agent_task.delete("reward_schemes_id")
@@ -54,8 +52,6 @@ class AgentTask
     reward_scheme.agent_tasks << self
     return true
   end
-
-
 
   def info
     self["survey_title"] = self.survey.try(:title).to_s
@@ -73,8 +69,6 @@ class AgentTask
       return ErrorEnum::WRONG_AGENT_TASK_STATUS
     end
   end
-
-
 
   def close
     if self.status == OPEN || self.status == AGENT_CLOSED
@@ -118,6 +112,9 @@ class AgentTask
       when Answer::UNDER_REVIEW
         self.under_review_count += 1
       end
+    end
+    if self.finished_count + self.under_review_count >= self.count
+      self.close
     end
     return self.save
   end

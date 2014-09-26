@@ -58,31 +58,58 @@ $(function(){
 			return this.issue.other_item && this.issue.other_item.has_other_item;
 		},
 
-		_getInfo: function() {
-			if(this.issue.min <= 0) {
-				if(this.issue.max <= 0) return '拖放选项进行排列';
-				else return '请最多排出前 ' + this.issue.max + ' 个选项，拖放选项进行排序';
-			} else {
-				if(this.issue.max <= 0) return '请至少排出前 ' + this.issue.min + ' 个选项，拖放选项进行排序';
-				else if(this.issue.max == this.issue.min) return '请排出前 ' + this.issue.min + ' 个选项，拖放选项进行排序';
-				else return '请排出前 ' + this.issue.min + ' 到 ' + this.issue.max + ' 个选项，拖放选项进行排序';
-			}
+		_getInfo: function(lang) {
+      if(lang=='en') {
+        if(this.issue.min <= 0) {
+          if(this.issue.max <= 0) return 'Drag to sort';
+          else return 'Drag to sort no more than ' + this.issue.max + ' items';
+        } else {
+          if(this.issue.max <= 0) return 'Drag to sort at least ' + this.issue.min + ' items';
+          else if(this.issue.max == this.issue.min) return 'Drag to sort ' + this.issue.min + ' items';
+          else return 'Drag to sort ' + this.issue.min + ' to ' + this.issue.max + ' items';
+        }
+      } else {
+        if(this.issue.min <= 0) {
+          if(this.issue.max <= 0) return '拖放选项进行排列';
+          else return '请最多排出前 ' + this.issue.max + ' 个选项，拖放选项进行排序';
+        } else {
+          if(this.issue.max <= 0) return '请至少排出前 ' + this.issue.min + ' 个选项，拖放选项进行排序';
+          else if(this.issue.max == this.issue.min) return '请排出前 ' + this.issue.min + ' 个选项，拖放选项进行排序';
+          else return '请排出前 ' + this.issue.min + ' 到 ' + this.issue.max + ' 个选项，拖放选项进行排序';
+        }
+      }
 		},
 
-		_checkAnswer: function(answer) {
-			if(answer.sort_result == undefined) return '请对选项进行排序';
-			for(var i=0; i<answer.sort_result.length; i++)
-				if(answer.sort_result[i] == undefined) return '请逐名次排序';
-			if(this.issue.min == this.issue.max && this.issue.min > 0 && this.issue.min != answer.sort_result.length) 
-				return '请排出前 ' + this.issue.min + ' 个选项';
-			if(this.issue.min >= 0 && answer.sort_result.length < this.issue.min) return '至少对 ' + this.issue.min + ' 个选项进行排序';
-			if(this.issue.max >= 0 && answer.sort_result.length > this.issue.max) return '最多对 ' + this.issue.max + ' 个选项进行排序';
-			if(this.hasOther()) {
-				for (var i = 0; i < answer.sort_result.length; i++) {
-					if(answer.sort_result[i] == this.issue.other_item.id && !answer.text_input) return '请填写其他项内容';
-				};
-			}
-			return null;
+		_checkAnswer: function(answer, lang) {
+      if(lang=='en') {
+        if(answer.sort_result == undefined) return 'Please sort the itmes';
+        for(var i=0; i<answer.sort_result.length; i++)
+          if(answer.sort_result[i] == undefined) return 'Please sort the itmes';
+        if(this.issue.min == this.issue.max && this.issue.min > 0 && this.issue.min != answer.sort_result.length) 
+          return 'Please sort the first ' + this.issue.min + ' items';
+        if(this.issue.min >= 0 && answer.sort_result.length < this.issue.min) return 'Sort at least ' + this.issue.min + ' items';
+        if(this.issue.max >= 0 && answer.sort_result.length > this.issue.max) return 'Sort no more than ' + this.issue.max + ' items';
+        if(this.hasOther()) {
+          for (var i = 0; i < answer.sort_result.length; i++) {
+            if(answer.sort_result[i] == this.issue.other_item.id && !answer.text_input) return 'Please fill the content';
+          };
+        }
+        return null;
+      } else {
+        if(answer.sort_result == undefined) return '请对选项进行排序';
+        for(var i=0; i<answer.sort_result.length; i++)
+          if(answer.sort_result[i] == undefined) return '请逐名次排序';
+        if(this.issue.min == this.issue.max && this.issue.min > 0 && this.issue.min != answer.sort_result.length) 
+          return '请排出前 ' + this.issue.min + ' 个选项';
+        if(this.issue.min >= 0 && answer.sort_result.length < this.issue.min) return '至少对 ' + this.issue.min + ' 个选项进行排序';
+        if(this.issue.max >= 0 && answer.sort_result.length > this.issue.max) return '最多对 ' + this.issue.max + ' 个选项进行排序';
+        if(this.hasOther()) {
+          for (var i = 0; i < answer.sort_result.length; i++) {
+            if(answer.sort_result[i] == this.issue.other_item.id && !answer.text_input) return '请填写其他项内容';
+          };
+        }
+        return null;
+      }
 		}
 		
 	});

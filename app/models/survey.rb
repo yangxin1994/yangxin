@@ -609,6 +609,14 @@ class Survey
     headers
   end
 
+  def agent_excel_header
+    headers =["agent_user_id", "状态", "IP", "地点", "答题时长"]
+    self.all_questions(false).each_with_index do |e, i|
+      headers += e.excel_header("q#{i+1}")
+    end
+    headers
+  end
+
   def excel_header
     headers =["user_id", "answer_id", "is_agent", "email", "mobile", "IP", "地点", "答题时长"]
     self.all_questions(false).each_with_index do |e, i|
@@ -692,6 +700,63 @@ class Survey
     answer_c
   end
 
+  def agent_to_csv(answers)
+    answers ||= []
+    formated_error = []
+    qindex = 0
+    q = self.all_questions_type(false)
+    csv_string = CSV.generate(:headers => true) do |csv|
+      break if answers.blank?
+      csv << agent_excel_header
+      answers.each_with_index do |answer, index|
+        if answer.finished_at.present?
+          answer_time = Time.at(answer.finished_at) - answer.created_at
+          answer_time = (answer_time.ceil / 60.0).ceil
+        else
+          answer_time = 0      
+        end
+        case answer.status
+        when Answer::EDIT
+          status = "正在答题"
+        when Answer::UNDER_REVIEW
+          status = "待审核"
+        when Answer::REDO
+          status = "重答"
+        when Answer::FINISH
+          status = "完成"
+        when Answer::REJECT
+          case answer.reject_type
+          when Answer::REJECT_BY_QUOTA
+            status = "被配额拒绝"
+          when Answer::REJECT_BY_QUALITY_CONTROL
+            status = "被质控题拒绝"
+          when Answer::REJECT_BY_REVIEW
+            status = "被管理员拒绝"
+          when Answer::REJECT_BY_SCREEN
+            status = "被甄别题拒绝"
+          when Answer::REJECT_BY_TIMEOUT
+            status = "超时拒绝"
+          when Answer::REJECT_BY_IP_RESTRICT
+            status = "IP限制拒绝"
+          when Answer::REJECT_BY_ADMIN
+            status = "被管理员拒绝"
+          end
+        end
+        line_answer = [answer.agent_user_id || "", status, answer.remote_ip, QuillCommon::AddressUtility.find_province_city_town_by_code(answer.region), "#{answer_time} 分"]
+        begin
+          all_questions_id(false).each_with_index do |question, index|
+            qindex = index
+            line_answer += q[index].answer_content(answer.answer_content[question], "q#{index + 1}")
+          end
+        rescue Exception => test
+          formated_error << [test, index + 1, qindex + 1, q[index + 1].class]
+        else
+          csv << line_answer
+        end
+      end
+    end
+  end
+
   def admin_to_csv(answers)
     answers ||= []
     formated_error = []
@@ -712,10 +777,11 @@ class Survey
         else
           answer_time = 0      
         end
-        line_answer = [answer.carnival_user.try(:id) || answer.user.try(:id) || "", answer._id, answer.agent_task.present?.to_s, answer.user.try(:email), answer.user.try(:mobile), answer.remote_ip, QuillCommon::AddressUtility.find_province_city_town_by_code(answer.region), "#{answer_time} 分"]
-        if carnival_answer
-          line_answer.insert(0, answer.carnival_user.try(:mobile).to_s)
+        if answer.agent_task.present?
+          agent_info = answer.agent_task.agent.name
+          agent_info += "(#{answer.mobile})" if answer.mobile.present?
         end
+        line_answer = [answer.carnival_user.try(:id) || answer.user.try(:id) || "", answer._id, agent_info.to_s, answer.user.try(:email), answer.user.try(:mobile), answer.remote_ip, QuillCommon::AddressUtility.find_province_city_town_by_code(answer.region), "#{answer_time} 分"]
         begin
           all_questions_id(false).each_with_index do |question, index|
             qindex = index

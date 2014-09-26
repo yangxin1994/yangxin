@@ -16,7 +16,7 @@ $(function(){
 			this.set('is_required', false);
 		},
 
-		_checkAnswer: function(answer) {
+		_checkAnswer: function(answer, lang) {
 			return null;
 		}
 

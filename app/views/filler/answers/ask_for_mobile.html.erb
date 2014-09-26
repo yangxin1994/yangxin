@@ -1,0 +1,20 @@
+<% content_for :head do %>
+  <%= javascript_include_tag "pages/filler/ask_for_mobile-bundle" %>
+  <%= stylesheet_link_tag    "pages/filler/survey-bundle" %>
+  <%= stylesheet_link_tag    "pages/filler/ask_for_mobile-bundle" %>
+  <script type='text/javascript'>
+    var aid = '<%= "#{params[:id]}" %>';
+  </script>
+<% end %>
+
+<div id='sf_main'>
+  <div class='welcome' >
+    <div class='inner'>
+        <h1 id='survey_title'>为了保证问卷数据的真实性，请输入您的手机号码参与问卷 </h1>
+        <div class='form'>
+          <input id='username_ipt' type="text" class='username' placeholder="请输入您的手号码" autofocus />
+          <button id='start_btn' >提交</button>
+        </div>
+    </div>
+  </div>
+</div>

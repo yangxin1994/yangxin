@@ -40,26 +40,26 @@ $(function(){
 			this.trigger('change:issue:sum');
 		},
 
-		_getInfo: function() {
-			return '请为每个选项配额，总和为' + this.issue.sum;
+		_getInfo: function(lang) {
+			return (lang=='en' ? 'Total is ' : '请为每个选项配额，总和为') + this.issue.sum;
 		},
 
-		_checkAnswer: function(answer) {
+		_checkAnswer: function(answer, lang) {
 			var sum = 0;
 			for (var i = 0; i < this.issue.items.length; i++) {
 				var id = this.issue.items[i].id;
 				if(isNaN(answer[id]))
-					return '请为所有选项进行配额';
+					return lang=='en' ? 'Please fill every option' : '请为所有选项进行配额';
 				sum += answer[id];
 			};
 			if(this.issue.other_item && this.issue.other_item.has_other_item) {
 				var a = answer[this.issue.other_item.id]
 				if(a != undefined) {
-					if(a != 0 && !answer.text_input) return '请填写其他项内容';
+					if(a != 0 && !answer.text_input) return lang=='en' ? 'Please input content' : '请填写其他项内容';
 					sum += answer[this.issue.other_item.id];
 				}
 			}
-			if(this.issue.sum != sum) return '输入总额需要为 ' + this.issue.sum;
+			if(this.issue.sum != sum) return (lang=='en' ? 'Total should be ' : '输入总额需要为 ') + this.issue.sum;
 			return null;
 		}
 

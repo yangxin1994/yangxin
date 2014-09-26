@@ -1,0 +1,21 @@
+<div id='sf_main'>
+	<div class='welcome no_reward'>
+		<div class='inner'>
+			<h1>{{title}}</h1>
+			<div class='msg red'>
+				<em></em>
+				<span>
+					<b>Please answer seriously</b><br />
+          You have one more chance to answer the survey.
+					{{#if audit_message}}
+					<br />
+					Your answer failed to pass the review: {{audit_message}}
+					{{/if}}
+				</span>
+			</div>
+			<div class='form'>
+				<button id='redo_btn'>Re-answer</button>
+			</div>
+		</div>
+	</div>
+</div>

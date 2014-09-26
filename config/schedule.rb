@@ -34,3 +34,11 @@ end
 every 1.weeks do
 	runner "SampleAttribute.make_statistics"
 end
+
+every 1.days, :at => '1:00 am' do
+	runner 'Order.refresh_esai_orders'
+end
+
+every 1.days, :at => '0:00 am' do
+	runner 'Order.recharge_fail_mobile'
+end

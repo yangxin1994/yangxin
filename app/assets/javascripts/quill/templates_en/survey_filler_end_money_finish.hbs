@@ -1,0 +1,59 @@
+<div id='sf_main'>
+	<div class='welcome no_reward'>
+		<div class='inner'>
+			<h1>{{title}}</h1>
+			<div class='msg {{#if waiting}}waiting{{/if}} {{#if success}}green{{/if}} {{#if failed}}red{{/if}}'>
+				<em></em>
+				<span>
+					{{#if failed}}
+					<b>Your answer failed to pass the review.</b><br />
+					{{else}}
+					<b>Finished! {{#if ../publish_result}}<a href='/surveys/{{../survey_id}}/result'>View report</a>{{/if}}</b><br />
+					{{/if}}
+					
+					{{#if waiting}}
+					Your order id is: <em>{{order_code}}</em><br />
+					We are processing the orders. {{#if signin}}{{else}}Click button below to track the order.{{/if}}
+					{{#if spreadable}}
+					<br /><a id='start_spread' href='javascript:void(0);'>Invite friends</a> to gain <em>{{spread_point}}</em> more points.
+					{{/if}}
+					{{#if show_subscribe}}
+					<br />(<a id='subscribe_btn' href='/surveys#subscribe' target='_blank'>Subscribe</a> survey notification)
+					{{/if}}
+					{{/if}}
+
+					{{#if success}}
+					You have gained <em>{{reward_money}}</em> Yuan.
+					{{#if spreadable}}
+					<br /><a id='start_spread' href='javascript:void(0);'>Invite friends</a> to gain <em>{{spread_point}}</em> more points.
+					{{/if}}
+					{{#if show_subscribe}}
+					<br />(<a id='subscribe_btn' href='/surveys#subscribe' target='_blank'>Subscribe</a> survey notification)
+					{{/if}}
+					{{/if}}
+
+					{{#if failed}}
+					Sorry, your answer failed to pass the review.
+					{{/if}}
+				</span>
+			</div>
+			<div class='form'>
+				{{#if waiting}}
+				{{#if signin}}
+				<button id='my_order_btn'>Track order</button>
+				{{else}}
+				<button id='signin_btn'>Sign in the track the order</button>
+				{{/if}}
+				{{/if}}
+
+				{{#if success}}
+				<button id='close_btn'>Close</button>
+				{{/if}}
+
+				{{#if failed}}
+				<button id='close_btn'>Close</button>
+				{{/if}}
+			</div>
+		</div>
+	</div>
+</div>
