@@ -31,7 +31,6 @@ module Spider
         begin
           movie_model.update_attributes(_movie)
           movie_model.save
-          
         rescue Exception => e
           binding.pry
         end
@@ -195,14 +194,14 @@ module Spider
         site 'http://movie.douban.com/'
         entrance "later"
 
-        fields :subject, ".stitle .ticket-btn" do |subject_url|
-          if _m = Movie.where(:subject_url => subject_url.native.attr("href").gsub("?from=playing_poster",'')).first
-            _m.nowplaying = true and _m.save
+        fields :subject, ".intro a" do |subject_url|
+          if _m = Movie.where(:subject_url => subject_url.native.attr("href")).first
+            _m.nowplaying = false and _m.save
           end
         end
 
-        follow '.stitle .ticket-btn' do
-          create_action :save do |cresult| self.save_movies(cresult, true, is_weibo) end
+        follow '.intro h3 a' do
+          create_action :save do |cresult| self.save_movies(cresult, false, is_weibo) end
           self.get_content
           save
         end

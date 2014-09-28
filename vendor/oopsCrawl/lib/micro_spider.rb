@@ -8,12 +8,12 @@ Capybara.current_driver = :mechanize
 Capybara.app = proc { |env| [200, {'Content-Type' => 'text/html'}, 'You need to use MicroSpider#site method to set app host.'] }
 
 # If has capybara-webkit, first priority
-begin
-  require 'capybara-webkit'
-  Capybara.current_driver = :webkit
-rescue Exception => e
-  # Nothing to do.
-end
+# begin
+#   require 'capybara-webkit'
+#   Capybara.current_driver = :webkit
+# rescue Exception => e
+#   # Nothing to do.
+# end
 
 require 'logger'
 require 'set'
