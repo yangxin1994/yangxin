@@ -1,0 +1,75 @@
+<!doctype html>
+<!--[if lt IE 7 ]><html lang="en" class="no-js ie6"> <![endif]-->
+<!--[if IE 7 ]><html lang="en" class="no-js ie7"> <![endif]-->
+<!--[if IE 8 ]><html lang="en" class="no-js ie8"> <![endif]-->
+<!--[if IE 9 ]><html lang="en" class="no-js ie9"> <![endif]-->
+<!--[if (gt IE 9)|!(IE)]><!--><html lang="en" class="no-js"> <!--<![endif]-->
+<head>
+<meta charset="utf-8">
+<meta name="author" content="ThemeFuse">
+<meta name="keywords" content="">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Skinny Frames | Template</title>
+
+<!-- main JS libs -->
+<script src="/js/libs/modernizr.min.js"></script>
+<script src="/js/libs/jquery-1.10.2.min.js"></script>
+<script src="/js/libs/jquery-ui.min.js"></script>
+<script src="/js/libs/bootstrap.min.js"></script>
+
+<!-- Style CSS -->
+<link href="/css/bootstrap.css" media="screen" rel="stylesheet">
+<link href="/style.css" media="screen" rel="stylesheet">
+
+<!-- General Scripts -->
+<script src="/js/general.js"></script>
+
+<!--[if lt IE 9]><script src="js/respond.min.js"></script><![endif]-->
+<!--[if gte IE 9]>
+<style type="text/css">
+    .gradient {filter: none !important;}
+</style>
+<![endif]-->
+</head>
+
+<body>
+  <div class="body-wrap">
+    <!--container-->
+    <div class="container">
+      <div class="row">
+        <div class="col-md-2">
+          <div class="dropdown">
+            <a id="drop" href="#" role="button" class="dropdown-toggle gradient" data-toggle="dropdown" hidefocus="true" style="outline: none;"><span></span>选择影片</a>
+            <ul class="dropdown-menu" role="menu" aria-labelledby="drop">
+              <li role="presentation"><a role="menuitem" tabindex="-1" href="#" hidefocus="true" style="outline: none;">Web design</a></li>
+              <li role="presentation"><a role="menuitem" tabindex="-1" href="#" hidefocus="true" style="outline: none;">User interface</a></li>
+              <li role="presentation"><a role="menuitem" tabindex="-1" href="#" hidefocus="true" style="outline: none;">Social Media</a></li>
+              <li role="presentation"><a role="menuitem" tabindex="-1" href="#" hidefocus="true" style="outline: none;">Reminder</a></li>
+            </ul>
+          </div>
+        </div>
+        <div class="col-md-10">
+          <ul class="menu clearfix ">
+            <li class=""><a href="#" hidefocus="true" style="outline: none;"><span>电影信息</span></a></li>
+            <li class="parent"><a href="#" hidefocus="true" style="outline: none;"><span>微博</span></a>
+              <ul>
+                <li><a href="#" hidefocus="true" style="outline: none;">账号</a></li>
+                <li><a href="#" hidefocus="true" style="outline: none;">评论</a></li>
+                <li><a href="#" hidefocus="true" style="outline: none;">用户</a></li>
+                <li><a href="#" hidefocus="true" style="outline: none;">品牌</a></li>
+              </ul>
+            </li>
+            <li class=""><a href="#" hidefocus="true" style="outline: none;"><span>爬虫状态</span></a></li>
+            <li class=""><a href="#" hidefocus="true" style="outline: none;"><span>代理</span></a></li>
+            <li class=""><a href="#" hidefocus="true" style="outline: none;"><span>影评</span></a></li>
+            <li class=""><a href="#" hidefocus="true" style="outline: none;"><span>票房</span></a></li>
+          </ul>
+        </div>
+      </div>
+      <%= yield %>
+
+    </div>
+    <!--/ container -->
+  </div>
+</body>
+</html>

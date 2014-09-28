@@ -1,0 +1,9 @@
+development:
+  sessions:
+    default:
+      # database: spiderman_2
+      database: oops_data_production
+      # username: oopsdata
+      # password: o2psllyscdata
+      hosts:
+        - localhost:27017
