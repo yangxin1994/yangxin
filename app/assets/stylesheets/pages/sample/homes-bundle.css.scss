@@ -560,19 +560,31 @@
 					position: absolute;
 					bottom:5px;
 					right:15px;
+					.btn{
+						background: #F1F1F4;
+						border:1px #E0E0E6 solid;
+					}
 					.want-to-see{
-						background: #F25D5D;
-						color:#fff;
+						color:#FF5E6A;
+						&:hover{
+							background: #FF5E6A;
+							color:#fff;
+							border:1px #F53040 solid;
+						}
+						
 					}
 					.have-read{
-						background: #FBBF62;
-						color:#fff;
+						color:#F98311;
+						&:hover{
+							background: #FBBF62;
+							color:#fff;
+							border: 1px #F9A82E solid;
+						}
 					}
 					.dont-want-to-see{
-						background: #5691F0;
-						color:#fff;
 						&:hover{
-							background: #4576C6;
+							color:#fff;
+							background: #B4B5BE;
 						}
 					}
 				}
