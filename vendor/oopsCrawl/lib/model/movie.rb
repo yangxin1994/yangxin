@@ -1,6 +1,6 @@
 # encoding: utf-8
 class Movie
-
+  attr_accessor :voted
   include Mongoid::Document
   Nlpir::Mongoid.included(self)
 
@@ -119,10 +119,28 @@ class Movie
     end
   end
 
-  def self.rand
+  def self.rand(user_id=nil)
     n = self.nowplaying.desc(:info_show_at)[0..2]
     m = self.later.asc(:info_show_at)[0..2]
-    return n + m 
+    result = n + m 
+    if user_id.present?
+      result = result.map do |e|
+        su = Suffrage.where(movie_id:e.id,user_id:user_id).first
+        if su.present?
+          e.write_attribute('voted', true)
+          e
+        else
+          e.write_attribute('voted',false)
+          e
+        end
+      end
+    else
+      result = result.map do |e|
+        e.write_attribute('voted',false)
+        e
+      end
+    end
+    result
   end
 
 

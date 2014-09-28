@@ -4,6 +4,13 @@ class LaterWorker
   def perform
     later_spider = OopSpider.new 
     later_spider.crawl_later
+    Movie.later.each do |m|
+    	unless m.photos.length > 0
+    		photo_spider = OopSpider.new(m.subject_id.to_s)
+    		photo_spider.crawl_photos
+    	end
+   
+    end
   end
 end
 
