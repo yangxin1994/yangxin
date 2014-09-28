@@ -1,5 +1,5 @@
 class Vote::VoteController < ApplicationController
-  layout false
+  layout 'sample'
 
   def set_vote_user_cookie(id)
     cookies[:vote_user_id] = {
