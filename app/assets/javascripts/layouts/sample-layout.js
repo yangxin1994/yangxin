@@ -154,4 +154,30 @@ $(document).ready(function() {
         })
     });
 
-})
+    //投票页面
+    var aLi = $('#being-hit li');
+    aLi.each(function(index, el) {
+        if((index+1)%4==0){
+            $(el).css('margin-right','0');
+        };
+    });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+});

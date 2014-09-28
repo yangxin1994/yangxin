@@ -14,13 +14,18 @@
       }, 500);
       });
     jQuery(function(){
+      //投票Tab
       var aLi = $('.vote-class li');
       var aDiv = $('.vote-list');
+      var aLink = $('.button-list a');
       aLi.click(function() {
         aLi.removeClass('active');
         $(this).addClass('active');
         aDiv.removeClass('dn');
         aDiv.eq($(this).index()).addClass('dn');
+      });
+      aLink.click(function() {
+        $(this).parent().html('已参与');
       });
     });
   </script>
@@ -127,7 +132,7 @@
             <span class="time">上映日期: 2014-10-1</span>
             <span class="actor">主演:西尔维斯特·史泰龙/杰森·斯坦森/阿诺·施瓦辛格/杜夫·龙格尔/韦斯利·斯奈普斯/梅尔·吉布森</span>
             <span class="button-list">
-              <a href="javascript:;" class="btn want-to-see">想看</a>
+              <a href="http://baidu.com" class="btn want-to-see">想看</a>
               <a href="javascript:;" class="btn dont-want-to-see">不想看</a>
             </span>
           </li>
