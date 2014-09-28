@@ -1,5 +1,6 @@
 <% content_for :head do %>
   <%= stylesheet_link_tag "pages/sample/homes-bundle", :media => "all" %>
+  <%= javascript_include_tag "pages/sample/homes-bundle", :media => "all" %>
   <script type="text/javascript">
     <% if user_signed_in %>
       window.current_user_id = "<%= current_user.id %>"
@@ -13,6 +14,7 @@
         }, 15000);
       }, 500);
       });
+<<<<<<< HEAD
     jQuery(function(){
       //投票Tab
       var aLi = $('.vote-class li');
@@ -28,6 +30,8 @@
         $(this).parent().html('已参与');
       });
     });
+=======
+>>>>>>> 08e9fb4b1ec2215960bc58c35aaea824ba41fd21
   </script>
 <% end %>
 <% if @data[:hot_survey].present? %>
@@ -111,8 +115,8 @@
       <div class="dashed-box-inner-top">
         <h3 class="box-title">影片小调查</h3>
         <ul class="vote-class">
-          <li><a class="left" href="javascript:;">即将上映</a></li>
           <li class="active"><a class="right" href="javascript:;">正在热播</a></li>
+          <li><a class="left" href="javascript:;">即将上映</a></li>
         </ul>
       </div>
       <div class="vote-list dn">
@@ -151,7 +155,7 @@
       <div class="vote-list">
         <ul>
           <li>
-            <span class="movie-name">大头儿子和小头爸爸之秘密计划(2014)</span>
+            <span class="movie-name">123123123(2014)</span>
             <span class="movie-img"><%=image_tag "movies-img/1.jpg", :alt => "大头儿子和小头爸爸之秘密计划(2014)" %></span>
             <span class="time">上映日期: 2014-10-1</span>
             <span class="actor">主演:刘纯燕/董浩/鞠萍/耿晨晨/陈苏/霍小雷</span>
@@ -161,30 +165,27 @@
           </li>
           <li>
             <span class="movie-name">大头儿子和小头爸爸之秘密计划(2014)</span>
-            <span class="movie-img"><%=image_tag "movies-img/1.jpg", :alt => "大头儿子和小头爸爸之秘密计划(2014)" %></span>
+            <span class="movie-img"><%=image_tag "movies-img/2.jpg", :alt => "大头儿子和小头爸爸之秘密计划(2014)" %></span>
             <span class="time">上映日期: 2014-10-1</span>
             <span class="actor">主演:西尔维斯特·史泰龙/杰森·斯坦森/阿诺·施瓦辛格/杜夫·龙格尔/韦斯利·斯奈普斯/梅尔·吉布森</span>
             <span class="button-list">
-              <a href="javascript:;" class="btn want-to-see">想看</a>
-              <a href="javascript:;" class="btn have-read">看过</a>
+              <a href="http://baidu.com" class="btn want-to-see">想看</a>
               <a href="javascript:;" class="btn dont-want-to-see">不想看</a>
             </span>
           </li>
           <li style="border:none;margin:0;">
             <span class="movie-name">大头儿子和小头爸爸之秘密计划(2014)</span>
-            <span class="movie-img"><%=image_tag "movies-img/1.jpg", :alt => "大头儿子和小头爸爸之秘密计划(2014)" %></span>
+            <span class="movie-img"><%=image_tag "movies-img/3.jpg", :alt => "大头儿子和小头爸爸之秘密计划(2014)" %></span>
             <span class="time">上映日期: 2014-10-1</span>
             <span class="actor">主演:刘纯燕/董浩/鞠萍/耿晨晨/陈苏/霍小雷</span>
             <span class="button-list">
               <a href="javascript:;" class="btn want-to-see">想看</a>
-              <a href="javascript:;" class="btn have-read">看过</a>
               <a href="javascript:;" class="btn dont-want-to-see">不想看</a>
             </span>
           </li>
         </ul>
       </div>
     </div>
-    
   </div>
 </div>
 

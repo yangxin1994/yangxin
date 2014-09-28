@@ -4,7 +4,15 @@ s = OopSpider.new()
 # # ============================
 # s.crawl_weibos(线程数)
 # s.crawl_reviews 
-# s.crawl_nowplaying 
+# s.crawl_nowplaying
+# s.crawl_later
+# Movie.each do |m|
+# 	unless m.photos.length > 0
+# 		ps = OopSpider.new(m.subject_id.to_s)
+# 		ps.crawl_photos
+# 	end
+# end 
+
 # # ============================
 # s.crawl_weibo_basic
 binding.pry

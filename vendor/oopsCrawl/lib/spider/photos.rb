@@ -31,16 +31,18 @@ module Spider
         create_action :save_photo do |cresult|
           _result = {}
           @movie = Movie.where(:subject_id => subject_id).first
-          cresult[:field].each { |field| _result.merge!(field) }
-          _result[:photos].each do |_photo|
-            # if photo = photo.where(:photo_id => _photo[:photo_id]).first
-              # "跳过~~"
-            # else
-              photo = Photo.create(_photo)
-              @movie.photos << photo
-            # end
+          if @movie.photos.length <= 0
+            cresult[:field].each { |field| _result.merge!(field) }
+            _result[:photos].each do |_photo|
+              # if photo = photo.where(:photo_id => _photo[:photo_id]).first
+                # "跳过~~"
+              # else
+                photo = Photo.create(_photo)
+                @movie.photos << photo
+              # end
+            end
+            @movie.save          
           end
-          @movie.save
         end
 
         fields :photos, ".poster-col4 li" do |photo|
