@@ -1,5 +1,4 @@
-
-
+# encoding: utf-8
 class Movie
 
   include Mongoid::Document
@@ -84,6 +83,12 @@ class Movie
   scope :nowplaying, ->{ where(:nowplaying => true) }
 
   validates :subject_id, uniqueness: true, presence: true
+
+  after_create :debug
+
+  def debug
+    puts "movie have been created ----------#{self.title}" 
+  end
 
   def title_zh
     title.split(' ')[0]

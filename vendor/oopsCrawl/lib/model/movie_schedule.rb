@@ -1,3 +1,4 @@
+# encoding: utf-8
 require 'rtesseract' 
 require 'mini_magick'
 require 'csv'
