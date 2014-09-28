@@ -519,6 +519,7 @@
 		ul{
 			overflow: hidden;
 			li{
+				position: relative;
 				width:295px;
 				height:170px;
 				float: left;
@@ -543,7 +544,9 @@
 				}
 				.actor{
 					width:175px;
+					height:72px;
 					display: inline-block;
+					overflow: hidden;
 					color:#999;
 					margin-bottom:10px;
 				}
@@ -553,9 +556,25 @@
 					margin-bottom:10px;
 				}
 				.button-list{
-					.want-to-see{}
-					.have-read{}
-					.dont-want-to-see{}
+					width:175px;
+					position: absolute;
+					bottom:5px;
+					right:15px;
+					.want-to-see{
+						background: #F25D5D;
+						color:#fff;
+					}
+					.have-read{
+						background: #FBBF62;
+						color:#fff;
+					}
+					.dont-want-to-see{
+						background: #5691F0;
+						color:#fff;
+						&:hover{
+							background: #4576C6;
+						}
+					}
 				}
 			}
 		}
