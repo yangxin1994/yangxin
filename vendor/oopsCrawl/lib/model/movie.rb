@@ -81,14 +81,9 @@ class Movie
 
 
   scope :nowplaying, ->{ where(:nowplaying => true) }
-
+  scope :later, -> {where(:nowplaying => false)}
+  #default_scope ->{ desc(:info_show_at) }
   validates :subject_id, uniqueness: true, presence: true
-
-  after_create :debug
-
-  def debug
-    puts "movie have been created ----------#{self.title}" 
-  end
 
   def title_zh
     title.split(' ')[0]
@@ -123,6 +118,13 @@ class Movie
       movie.update_attribute(:nowplaying, false)
     end
   end
+
+  def self.rand
+    n = self.nowplaying.desc(:info_show_at)[0..2]
+    m = self.later.asc(:info_show_at)[0..2]
+    return n + m 
+  end
+
 
   def rating
     rating_p
@@ -186,33 +188,7 @@ class Movie
     tags_info.map { |k, v| {text: k, size: v} }
   end
 
-  # def get_approve_co(keyword, page = 0, is_media = false)
-  #   page = page.to_i > 0 ? page.to_i - 1 : 0
-  #   apc = get_approve_co_all(keyword, is_media)
-  #   data = apc.sort_by{|a| a[1]["count"]}.reverse.map { |e| e[1] }
-  #   apc = {
-  #     "all_count" => data.count,
-  #     "data" => data.slice(page * 9, 9),
-  #     "total_page" => (data.count / 9.0).ceil,
-  #     "current_page" => page <= 1 ? 1 : page + 1,
-  #     "success" => true
-  #   }
-  #   apc
-  # end
-  # def get_approve_co(keyword, page = 0, is_media = false)
-  #   page = page.to_i > 0 ? page.to_i - 1 : 0
-  #   apc = get_approve_co_all(keyword, is_media)
-  #   data = apc.sort_by{|a| a[1]["count"]}.reverse.map { |e| e[1] }
-  #   apc = {
-  #     "all_count" => data.count,
-  #     "data" => data.slice(page * 9, 9),
-  #     "total_page" => (data.count / 9.0).ceil,
-  #     "current_page" => page <= 1 ? 1 : page + 1,
-  #     "success" => true
-  #   }
-  #   save
-  #   apc
-  # end
+
 
   def reset_cache
     if need_reset_cache

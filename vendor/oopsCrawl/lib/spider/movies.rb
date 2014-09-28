@@ -21,13 +21,8 @@ module Spider
           end
           _movie.merge!(_field) 
         end
-        if is_weibo
-          movie_model = Movie.where(:subject_id => _movie[:subject_id]).first
-          return unless movie_model
-          return unless movie_model.weibo_id.present?
-        else
-          movie_model = Movie.find_or_create_by(:subject_id => _movie[:subject_id])
-        end
+        
+        movie_model = Movie.find_or_create_by(:subject_id => _movie[:subject_id])
         begin
           movie_model.update_attributes(_movie)
           movie_model.save
@@ -157,6 +152,12 @@ module Spider
     def crawl_nowplaying(is_weibo = false)
       @nowplaying_spider.reset
       learn_nowplaying(is_weibo)
+      @nowplaying_spider.crawl
+    end
+
+    def crawl_later(is_weibo = false)
+      @nowplaying_spider.reset
+      learn_later(is_weibo)
       @nowplaying_spider.crawl
     end
 

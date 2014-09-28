@@ -2,9 +2,8 @@ class NowplayingWorker
   include Sidekiq::Worker
 
   def perform
-    Movie.clear_nowplaying
-    all_spider = OopSpider.new 
-    all_spider.crawl_nowplaying
+    playing_spider = OopSpider.new 
+   	playing_spider.crawl_nowplaying
   end
 end
 
