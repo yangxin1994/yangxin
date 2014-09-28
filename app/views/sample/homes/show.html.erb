@@ -14,7 +14,6 @@
         }, 15000);
       }, 500);
       });
-<<<<<<< HEAD
     jQuery(function(){
       //投票Tab
       var aLi = $('.vote-class li');
@@ -30,8 +29,6 @@
         $(this).parent().html('已参与');
       });
     });
-=======
->>>>>>> 08e9fb4b1ec2215960bc58c35aaea824ba41fd21
   </script>
 <% end %>
 <% if @data[:hot_survey].present? %>
@@ -121,9 +118,28 @@
       </div>
       <div class="vote-list dn">
         <ul>
-          <li>
+          <% @data[:movies][3..5].each_with_index do |movie,idx|%>
+            <li <% if idx == 2 %>style="border:none;margin:0;"<% end%> >
+              <span class="movie-name"><%=movie.title%></span>
+              <span class="movie-img"><img src="<%=movie.poster %>" alt="<%= movie.title%>" /></span>
+              <span class="time">上映日期: <%= Time.at(movie.info_show_at).strftime('%F') %></span>
+              <span class="actor">主演:<%=movie.info_actors%></span>
+              <span class="button-list">
+                <% if movie.voted %>
+                  <span class="r">已参与</span>
+                <% else%>
+                  <a href="javascript:;" class="btn want-to-see">想看</a>
+                  <a href="javascript:;" class="btn have-read">看过</a>
+                  <a href="javascript:;" class="btn dont-want-to-see">不想看</a>                
+                <% end %>
+              </span>
+            </li>          
+          <% end %>  
+
+
+<!--           <li>
             <span class="movie-name">大头儿子和小头爸爸之秘密计划(2014)</span>
-            <span class="movie-img"><%=image_tag "movies-img/1.jpg", :alt => "大头儿子和小头爸爸之秘密计划(2014)" %></span>
+            <span class="movie-img"><%#=image_tag "movies-img/1.jpg", :alt => "大头儿子和小头爸爸之秘密计划(2014)" %></span>
             <span class="time">上映日期: 2014-10-1</span>
             <span class="actor">主演:刘纯燕/董浩/鞠萍/耿晨晨/陈苏/霍小雷</span>
             <span class="button-list">
@@ -132,7 +148,7 @@
           </li>
           <li>
             <span class="movie-name">大头儿子和小头爸爸之秘密计划(2014)</span>
-            <span class="movie-img"><%=image_tag "movies-img/2.jpg", :alt => "大头儿子和小头爸爸之秘密计划(2014)" %></span>
+            <span class="movie-img"><%#=image_tag "movies-img/2.jpg", :alt => "大头儿子和小头爸爸之秘密计划(2014)" %></span>
             <span class="time">上映日期: 2014-10-1</span>
             <span class="actor">主演:西尔维斯特·史泰龙/杰森·斯坦森/阿诺·施瓦辛格/杜夫·龙格尔/韦斯利·斯奈普斯/梅尔·吉布森</span>
             <span class="button-list">
@@ -142,21 +158,41 @@
           </li>
           <li style="border:none;margin:0;">
             <span class="movie-name">大头儿子和小头爸爸之秘密计划(2014)</span>
-            <span class="movie-img"><%=image_tag "movies-img/3.jpg", :alt => "大头儿子和小头爸爸之秘密计划(2014)" %></span>
+            <span class="movie-img"><%#=image_tag "movies-img/3.jpg", :alt => "大头儿子和小头爸爸之秘密计划(2014)" %></span>
             <span class="time">上映日期: 2014-10-1</span>
             <span class="actor">主演:刘纯燕/董浩/鞠萍/耿晨晨/陈苏/霍小雷</span>
             <span class="button-list">
               <a href="javascript:;" class="btn want-to-see">想看</a>
               <a href="javascript:;" class="btn dont-want-to-see">不想看</a>
             </span>
-          </li>
+          </li> -->
         </ul>
       </div>
       <div class="vote-list">
         <ul>
-          <li>
+          <% @data[:movies][0..2].each_with_index do |movie,idx|%>
+            <li <% if idx == 2 %>style="border:none;margin:0;"<% end%> >
+              <span class="movie-name"><%=movie.title%></span>
+              <span class="movie-img"><img src="<%=movie.poster %>" alt="<%= movie.title%>" /></span>
+              <span class="time">上映日期: <%= Time.at(movie.info_show_at).strftime('%F') %></span>
+              <span class="actor">主演:<%=movie.info_actors%></span>
+              <span class="button-list">
+                <% if movie.voted %>
+                  <span class="r">已参与</span>
+                <% else%>
+                  <a href="javascript:;" class="btn want-to-see">想看</a>
+                  <a href="javascript:;" class="btn have-read">看过</a>
+                  <a href="javascript:;" class="btn dont-want-to-see">不想看</a>                
+                <% end %>              
+              </span>
+            </li>          
+          <% end %> 
+
+
+
+<!--           <li>
             <span class="movie-name">123123123(2014)</span>
-            <span class="movie-img"><%=image_tag "movies-img/1.jpg", :alt => "大头儿子和小头爸爸之秘密计划(2014)" %></span>
+            <span class="movie-img"><%#=image_tag "movies-img/1.jpg", :alt => "大头儿子和小头爸爸之秘密计划(2014)" %></span>
             <span class="time">上映日期: 2014-10-1</span>
             <span class="actor">主演:刘纯燕/董浩/鞠萍/耿晨晨/陈苏/霍小雷</span>
             <span class="button-list">
@@ -165,7 +201,7 @@
           </li>
           <li>
             <span class="movie-name">大头儿子和小头爸爸之秘密计划(2014)</span>
-            <span class="movie-img"><%=image_tag "movies-img/2.jpg", :alt => "大头儿子和小头爸爸之秘密计划(2014)" %></span>
+            <span class="movie-img"><%#=image_tag "movies-img/2.jpg", :alt => "大头儿子和小头爸爸之秘密计划(2014)" %></span>
             <span class="time">上映日期: 2014-10-1</span>
             <span class="actor">主演:西尔维斯特·史泰龙/杰森·斯坦森/阿诺·施瓦辛格/杜夫·龙格尔/韦斯利·斯奈普斯/梅尔·吉布森</span>
             <span class="button-list">
@@ -175,14 +211,14 @@
           </li>
           <li style="border:none;margin:0;">
             <span class="movie-name">大头儿子和小头爸爸之秘密计划(2014)</span>
-            <span class="movie-img"><%=image_tag "movies-img/3.jpg", :alt => "大头儿子和小头爸爸之秘密计划(2014)" %></span>
+            <span class="movie-img"><%#=image_tag "movies-img/3.jpg", :alt => "大头儿子和小头爸爸之秘密计划(2014)" %></span>
             <span class="time">上映日期: 2014-10-1</span>
             <span class="actor">主演:刘纯燕/董浩/鞠萍/耿晨晨/陈苏/霍小雷</span>
             <span class="button-list">
               <a href="javascript:;" class="btn want-to-see">想看</a>
               <a href="javascript:;" class="btn dont-want-to-see">不想看</a>
             </span>
-          </li>
+          </li> -->
         </ul>
       </div>
     </div>

@@ -5,7 +5,8 @@ class VoteUser
   include Mongoid::Timestamps
   include FindTool
 
-  field :user_id, type: String
+  # field :user_id, type: String
+  has_many :suffrages
 
   def self.create_new(user_id=nil)
     vote_user = self.create(user_id:user_id)

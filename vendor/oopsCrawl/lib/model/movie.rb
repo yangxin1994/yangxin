@@ -107,6 +107,8 @@ class Movie
   has_and_belongs_to_many :brands
   has_many :photos
   has_many :boxes
+  has_many :suffrages
+
   begin
     MovieIndex
   rescue
@@ -119,28 +121,45 @@ class Movie
     end
   end
 
-  def self.rand(user_id=nil)
-    n = self.nowplaying.desc(:info_show_at)[0..2]
-    m = self.later.asc(:info_show_at)[0..2]
+  def self.rand(limit=false,user_id=nil)
+    if limit
+      n = self.nowplaying.desc(:info_show_at)[0..2]
+      m = self.later.asc(:info_show_at)[0..2]
+    else
+      n = self.nowplaying.desc(:info_show_at)
+      m = self.later.asc(:info_show_at)
+    end
+
     result = n + m 
     if user_id.present?
       result = result.map do |e|
-        su = Suffrage.where(movie_id:e.id,user_id:user_id).first
-        if su.present?
-          e.write_attribute('voted', true)
-          e
-        else
-          e.write_attribute('voted',false)
-          e
-        end
-      end
-    else
-      result = result.map do |e|
-        e.write_attribute('voted',false)
+        e.write_attribute('voted',true) if e.suffrages.where(user_id:user_id).count > 0
         e
       end
     end
     result
+  end
+
+  def self.get_playing(user_id)
+    result = self.nowplaying.desc(:info_show_at)
+    if user_id.present?
+      result = result.map do |e|
+        e.write_attribute('voted',true) if e.suffrages.where(user_id:user_id).count > 0
+        e
+      end
+    end
+    return result
+  end
+
+  def self.get_later(user_id)
+    result = self.later.asc(:info_show_at)
+    if user_id.present?
+      result = result.map do |e|
+        e.write_attribute('voted',true) if e.suffrages.where(user_id:user_id).count > 0
+        e
+      end
+    end
+    return result    
   end
 
 

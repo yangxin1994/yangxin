@@ -3,7 +3,8 @@ class Vote::SuffragesController < Vote::VoteController
 
   def index
     new_vote
-    #@movie_list = Movie.all
+    @playing_movies = Movie.get_playing(cookies[:vote_user_id])
+    @later_movies   = Movie.get_later(cookies[:vote_user_id])
   end
 
   def statr_vote
