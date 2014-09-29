@@ -1,15 +1,15 @@
 jQuery(function(){
 
 	//判断cookie
-	var str = getCookie('vote_id');
-	if(str){
-		var arr=str.split(',');
-	};
-	$('li .button-list .btn').each(function(index, el) {
-		if(arr.indexOf($(el).data('id')) > -1){
-			$(el).click();
-		};
-	});
+	// var str = getCookie('vote_id');
+	// if(str){
+	// 	var arr=str.split(',');
+	// };
+	// $('li .button-list .btn').each(function(index, el) {
+	// 	if(arr.indexOf($(el).data('id')) > -1){
+	// 		$(el).click();
+	// 	};
+	// });
 
 	var aLi = $('#being-hit li');
 	aLi.each(function(index, el){
