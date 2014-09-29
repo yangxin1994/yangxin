@@ -15,7 +15,7 @@ class Vote::SuffragesController < Vote::VoteController
       set_vote_user_cookie(@current_vote_user.id.to_s)
     end
 
-    suffrage = Suffrage.create_new(current_vote_user.id.to_s,movie_id,vt)
+    suffrage = Suffrage.create_new(current_vote_user.id.to_s,params[:movie_id],params[:vt])
 
     render_json_auto suffrage and return 
   end

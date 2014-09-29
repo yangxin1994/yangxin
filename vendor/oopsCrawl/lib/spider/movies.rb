@@ -195,7 +195,7 @@ module Spider
         site 'http://movie.douban.com/'
         entrance "later"
 
-        fields :subject, ".intro a" do |subject_url|
+        fields :subject, ".intro h3 a" do |subject_url|
           if _m = Movie.where(:subject_url => subject_url.native.attr("href")).first
             _m.nowplaying = false and _m.save
           end
