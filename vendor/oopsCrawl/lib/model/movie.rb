@@ -1,4 +1,6 @@
 # encoding: utf-8
+require File.expand_path("../../../../../app/models/vote_related/suffrage", __FILE__) 
+require File.expand_path("../../../../../app/models/vote_related/vote_user", __FILE__) 
 class Movie
   attr_accessor :voted,:want,:no_want,:seen,:total
   include Mongoid::Document
@@ -82,7 +84,6 @@ class Movie
 
   scope :nowplaying, ->{ where(:nowplaying => true) }
   scope :later, -> {where(:nowplaying => false)}
-  #default_scope ->{ desc(:info_show_at) }
   validates :subject_id, uniqueness: true, presence: true
 
   def title_zh
