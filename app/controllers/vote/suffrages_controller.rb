@@ -7,7 +7,7 @@ class Vote::SuffragesController < Vote::VoteController
     @later_movies   = Movie.get_later(cookies[:vote_user_id])
   end
 
-  def statr_vote
+  def statrt_vote
     if cookies[:vote_user_id].present?
       current_vote_user = VoteUser.where(id:cookies[:carnival_user_id]).first
     else

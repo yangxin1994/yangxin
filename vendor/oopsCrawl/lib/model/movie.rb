@@ -1,6 +1,6 @@
 # encoding: utf-8
 class Movie
-  attr_accessor :voted
+  attr_accessor :voted,:want,:no_want,:seen,:total
   include Mongoid::Document
   Nlpir::Mongoid.included(self)
 
@@ -140,11 +140,20 @@ class Movie
     result
   end
 
+
   def self.get_playing(user_id)
     result = self.nowplaying.desc(:info_show_at)
     if user_id.present?
       result = result.map do |e|
+        total = e.suffrages.count
+        want  = e.suffrages.where(vote_tpye:Suffrage::VOTE_TYPE_0).count
+        no_want = e.suffrages.where(vote_tpye:Suffrage::VOTE_TYPE_1).count
+        seen = e.suffrages.where(vote_tpye:Suffrage::VOTE_TYPE_2).count
         e.write_attribute('voted',true) if e.suffrages.where(user_id:user_id).count > 0
+        e.write_attribute('total',total)
+        e.write_attribute('want',want)
+        e.write_attribute('no_want',no_want)
+        e.write_attribute('seen',seen)
         e
       end
     end
