@@ -644,7 +644,11 @@ OopsData::Application.routes.draw do
   end
 
   namespace :vote do 
-    resources :suffrages
+    resources :suffrages do 
+      collection do 
+        get :statrt_vote
+      end
+    end
   end
 
   # Root: different roots for diffent hosts
