@@ -1,16 +1,4 @@
 jQuery(function(){
-
-	//判断cookie
-	// var str = getCookie('vote_id');
-	// if(str){
-	// 	var arr=str.split(',');
-	// };
-	// $('li .button-list .btn').each(function(index, el) {
-	// 	if(arr.indexOf($(el).data('id')) > -1){
-	// 		$(el).click();
-	// 	};
-	// });
-
 	var aLi = $('#being-hit li');
 	aLi.each(function(index, el){
 	    if((index+1)%4==0){
@@ -100,11 +88,6 @@ function voteAjax(number,This,beingHit){
 	    	+'</ul>'
 			);
 		};
-		//存cookie
-		var movies_id = getCookie('vote_id');
-		if(movies_id) movies_id+=',';
-		movies_id+=This.data('id');
-		addCookie('vote_id',movies_id,10);
 	})
 
 	.fail(function() {
