@@ -4,6 +4,16 @@ class Vote::SuffragesController < Vote::VoteController
   def index
     new_vote
     @playing_movies = Movie.get_playing(cookies[:vote_user_id])
+    Rails.logger.info('===============')
+    @playing_movies.each do |m|
+      Rails.logger.info(m.voted)
+      Rails.logger.info(m.tot)
+      Rails.logger.info(m.want)
+      Rails.logger.info(m.no_want)
+      Rails.logger.info(m.seen)
+      Rails.logger.info('-------------')
+    end
+    Rails.logger.info('===============')
     @later_movies   = Movie.get_later(cookies[:vote_user_id])
   end
 

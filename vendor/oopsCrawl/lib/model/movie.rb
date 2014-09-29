@@ -141,7 +141,6 @@ class Movie
     result
   end
 
-
   def self.get_playing(user_id)
     result = self.nowplaying.desc(:info_show_at)
     if user_id.present?
@@ -150,11 +149,11 @@ class Movie
         want    = e.suffrages.where(vote_tpye:Suffrage::VOTE_TYPE_0).count
         no_want = e.suffrages.where(vote_tpye:Suffrage::VOTE_TYPE_1).count
         seen    = e.suffrages.where(vote_tpye:Suffrage::VOTE_TYPE_2).count
-        e.write_attribute('voted',true) if e.suffrages.where(user_id:user_id).count > 0
-        e.write_attribute('tot',tot)
-        e.write_attribute('want',want)
-        e.write_attribute('no_want',no_want)
-        e.write_attribute('seen',seen)
+        e.write_attribute(:voted,'yes') if e.suffrages.where(vote_user_id:user_id).count > 0
+        e.write_attribute(:tot,tot)
+        e.write_attribute(:want,want)
+        e.write_attribute(:no_want,no_want)
+        e.write_attribute(:seen,seen)
         e
       end
     end
@@ -165,7 +164,15 @@ class Movie
     result = self.later.asc(:info_show_at)
     if user_id.present?
       result = result.map do |e|
-        e.write_attribute('voted',true) if e.suffrages.where(user_id:user_id).count > 0
+        tot     = e.suffrages.count
+        want    = e.suffrages.where(vote_tpye:Suffrage::VOTE_TYPE_0).count
+        no_want = e.suffrages.where(vote_tpye:Suffrage::VOTE_TYPE_1).count
+        seen    = e.suffrages.where(vote_tpye:Suffrage::VOTE_TYPE_2).count        
+        e.write_attribute(:voted,'yes') if e.suffrages.where(vote_user_id:user_id).count > 0
+        e.write_attribute(:tot,tot)
+        e.write_attribute(:want,want)
+        e.write_attribute(:no_want,no_want)
+        e.write_attribute(:seen,seen)
         e
       end
     end
