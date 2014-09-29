@@ -3,10 +3,11 @@ class Vote::SuffragesController < Vote::VoteController
 
   def index
     new_vote
-    #@movie_list = Movie.all
+    @playing_movies = Movie.get_playing(cookies[:vote_user_id])
+    @later_movies   = Movie.get_later(cookies[:vote_user_id])
   end
 
-  def statr_vote
+  def statrt_vote
     if cookies[:vote_user_id].present?
       current_vote_user = VoteUser.where(id:cookies[:carnival_user_id]).first
     else

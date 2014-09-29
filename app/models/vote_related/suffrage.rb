@@ -10,7 +10,9 @@ class Suffrage
 
   field :vote_type, type:Integer # 表示是想看、不想看、看过
   field :user_id, type: String
-  field :movie_id,type: String
+  # field :movie_id,type: String
+  belongs_to :movie
+  belongs_to :vote_user
 
   def self.create_new(user_id,movie_id,vt)
   	suffrage =  self.where(user:user_id,movie_id:movie_id).first
