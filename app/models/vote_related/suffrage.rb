@@ -2,7 +2,6 @@
 class Suffrage
   include Mongoid::Document
   include Mongoid::Timestamps
-  include FindTool
 
   VOTE_TYPE_0 = 0 #想看
   VOTE_TYPE_1 = 1 #不想看

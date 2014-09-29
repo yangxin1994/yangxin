@@ -3,7 +3,6 @@ class VoteUser
 
   include Mongoid::Document
   include Mongoid::Timestamps
-  include FindTool
 
   # field :user_id, type: String
   has_many :suffrages
