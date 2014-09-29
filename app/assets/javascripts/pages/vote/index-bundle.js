@@ -12,6 +12,17 @@ jQuery(function(){
 	        $(el).css('margin-right','0');
 	    };
 	});
+
+	// $('.button-list .btn').click(function(){
+	// 	var mid = $(this).data('id');
+	// 	var t   = $(this).data('t');
+	// 	$.get('/vote/suffrages/statrt_vote',{movie_id:mid,vt:t},function(ret){
+	// 		console.log(ret)
+	// 	})
+	// })
+
+
+
 });
 
 //cookie框架
