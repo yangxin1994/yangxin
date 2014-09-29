@@ -13,20 +13,25 @@ jQuery(function(){
 	    };
 	});
 	//遮罩动画
-	var m = true;
 	$('#being-hit li').hover(function() {
 		$(this).find('.shadow-txt').stop().animate({top: 0}, 300);
 		$(this).find('.content').stop().animate({top: 0}, 300);
 	}, function() {
-		$(this).find('.shadow-txt').stop().animate({top: -230}, 300);
-		$(this).find('.content').stop().animate({top: -230}, 300);
+		if(voted)
+		{
+			return false;
+		}else{
+			$(this).find('.shadow-txt').stop().animate({top: -230}, 300);
+			$(this).find('.content').stop().animate({top: -230}, 300);
+			voted = false;
+		};
 	});
 	//AJAX
 	$('#being-hit li a.btn').click(function(){
 		var This = $(this);
+		$(this).parent().voted = true;
 		if($(this).hasClass('want-to-see'))
 		{
-			console.log("1");
 			$.ajax({
 				url: '/vote/suffrages/statrt_vote',
 				type: 'GET',
@@ -39,10 +44,10 @@ jQuery(function(){
 					'<h2>投票结果:</h2>'
 					+'<p>已有'+str.value.total+'人投票</p>'
 					+'<ul id="progress-bar-content">'
-	                +'<li class="progress-xk"><b>想看:'+str.value.want+'人</b><span class="progress-bar"><span class="progress" style="width:70%;"></span></span>'
-	                +'<span class="num">70%</span></li>'
-	                +'<li class="progress-kg"><b>看过:'+str.value.seen+'人</b><span class="progress-bar"><span class="progress" style="width:20%;"></span></span><span class="num">20%</span></li>'
-	                +'<li class="progress-bxk"><b>不想看:'+str.value.no_want+'人</b><span class="progress-bar"><span class="progress" style="width:10%;"></span></span><span class="num">10%</span></li>'
+	                +'<li class="progress-xk"><b>想看:'+str.value.want+'人</b><span class="progress-bar"><span class="progress" style="width:'+ parseInt((str.value.want/str.value.total)*100) +'%;"></span></span>'
+	                +'<span class="num">'+ parseInt((str.value.want/str.value.total)*100) +'%</span></li>'
+	                +'<li class="progress-kg"><b>看过:'+str.value.seen+'人</b><span class="progress-bar"><span class="progress" style="width:'+ parseInt((str.value.seen/str.value.total)*100) +'%;"></span></span><span class="num">'+ parseInt((str.value.want/str.value.total)*100) +'%</span></li>'
+	                +'<li class="progress-bxk"><b>不想看:'+str.value.no_want+'人</b><span class="progress-bar"><span class="progress" style="width:'+ parseInt((str.value.no_want/str.value.total)*100) +'%;"></span></span><span class="num">'+ parseInt((str.value.no_want/str.value.total)*100) +'%</span></li>'
 	              	+'</ul>'
 				);
 			})
