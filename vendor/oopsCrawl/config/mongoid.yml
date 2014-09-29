@@ -2,7 +2,7 @@ development:
   sessions:
     default:
       # database: spiderman_2
-      database: oops_data_production
+      database: wenjuan
       # username: oopsdata
       # password: o2psllyscdata
       hosts:
