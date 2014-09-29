@@ -83,7 +83,7 @@ function voteAjax(number,This,beingHit){
 				+'<ul id="progress-bar-content">'
 	      +'<li class="progress-xk"><b>想看:'+str.value.want+'人</b><span class="progress-bar"><span class="progress" style="width:'+ parseInt((str.value.want/str.value.total)*100) +'%;"></span></span>'
 	      +'<span class="num">'+ parseInt((str.value.want/str.value.total)*100) +'%</span></li>'
-	      +'<li class="progress-kg"><b>看过:'+str.value.seen+'人</b><span class="progress-bar"><span class="progress" style="width:'+ parseInt((str.value.seen/str.value.total)*100) +'%;"></span></span><span class="num">'+ parseInt((str.value.want/str.value.total)*100) +'%</span></li>'
+	      +'<li class="progress-kg"><b>看过:'+str.value.seen+'人</b><span class="progress-bar"><span class="progress" style="width:'+ parseInt((str.value.seen/str.value.total)*100) +'%;"></span></span><span class="num">'+ parseInt((str.value.seen/str.value.total)*100) +'%</span></li>'
 	      +'<li class="progress-bxk"><b>不想看:'+str.value.no_want+'人</b><span class="progress-bar"><span class="progress" style="width:'+ parseInt((str.value.no_want/str.value.total)*100) +'%;"></span></span><span class="num">'+ parseInt((str.value.no_want/str.value.total)*100) +'%</span></li>'
 	    	+'</ul>'
 			);
