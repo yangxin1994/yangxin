@@ -9,7 +9,7 @@ class Vote::SuffragesController < Vote::VoteController
 
   def statrt_vote
     if cookies[:vote_user_id].present?
-      current_vote_user = VoteUser.where(id:cookies[:carnival_user_id]).first
+      current_vote_user = VoteUser.where(id:cookies[:vote_user_id]).first
     else
       current_vote_user = VoteUser.create_new(current_user.id.to_s)
       set_vote_user_cookie(@current_vote_user.id.to_s)

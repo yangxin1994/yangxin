@@ -10,7 +10,7 @@
           <li>
             <span class="movie-img"><img src="<%=movie.poster %>" alt="<%= movie.title%>" /></span>
             <span class="button-list">
-              <a href="javascript:;" class="btn want-to-see">想看</a>
+              <a href="javascript:;" data-id="<%=movie.id.to_s%>" class="btn want-to-see">想看</a>
               <a href="javascript:;" class="btn have-read">看过</a>
               <a href="javascript:;" class="btn dont-want-to-see">不想看</a>              
             </span>
