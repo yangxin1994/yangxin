@@ -10,9 +10,15 @@
           <li>
             <span class="movie-img"><img src="<%=movie.poster %>" alt="<%= movie.title%>" /></span>
             <span class="button-list">
+<<<<<<< HEAD
               <a href="javascript:;" data-id="<%=movie.id.to_s%>" class="btn want-to-see">想看</a>
               <a href="javascript:;" data-id="<%=movie.id.to_s%>" class="btn have-read">看过</a>
               <a href="javascript:;" data-id="<%=movie.id.to_s%>" class="btn dont-want-to-see">不想看</a>              
+=======
+              <a href="javascript:;" data-t=0 data-id="<%=movie.id.to_s%>" class="btn want-to-see">想看</a>
+              <a href="javascript:;" data-t=2 data-id="<%=movie.id.to_s%>" class="btn have-read">看过</a>
+              <a href="javascript:;" data-t=1 data-id="<%=movie.id.to_s%>" class="btn dont-want-to-see">不想看</a>              
+>>>>>>> 72e98575a2786df331fa59ebc423b98a14485bb1
             </span>
             <span class="shadow"></span>
             <span class="shadow-txt" style="top:-230px;"></span>
