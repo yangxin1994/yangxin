@@ -12,6 +12,14 @@ jQuery(function(){
 	        $(el).css('margin-right','0');
 	    };
 	});
+	//遮罩动画
+	$('#being-hit li').hover(function() {
+		$(this).find('.shadow-txt').stop().animate({top: 0}, 300);
+		$(this).find('.content').stop().animate({top: 0}, 300);
+	}, function() {
+		$(this).find('.shadow-txt').stop().animate({top: -230}, 300);
+		$(this).find('.content').stop().animate({top: -230}, 300);
+	});
 });
 
 //cookie框架

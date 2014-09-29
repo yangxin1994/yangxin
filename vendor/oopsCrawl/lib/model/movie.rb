@@ -122,55 +122,55 @@ class Movie
     end
   end
 
-  # def self.rand(limit=false,user_id=nil)
-  #   if limit
-  #     n = self.nowplaying.desc(:info_show_at)[0..2]
-  #     m = self.later.asc(:info_show_at)[0..2]
-  #   else
-  #     n = self.nowplaying.desc(:info_show_at)
-  #     m = self.later.asc(:info_show_at)
-  #   end
+  def self.rand(limit=false,user_id=nil)
+    if limit
+      n = self.nowplaying.desc(:info_show_at)[0..2]
+      m = self.later.asc(:info_show_at)[0..2]
+    else
+      n = self.nowplaying.desc(:info_show_at)
+      m = self.later.asc(:info_show_at)
+    end
 
-  #   result = n + m 
-  #   if user_id.present?
-  #     result = result.map do |e|
-  #       e.write_attribute('voted',true) if e.suffrages.where(user_id:user_id).count > 0
-  #       e
-  #     end
-  #   end
-  #   result
-  # end
+    result = n + m 
+    if user_id.present?
+      result = result.map do |e|
+        e.write_attribute('voted',true) if e.suffrages.where(user_id:user_id).count > 0
+        e
+      end
+    end
+    result
+  end
 
 
-  # def self.get_playing(user_id)
-  #   result = self.nowplaying.desc(:info_show_at)
-  #   if user_id.present?
-  #     result = result.map do |e|
-  #       total = e.suffrages.count
-  #       want  = e.suffrages.where(vote_tpye:Suffrage::VOTE_TYPE_0).count
-  #       no_want = e.suffrages.where(vote_tpye:Suffrage::VOTE_TYPE_1).count
-  #       seen = e.suffrages.where(vote_tpye:Suffrage::VOTE_TYPE_2).count
-  #       e.write_attribute('voted',true) if e.suffrages.where(user_id:user_id).count > 0
-  #       e.write_attribute('total',total)
-  #       e.write_attribute('want',want)
-  #       e.write_attribute('no_want',no_want)
-  #       e.write_attribute('seen',seen)
-  #       e
-  #     end
-  #   end
-  #   return result
-  # end
+  def self.get_playing(user_id)
+    result = self.nowplaying.desc(:info_show_at)
+    if user_id.present?
+      result = result.map do |e|
+        total = e.suffrages.count
+        want  = e.suffrages.where(vote_tpye:Suffrage::VOTE_TYPE_0).count
+        no_want = e.suffrages.where(vote_tpye:Suffrage::VOTE_TYPE_1).count
+        seen = e.suffrages.where(vote_tpye:Suffrage::VOTE_TYPE_2).count
+        e.write_attribute('voted',true) if e.suffrages.where(user_id:user_id).count > 0
+        e.write_attribute('total',total)
+        e.write_attribute('want',want)
+        e.write_attribute('no_want',no_want)
+        e.write_attribute('seen',seen)
+        e
+      end
+    end
+    return result
+  end
 
-  # def self.get_later(user_id)
-  #   result = self.later.asc(:info_show_at)
-  #   if user_id.present?
-  #     result = result.map do |e|
-  #       e.write_attribute('voted',true) if e.suffrages.where(user_id:user_id).count > 0
-  #       e
-  #     end
-  #   end
-  #   return result    
-  # end
+  def self.get_later(user_id)
+    result = self.later.asc(:info_show_at)
+    if user_id.present?
+      result = result.map do |e|
+        e.write_attribute('voted',true) if e.suffrages.where(user_id:user_id).count > 0
+        e
+      end
+    end
+    return result    
+  end
 
 
   def rating
