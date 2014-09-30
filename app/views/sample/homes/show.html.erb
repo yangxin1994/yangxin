@@ -125,12 +125,11 @@
               <span class="time">上映日期: <%= Time.at(movie.info_show_at).strftime('%F') %></span>
               <span class="actor">主演:<%=movie.info_actors%></span>
               <span class="button-list">
-                <% if movie.voted %>
+                <% if movie['voted'] %>
                   <span class="r">已参与</span>
                 <% else%>
-                  <a href="/vote/suffrages" class="btn want-to-see">想看</a>
-                  <a href="/vote/suffrages" class="btn have-read">看过</a>
-                  <a href="/vote/suffrages" class="btn dont-want-to-see">不想看</a>                
+                  <a href="javascript:void(0);" data-t=0 data-id="<%= movie.id.to_s %>" class="btn want-to-see">想看</a>
+                  <a href="javascript:void(0);" data-t=1 data-id="<%= movie.id.to_s %>" class="btn dont-want-to-see">不想看</a>                
                 <% end %>
               </span>
             </li>          
@@ -146,12 +145,12 @@
               <span class="time">上映日期: <%= Time.at(movie.info_show_at).strftime('%F') %></span>
               <span class="actor">主演:<%=movie.info_actors%></span>
               <span class="button-list">
-                <% if movie.voted %>
+                <% if movie['voted'] %>
                   <span class="r">已参与</span>
                 <% else%>
-                  <a href="/vote/suffrages" class="btn want-to-see">想看</a>
-                  <a href="/vote/suffrages" class="btn have-read">看过</a>
-                  <a href="/vote/suffrages" class="btn dont-want-to-see">不想看</a>                
+                  <a href="javascript:void(0);" data-t=0 data-id="<%= movie.id.to_s %>" class="btn want-to-see">想看</a>
+                  <a href="javascript:void(0);" data-t=2 data-id="<%= movie.id.to_s %>" class="btn have-read">看过</a>
+                  <a href="javascript:void(0);" data-t=1 data-id="<%= movie.id.to_s %>" class="btn dont-want-to-see">不想看</a>                
                 <% end %>              
               </span>
             </li>          

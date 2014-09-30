@@ -122,19 +122,13 @@ class Movie
     end
   end
 
-  def self.rand(limit=false,user_id=nil)
-    if limit
-      n = self.nowplaying.desc(:info_show_at)[0..2]
-      m = self.later.asc(:info_show_at)[0..2]
-    else
-      n = self.nowplaying.desc(:info_show_at)
-      m = self.later.asc(:info_show_at)
-    end
-
+  def self.rand(user_id=nil)
+    n = self.nowplaying.desc(:info_show_at)[0..2]
+    m = self.later.asc(:info_show_at)[0..2]
     result = n + m 
     if user_id.present?
       result = result.map do |e|
-        e.write_attribute('voted',true) if e.suffrages.where(user_id:user_id).count > 0
+        e.write_attribute('voted',true) if e.suffrages.where(vote_user_id:user_id).count > 0
         e
       end
     end
@@ -167,12 +161,14 @@ class Movie
         tot     = e.suffrages.count
         want    = e.suffrages.want.count
         no_want = e.suffrages.no_want.count
-        seen    = e.suffrages.seen.count       
+        Rails.logger.info(tot)
+        Rails.logger.info(want)
+        Rails.logger.info(no_want)
+        Rails.logger.info('*************************')     
         e.write_attribute(:voted,true) if e.suffrages.where(vote_user_id:user_id).count > 0
         e.write_attribute(:tot,tot)
         e.write_attribute(:want,want)
         e.write_attribute(:no_want,no_want)
-        e.write_attribute(:seen,seen)
         e
       end
     end

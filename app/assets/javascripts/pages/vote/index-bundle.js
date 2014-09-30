@@ -5,7 +5,7 @@ jQuery(function(){
 	        $(el).css('margin-right','0');
 	    };
 	});
-	var oLi = $('#upcoming li');
+	var oLi = $('#upcoming .li-container > li');
 	oLi.each(function(index, el){
 	    if((index+1)%4==0){
 	        $(el).css('margin-right','0');
