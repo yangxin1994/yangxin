@@ -59,7 +59,7 @@ function voteAjax(number,This,beingHit){
 		url: '/vote/suffrages/statrt_vote',
 		type: 'GET',
 		dataType: 'json',
-		data: {vt:number,movie_id:$(this).data('id')},
+		data: {vt:number,movie_id:This.data('id')},
 	})
 
 	.done(function(str) {
