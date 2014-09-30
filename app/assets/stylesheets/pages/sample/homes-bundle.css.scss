@@ -481,3 +481,132 @@
 		}
 	}
 }
+//投票
+#vote{
+	cursor: default;
+	.dashed-box-inner-top{
+		height:30px;
+	}
+	margin-top:20px;
+	.vote-class{
+		float: right;
+		overflow: hidden;
+		margin-top:-5px;
+		li{
+			float: left;
+			a{
+				background: #eee;
+				padding:4px 8px;
+				display: block;
+				&.left{
+					border-radius: 3px 0 0 3px;
+				}
+				&.right{
+					border-radius: 0 3px 3px 0;
+				}
+			}
+			&.active{
+				a{
+					background: #F25D5D;
+					color:#FFF;
+					cursor: default;
+				}
+			}
+		}
+	}
+	.vote-list{
+		margin-top:20px;
+		ul{
+			overflow: hidden;
+			li{
+				position: relative;
+				width:295px;
+				height:170px;
+				float: left;
+				border-right:1px #dbdbdb dashed;
+				margin-right:15px;
+				.movie-name{
+					width:295px;
+					height:20px;
+					line-height: 20px;
+					display: block;
+					overflow: hidden;
+					font-size: 14px;
+					margin-bottom:10px;
+				}
+				.movie-img{
+					float: left;
+					margin-right:15px;
+					img{
+						width:93px;
+						height:137px;
+					}
+				}
+				.actor{
+					width:175px;
+					height:72px;
+					display: inline-block;
+					overflow: hidden;
+					color:#999;
+					margin-bottom:10px;
+				}
+				.time{
+					display: block;
+					color:#999;
+					margin-bottom:10px;
+				}
+				.button-list{
+					width:175px;
+					position: absolute;
+					bottom:5px;
+					right:15px;
+					.btn{
+						background: #F1F1F4;
+						border:1px #E0E0E6 solid;
+					}
+					.want-to-see{
+						color:#FF5E6A;
+						&:hover{
+							background: #FF5E6A;
+							color:#fff;
+							border:1px #F53040 solid;
+						}
+						
+					}
+					.have-read{
+						color:#F98311;
+						&:hover{
+							background: #FBBF62;
+							color:#fff;
+							border: 1px #F9A82E solid;
+						}
+					}
+					.dont-want-to-see{
+						&:hover{
+							color:#fff;
+							background: #B4B5BE;
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

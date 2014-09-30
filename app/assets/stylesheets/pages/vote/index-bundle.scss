@@ -1,0 +1,165 @@
+.vote{
+	cursor: default;
+	margin-top:20px;
+	ul{
+		overflow: hidden;
+		li{
+			width:218px;
+			height:310px;
+			float:left;
+			margin:15px 15px 0 0;
+			position: relative;
+			overflow: hidden;
+			.movie-img{
+				img{
+					width:218px;
+					height:280px;
+				}
+			}
+			.shadow{
+				width:218px;
+				height:50px;
+				background: #000;
+				opacity: .6;
+				filter: alpha(opacity=60);
+				position: absolute;
+				bottom:30px;
+				left:0;
+			}
+			.shadow-txt{
+				width:218px;
+				height:230px;
+				background: #000;
+				opacity: .6;
+				filter: alpha(opacity=60);
+				position: absolute;
+				left:0;
+				top:0;
+			}
+			.button-list{
+				width:218px;
+				height:50px;
+				display: block;
+				position: absolute;
+				bottom:15px;
+				left:15px;
+				z-index: 10;
+				.btn{
+					background: #F1F1F4;
+					border:1px #E0E0E6 solid;
+					margin-right:5px;
+				}
+				.want-to-see{
+					color:#FF5E6A;
+					&:hover{
+						background: #FF5E6A;
+						color:#fff;
+						border:1px #F53040 solid;
+					}
+					
+				}
+				.have-read{
+					color:#F98311;
+					&:hover{
+						background: #FBBF62;
+						color:#fff;
+						border: 1px #F9A82E solid;
+					}
+				}
+				.dont-want-to-see{
+					&:hover{
+						color:#fff;
+						background: #B4B5BE;
+					}
+				}
+			}
+			.content{
+				width:188px;
+				height:230px;
+				padding:15px;
+				position: absolute;
+				color:#fff;
+				font-size: 14px;
+				top:0;
+				left:0;
+				.loading{
+					text-align: center;
+					margin-top: 100px;
+				}
+				.time{
+					width:188px;
+					height:24px;
+					line-height: 24px;
+					display: block;
+					font-size: 14px;
+				}
+				.actor{
+					width:188px;
+					height:180px;
+					display: block;
+					margin-top:15px;
+					overflow: hidden;
+				}
+				h2{
+					margin:15px 0;
+					font-weight: bold;
+					font-size: 16px;
+				}
+				#progress-bar-content{
+					li{
+						height:30px;
+						b{
+							display: block;
+						}
+						.progress-bar{
+							width:150px;
+							height:10px;
+							display: block;
+							background: #fff;
+							float: left;
+							.progress{
+								height:10px;
+								display: block;
+							}
+						}
+						.num{
+							display: inline-block;
+							position: relative;
+							top:-5px;
+							left:5px;
+							font-size: 12px;
+						}
+						&.progress-xk{
+							.progress{
+								background: red;
+							}
+						}
+						&.progress-bxk{
+							.progress{
+								background: blue;
+							}
+						}
+						&.progress-kg{
+							.progress{
+								background: orange;
+							}
+						}
+					}
+				}
+			}
+			.movie-name{
+				width:198px;
+				font-size: 14px;
+				height:24px;
+				line-height: 24px;
+				display: block;
+				overflow: hidden;
+				padding:0 10px;
+				text-align: center;
+			}
+		}
+	}
+}
+#upcoming{
+	margin-top:20px;
+}

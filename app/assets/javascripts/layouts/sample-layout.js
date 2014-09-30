@@ -153,5 +153,4 @@ $(document).ready(function() {
             $(this).find('.time').text(data['other_times'][k])
         })
     });
-
-})
+});

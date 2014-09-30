@@ -473,4 +473,9 @@ module ApplicationHelper
     end
     return QuillCommon::AddressUtility.find_province_city_town_by_code(code)
   end
+
+  def perc_width(f,m)
+    return "#{((f / m.to_f) * 100).round(0)}%"
+  end
+
 end
