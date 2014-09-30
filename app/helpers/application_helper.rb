@@ -475,7 +475,7 @@ module ApplicationHelper
   end
 
   def perc_width(f,m)
-    return "#{((f / m.to_f) * 100).round(2)}%"
+    return "#{((f / m.to_f) * 100).round(0)}%"
   end
 
 end
