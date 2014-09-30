@@ -1,3 +1,4 @@
+# encoding: utf-8
 module WeiboHacks
   def get_attr(node, attr_name)
     logger.info "> 开始解析: #{attr_name}"
