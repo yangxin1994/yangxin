@@ -4,7 +4,7 @@ require File.expand_path("../../../../../app/models/vote_related/vote_user", __F
 class Movie
   attr_accessor :voted,:want,:no_want,:seen,:tot
   include Mongoid::Document
-  Nlpir::Mongoid.included(self)
+  # Nlpir::Mongoid.included(self)
 
   field :status, :type => Integer, :default => 0
 

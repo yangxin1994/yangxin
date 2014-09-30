@@ -17,3 +17,4 @@ public/uploads/avatar/*
 public/assets/*
 lib/data.csv
 public/images/*
+vendor/oopsCrawl/config/mongoid.yml

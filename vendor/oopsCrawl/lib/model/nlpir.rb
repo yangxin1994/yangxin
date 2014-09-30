@@ -1,6 +1,6 @@
 # coding: utf-8
 if Rails ||= nil
-  require File.expand_path("#{Rails.root}/vendor/oopsCrawl/lib/nlpir")
+#  require File.expand_path("#{Rails.root}/vendor/oopsCrawl/lib/nlpir")
 end
 # module Nlpir
 #   module Mongoid
