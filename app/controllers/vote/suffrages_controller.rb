@@ -5,14 +5,6 @@ class Vote::SuffragesController < Vote::VoteController
     new_vote
     @playing_movies = Movie.get_playing(cookies[:vote_user_id])
     @later_movies   = Movie.get_later(cookies[:vote_user_id])
-    Rails.logger.info('=======================================')
-    @later_movies.each do |lm|
-      Rails.logger.info(lm['tot'])
-      Rails.logger.info(lm['want'])
-      Rails.logger.info(lm['no_want'])
-      Rails.logger.info('-------------------------------------')
-    end
-    Rails.logger.info('=======================================')
   end
 
   def statrt_vote
