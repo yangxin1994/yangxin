@@ -1,5 +1,5 @@
 jQuery(function(){
-	var aLi = $('#being-hit li');
+	var aLi = $('#being-hit .li-container > li');
 	aLi.each(function(index, el){
 	    if((index+1)%4==0){
 	        $(el).css('margin-right','0');
@@ -52,9 +52,7 @@ jQuery(function(){
 
 //封装
 function voteAjax(number,This,beingHit){
-
 	This.parent().siblings('span.content').html('<div class="loading"><img src="/assets/loadingb.gif"></div>');
-
 	$.ajax({
 		url: '/vote/suffrages/statrt_vote',
 		type: 'GET',
@@ -94,9 +92,10 @@ function voteAjax(number,This,beingHit){
 		alert('error:投票失败,请重试');
 	})
 	.always(function() {
-		console.log("complete");
+		// console.log("complete");
 	})
 };
+
 
 
 //cookie框架

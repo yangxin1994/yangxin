@@ -5,27 +5,45 @@
       <div class="dashed-box-inner-top">
         <h3 class="box-title">正在热播</h3>
       </div>
-      <ul>
+      <ul class='li-container'>
         <% @playing_movies.each do |movie|%>
-          <li>
+          <li>                                       
             <span class="movie-img"><img src="<%=movie.poster %>" alt="<%= movie.title%>" /></span>
-            <span class="button-list">
-
-              <a href="javascript:;" data-t=0 data-id="<%=movie.id.to_s%>" class="btn want-to-see">想看</a>
-              <a href="javascript:;" data-t=2 data-id="<%=movie.id.to_s%>" class="btn have-read">看过</a>
-              <a href="javascript:;" data-t=1 data-id="<%=movie.id.to_s%>" class="btn dont-want-to-see">不想看</a>              
-
-            </span>
+            <% unless movie['voted']%>
+              <span class="button-list">
+                <a href="javascript:;" data-id="<%=movie.id.to_s%>" class="btn want-to-see">想看</a>
+                <a href="javascript:;" data-t=2 data-id="<%=movie.id.to_s%>" class="btn have-read">看过</a>
+                <a href="javascript:;" data-id="<%=movie.id.to_s%>" class="btn dont-want-to-see">不想看</a>
+              </span>
+            <% end %>
             <span class="shadow"></span>
-            <span class="shadow-txt" style="top:-230px;"></span>
-            <span class="content" style="top:-230px;">
-              <span class="time">上映日期: <%= Time.at(movie.info_show_at).strftime('%F') %></span>
-              <span class="actor">主演:<%=movie.info_actors%></span>
-            </span>
+            <% if movie['voted'] %>
+              <span class="shadow-txt"></span>
+              <span class="content">
+                <h2>投票结果:</h2>
+                <p>已有<%= movie['tot'] %>人投票</p>
+                <ul id="progress-bar-content">
+                  <li class="progress-xk">
+                    <b>想看:<%= movie['want']%>人</b><span class="progress-bar"><span class="progress" style="width:<%=perc_width(movie['want'],movie['tot'])%>;"></span></span><span class="num"><%=perc_width(movie['want'],movie['tot'])%></span>
+                  </li>
+                  <li class="progress-kg">
+                    <b>看过:<%= movie['seen']%>人</b><span class="progress-bar"><span class="progress" style="width:<%=perc_width(movie['seen'],movie['tot'])%>;"></span></span><span class="num"><%=perc_width(movie['seen'],movie['tot'])%></span>
+                  </li>
+                  <li class="progress-bxk">
+                    <b>不想看:<%= movie['no_want']%>人</b><span class="progress-bar"><span class="progress" style="width:<%=perc_width(movie['no_want'],movie['tot'])%>;"></span></span><span class="num"><%=perc_width(movie['no_want'],movie['tot'])%></span>
+                  </li>
+                </ul>
+              </span>
+            <% else %>
+              <span class="shadow-txt" style="top:-230px;"></span>
+              <span class="content" style="top:-230px;">
+                <span class="time">上映日期: <%= Time.at(movie.info_show_at).strftime('%F') %></span>
+                <span class="actor">主演:<%=movie.info_actors%></span>
+              </span>
+            <% end %>
             <span class="movie-name"><%=movie.title%></span>
           </li>
-        <% end %>
-     
+        <%end %>      
       </ul>
     </div>
   </div>
@@ -37,19 +55,42 @@
       <div class="dashed-box-inner-top">
         <h3 class="box-title">即将上映</h3>
       </div>
-      <ul>
+      <ul class='li-container'>
       <% @later_movies.each do |movie|%>
-        <li>
+        <li>                                         
           <span class="movie-img"><img src="<%=movie.poster %>" alt="<%= movie.title%>" /></span>
-          <span class="button-list">
-            <a href="javascript:;" data-id="<%=movie.id.to_s%>" class="btn want-to-see">想看</a>
-            <a href="javascript:;" data-id="<%=movie.id.to_s%>" class="btn dont-want-to-see">不想看</a>
-          </span>
+          <% unless movie['voted']%>
+            <span class="button-list">
+              <a href="javascript:;" data-id="<%=movie.id.to_s%>" class="btn want-to-see">想看</a>
+              <a href="javascript:;" data-id="<%=movie.id.to_s%>" class="btn dont-want-to-see">不想看</a>
+            </span>
+          <% end %>
           <span class="shadow"></span>
-          <span class="shadow-txt" style="top:-230px;"></span>
-          <span class="content" style="top:-230px;">
-            <span class="time">上映日期: <%= Time.at(movie.info_show_at).strftime('%F') %></span>
-            <span class="actor">主演:<%=movie.info_actors%></span>
+          <% if movie['voted'] %>
+            <span class="shadow-txt"></span>
+            <span class="content">
+              <h2>投票结果:</h2>
+              <p>已有<%= movie['tot'] %>人投票</p>
+              <ul id="progress-bar-content">
+                <li class="progress-xk">
+                  <b>想看:<%= movie['want']%>人</b>
+                  <span class="progress-bar"><span class="progress" style="width:<%=perc_width(movie['want'],movie['tot'])%>;"></span></span>
+                  <span class="num"><%=perc_width(movie['want'],movie['tot'])%></span>
+                </li>
+                <li class="progress-bxk">
+                  <b>不想看:<%= movie['no_want']%>人</b>
+                  <span class="progress-bar"><span class="progress" style="width:<%= perc_width(movie['no_want'],movie['tot'])%>;"></span></span>
+                  <span class="num"><%=perc_width(movie['no_want'],movie['tot'])%></span>
+                </li>
+              </ul>
+            </span>
+          <% else %>
+            <span class="shadow-txt" style="top:-230px;"></span>
+            <span class="content" style="top:-230px;">
+              <span class="time">上映日期: <%= Time.at(movie.info_show_at).strftime('%F') %></span>
+              <span class="actor">主演:<%=movie.info_actors%></span>
+            </span>
+          <% end %>
           </span>
           <span class="movie-name"><%=movie.title%></span>
         </li>
