@@ -28,7 +28,7 @@ start)
     echo "You need to first stop the sidekiq process, or remove the pid file if you can confirm no sidekiq process is running."
     exit
   fi
-  bundle exec sidekiq -C config/sidekiq.yml -r ./workers/workers.rb  -d
+  bundle exec sidekiq -C config/sidekiq.yml -r ./workers/workers.rb -d
   ;;
 stop)
   if [ $pid_file_exist = 0 ]; then
