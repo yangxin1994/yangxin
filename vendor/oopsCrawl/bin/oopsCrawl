@@ -32,7 +32,7 @@ start)
   ;;
 stop)
   if [ $pid_file_exist = 0 ]; then
-    echo "Cannot find sidekiq_movie.pid at tmp/pids."
+    echo "Cannot find sidekiq.pid at tmp/pids."
     echo "No sidekiq process to stop"
     exit
   fi
