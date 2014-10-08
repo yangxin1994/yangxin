@@ -11,8 +11,8 @@ class Vote::SuffragesController < Vote::VoteController
     if cookies[:vote_user_id].present?
       current_vote_user = VoteUser.where(id:cookies[:vote_user_id]).first
     else
-      current_vote_user = VoteUser.create_new(current_user.id.to_s)
-      set_vote_user_cookie(@current_vote_user.id.to_s)
+      current_vote_user = VoteUser.create_new(current_user.try(:id).to_s)
+      set_vote_user_cookie(current_vote_user.id.to_s)
     end
 
     suffrage = Suffrage.create_new(current_vote_user.id.to_s,params[:movie_id],params[:vt])
