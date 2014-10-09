@@ -47,7 +47,7 @@
 				.btn{
 					background: #F1F1F4;
 					border:1px #E0E0E6 solid;
-					margin-right:5px;
+					margin-left:7px;
 				}
 				.want-to-see{
 					color:#FF5E6A;
@@ -72,10 +72,27 @@
 						background: #B4B5BE;
 					}
 				}
+				.tip{
+					position: absolute;
+					left:-15px;
+					bottom:65px;
+					width:218px;
+					height:30px;
+					line-height: 30px;
+					font-size: 14px;
+					text-align: center;
+					display: none;
+					background:#f25d5d;
+					opacity: .9;
+					filter: alpha(opacity=90);
+					color:#fff;
+					z-index: 99;
+				}
+
 			}
 			.content{
 				width:188px;
-				height:230px;
+				height:200px;
 				padding:15px;
 				position: absolute;
 				color:#fff;
@@ -88,16 +105,16 @@
 				}
 				.time{
 					width:188px;
-					height:24px;
-					line-height: 24px;
+					height:20px;
+					line-height: 20px;
 					display: block;
 					font-size: 14px;
 				}
 				.actor{
 					width:188px;
-					height:180px;
+					height:150px;
 					display: block;
-					margin-top:15px;
+					margin-top:10px;
 					overflow: hidden;
 				}
 				h2{

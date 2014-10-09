@@ -10,6 +10,9 @@
             <span class="movie-img"><img src="<%=movie.poster %>" alt="<%= movie.title%>" /></span>
             <% unless movie['voted']%>
               <span class="button-list">
+                <span class="tip">
+                  仅限影院观看意愿
+                </span>
                 <a href="javascript:;" data-t=0 data-id="<%=movie.id.to_s%>" class="btn want-to-see">想看</a>
                 <a href="javascript:;" data-t=2 data-id="<%=movie.id.to_s%>" class="btn have-read">看过</a>
                 <a href="javascript:;" data-t=1 data-id="<%=movie.id.to_s%>" class="btn dont-want-to-see">不想看</a>
@@ -17,7 +20,7 @@
             <% end %>
             <span class="shadow"></span>
             <% if movie['voted'] %>
-              <span class="shadow-txt"></span>
+              <span class="shadow-txt" style="height:230px;"></span>
               <span class="content">
                 <h2>投票结果:</h2>
                 <p>已有<%= movie['tot'] %>人投票</p>
@@ -60,6 +63,9 @@
           <span class="movie-img"><img src="<%=movie.poster %>" alt="<%= movie.title%>" /></span>
           <% unless movie['voted']%>
             <span class="button-list">
+              <span class="tip">
+                仅限影院观看意愿
+              </span>
               <a href="javascript:;"   data-t=0 data-id="<%=movie.id.to_s%>" class="btn want-to-see">想看</a>
               <a href="javascript:;"   data-t=1 data-id="<%=movie.id.to_s%>" class="btn dont-want-to-see">不想看</a>
             </span>

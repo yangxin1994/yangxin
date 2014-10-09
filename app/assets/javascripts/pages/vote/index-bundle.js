@@ -17,12 +17,18 @@ jQuery(function(){
 		el.hover(function() {
 			$(this).find('.shadow-txt').stop().animate({top: 0}, 300);
 			$(this).find('.content').stop().animate({top: 0}, 300);
+			if($(this).hasClass('voted')){
+				$(this).find('.tip').hide();
+			}else{
+				$(this).find('.tip').show();
+			}
 		}, function() {
 			if($(this).hasClass('voted')){
 				return false;
 			}
 			$(this).find('.shadow-txt').stop().animate({top: -230}, 300);
 			$(this).find('.content').stop().animate({top: -230}, 300);
+			$(this).find('.tip').hide();
 		});
 	};
 	voteMove(aLi);
@@ -96,30 +102,5 @@ function voteAjax(number,This,beingHit){
 	})
 };
 
-
-
-//cookie框架
-function addCookie(name,value,iHours){
-	if(iHours){
-		var oDate=new Date();
-		oDate.setHours(oDate.getHours()+iHours);
-		document.cookie=name+'='+value+';path=/;expires='+oDate;
-	}else{
-		document.cookie=name+'='+value+';path=/';	
-	};
-};
-function getCookie(name){
-	var arr=document.cookie.split('; ');
-	for(var i=0; i<arr.length; i++){
-		var arr2=arr[i].split('=');
-		if(arr2[0]==name){
-			return arr2[1];	
-		};
-	};
-	return '';
-};
-function delCookie(name){
-	addCookie(name,'oopsdata',-10);
-};
 
 
