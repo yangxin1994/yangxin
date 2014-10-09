@@ -160,11 +160,7 @@ class Movie
       result = result.map do |e|
         tot     = e.suffrages.count
         want    = e.suffrages.want.count
-        no_want = e.suffrages.no_want.count
-        Rails.logger.info(tot)
-        Rails.logger.info(want)
-        Rails.logger.info(no_want)
-        Rails.logger.info('*************************')     
+        no_want = e.suffrages.no_want.count   
         e.write_attribute(:voted,true) if e.suffrages.where(vote_user_id:user_id).count > 0
         e.write_attribute(:tot,tot)
         e.write_attribute(:want,want)

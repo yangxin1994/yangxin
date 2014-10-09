@@ -8,6 +8,9 @@ l = OopSpider.new()
 # s.crawl_nowplaying
 # l.crawl_later
 # Movie.each do |m|
+#   if Time.now.to_i > m.info_show_at
+#     m.update_attributes(nowplaying:true)
+#   end
 # 	unless m.photos.length > 0
 # 		ps = OopSpider.new(m.subject_id.to_s)
 # 		ps.crawl_photos
