@@ -1,0 +1,20 @@
+<table class="table">
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>昵称</th>
+      <th>上次使用时间</th>
+      <th>状态</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @accounts.each_with_index do |account, i| %>
+    <tr>
+      <td><%= i + 1 %></td>
+      <td><%= account.username %></td>
+      <td><%= Time.at(account.last_use).strftime("%F-%R") %></td>
+      <td><%= account.on_crawl %></td>
+    </tr>
+    <% end %>
+  </tbody>
+</table>

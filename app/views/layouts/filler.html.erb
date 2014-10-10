@@ -14,7 +14,7 @@
     window.survey_lang = <%= raw @survey[:lang].to_json %>;
 	</script>
 
-	<% if @survey['_id'].to_s == '52a59fc6eb0e5bb2c5000007' %>
+	<% if ["52a59fc6eb0e5bb2c5000007", "54365c14eb0e5bba58000204"].include?(@survey['_id'].to_s) %>
 	<!-- hack gonganbu to hide logo -->
 		<style type="text/css">
 			#logo { display: none; }

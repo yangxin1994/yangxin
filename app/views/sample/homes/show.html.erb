@@ -1,5 +1,6 @@
 <% content_for :head do %>
   <%= stylesheet_link_tag "pages/sample/homes-bundle", :media => "all" %>
+  <%= javascript_include_tag "pages/sample/homes-bundle", :media => "all" %>
   <script type="text/javascript">
     <% if user_signed_in %>
       window.current_user_id = "<%= current_user.id %>"
@@ -12,79 +13,28 @@
           $('#carnival').slideUp(1500);
         }, 15000);
       }, 500);
-      
-    //     var paidSlider = $('.paid-survey');
-    //     var content = $('.paid-survey ul')[0];
-    //     var oLi = content.children;
-    //     var page = $('.page')[0];
-    //     var prev = page.children[0];
-    //     var next = page.children[1];
-    //     var n = content.offsetTop;
-    //     var target;
-    //     var timer;
-    //     if(oLi.length<=2){
-    //       page.style.display = 'none';
-    //       return;
-    //     }else{
-    //       page.style.display = 'block';
-    //       content.innerHTML += content.innerHTML;
-    //       function sliderTop(){
-    //         target = setInterval(function(){
-    //           n-=1;
-    //           if(n <= -content.offsetHeight/2){
-    //             n = 0;
-    //           };
-    //           if(!(n%-content.children[0].offsetHeight)){
-    //               clearInterval(target);
-    //               return;
-    //           };
-    //           $(content).animate({top:n+'px'},10);
-    //         },10);
-    //         return target;
-    //       };        
-    //       sliderTop();
-    //       function sliderDown(){
-    //         target = setInterval(function(){
-    //           n+=1;
-    //           if(n >= 0){
-    //             n = -content.offsetHeight/2;
-    //           };
-    //           if(!(n%-content.children[0].offsetHeight)){
-    //               clearInterval(target);
-    //               return;
-    //           };
-    //           $(content).animate({top:n+'px'},10);
-    //         },10);
-    //         return target;
-    //       };        
-
-    //       //停止上移动
-    //       function stopMove(){
-    //         return setInterval(function(){
-    //           sliderTop();
-    //         },5000); 
-    //       };
-    //       timer = stopMove();
-    //       //移入
-    //       paidSlider.mouseenter(function(){
-    //         clearInterval(timer);
-    //       });
-    //       //移出
-    //       paidSlider.mouseleave(function(){
-    //         timer = stopMove();
-    //       });
-    //       //上翻页
-    //       prev.onclick = function(){
-    //         clearInterval(target);
-    //         sliderTop();
-    //       }
-    //       //下翻页
-    //       next.onclick = function(){
-    //         clearInterval(target);
-    //         sliderDown();
-    //       };
-    //      };
       });
+    jQuery(function(){
+      //投票Tab
+      var aLi = $('.vote-class li');
+      var aDiv = $('.vote-list');
+      var aLink = $('.button-list a');
+      aLi.click(function() {
+        aLi.removeClass('active');
+        $(this).addClass('active');
+        aDiv.removeClass('dn');
+        aDiv.eq($(this).index()).addClass('dn');
+      });
+      aLink.live('click', function(event) {
+        $(this).closest('.button-list').html('已参与');
+      });
+      aLink.live('mouseover', function(event) {
+        $(this).siblings().css('display', 'block');
+      });
+      aLink.live('mouseout', function(event) {
+        aLink.siblings().css('display','none');
+      });
+    });
   </script>
 <% end %>
 <% if @data[:hot_survey].present? %>
@@ -162,6 +112,76 @@
   </div>
 </div>
 
+<div id="vote" class="inner-page mt20">
+  <div class="dashed-box">
+    <div class="dashed-box-inner">
+      <div class="dashed-box-inner-top">
+        <!-- <h3 class="box-title">影片小调查</h3> -->
+        <ul class="vote-class">
+          <li class="active"><a class="left" href="javascript:;">正在热播</a></li>
+          <li><a class="right" href="javascript:;">即将上映</a></li>
+        </ul>
+        <a href="http://wenjuanba.com/vote/suffrages" target="_blank" class="vote-more">更多</a>
+      </div>
+      <div class="vote-list dn">
+        <ul>
+          <% @data[:movies][3..5].each_with_index do |movie,idx|%>
+            <li <% if idx == 2 %>style="border:none;margin:0;"<% end%> >
+              <span class="movie-name"><a href='/vote/suffrages'><%=movie.title%></a></span>
+              <span class="movie-img"><img src="<%=movie.poster %>" alt="<%= movie.title%>" /></span>
+              <span class="time">上映日期: <%= Time.at(movie.info_show_at).strftime('%F') %></span>
+              <span class="actor">主演:<%=movie.info_actors%></span>
+              <span class="button-list">
+                <% if movie['voted'] %>
+                  <span>已参与</span>
+                <% else%>
+                <span>
+                  <a href="javascript:void(0);" data-t=0 data-id="<%= movie.id.to_s %>" class="btn want-to-see">想看</a>
+                  <b class="tip"><i></i>仅限影院观看意愿</b>
+                </span>
+                <span>
+                  <a href="javascript:void(0);" data-t=1 data-id="<%= movie.id.to_s %>" class="btn dont-want-to-see">不想看</a>
+                  <b class="tip"><i></i>仅限影院观看意愿</b> 
+                </span>               
+                <% end %>
+              </span>
+            </li>          
+          <% end %>  
+        </ul>
+      </div>
+      <div class="vote-list">
+        <ul>
+          <% @data[:movies][0..2].each_with_index do |movie,idx|%>
+            <li <% if idx == 2 %>style="border:none;margin:0;"<% end%> >
+              <span class="movie-name"><a href="/vote/suffrages"><%=movie.title%></a></span>
+              <span class="movie-img"><img src="<%=movie.poster %>" alt="<%= movie.title%>" /></span>
+              <span class="time">上映日期: <%= Time.at(movie.info_show_at).strftime('%F') %></span>
+              <span class="actor">主演:<%=movie.info_actors%></span>
+              <span class="button-list">
+                <% if movie['voted'] %>
+                  <span>已参与</span>
+                <% else%>
+                <span>
+                  <a href="javascript:void(0);" data-t=0 data-id="<%= movie.id.to_s %>" class="btn want-to-see">想看</a>
+                  <b class="tip"><i></i>仅限影院观看意愿</b>
+                </span>
+                <span>
+                  <a href="javascript:void(0);" data-t=2 data-id="<%= movie.id.to_s %>" class="btn have-read">看过</a>
+                  <b class="tip"><i></i>仅限影院观看意愿</b>
+                </span>  
+                <span>
+                  <a href="javascript:void(0);" data-t=1 data-id="<%= movie.id.to_s %>" class="btn dont-want-to-see">不想看</a>
+                  <b class="tip"><i></i>仅限影院观看意愿</b> 
+                </span>          
+                <% end %>              
+              </span>
+            </li>          
+          <% end %> 
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
 
 <div class="inner-page">
   <% if @data[:express_surveys].present? %>

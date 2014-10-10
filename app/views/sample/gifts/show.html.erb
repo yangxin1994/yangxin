@@ -10,7 +10,7 @@
       window.sample_mobile   = "<%= @data[:receiver_info]['mobile']  if @data[:receiver_info] %>  "
       window.sample_postcode = "<%= @data[:receiver_info]['postcode'] if @data[:receiver_info]    %>"
       window.sample_address  = "<%= @data[:receiver_info]['address'] if @data[:receiver_info] %>  "
-      window.sample_street_info = "<%= @data[:receiver_info]['street_info'] if @data[ :receiver_info] %>"
+      window.sample_street_info = <%= raw @data[:receiver_info]['street_info'].to_json if @data[ :receiver_info] %>
       window.completed_info = "<%=  current_user.completed_info  %>"
       window.receiver_completed = "<%=  current_user.receiver_completed_info  %>"
     <% end %>

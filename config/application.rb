@@ -57,7 +57,7 @@ module OopsData
 
     config.autoload_paths += Dir["#{config.root}/lib/**/"]
     config.autoload_paths += Dir["#{config.root}/app/models/*/"].find_all { |f| File.stat(f).directory? } 
-
+    config.autoload_paths += [Rails.root.join('vendor', 'oopsCrawl', 'lib', 'model')]
     config.permanent_signed_in_months = 24
     config.answer_id_time_out_in_hours = 240
     config.bind_answer_id_cookie_key = 'odb'

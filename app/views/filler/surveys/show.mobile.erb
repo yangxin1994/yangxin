@@ -72,10 +72,13 @@
 			<% end %>
 			<p class="error" id="error_msg" style="display:none;">调查问卷尚未发布，请等待问卷发布之后再进行填写。<	/p>
 			<p><a href="javascript:void(0);" id='start_btn' class='btn'>开始答题</a></p>
-			<p class="tip">
-				<span class='fl'>耗时<span id="left_time"></span></span>
-				<span class="fr">奖励<span id="reward_info"></span></span>
-			</p>
+			<% unless params[:ati].present? %>
+				<p class="tip">
+					<span class='fl'>耗时<span id="left_time"></span></span>
+					<span class="fr">奖励<span id="reward_info"></span></span>
+				</p>
+			<% end %>
+
 
 			<div class="reward_show">
 				<div class="rtype"></div>

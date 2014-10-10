@@ -777,7 +777,11 @@ class Survey
         else
           answer_time = 0      
         end
-        line_answer = [answer.carnival_user.try(:id) || answer.user.try(:id) || "", answer._id, answer.agent_task.present?.to_s, answer.user.try(:email), answer.user.try(:mobile), answer.remote_ip, QuillCommon::AddressUtility.find_province_city_town_by_code(answer.region), "#{answer_time} 分"]
+        if answer.agent_task.present?
+          agent_info = answer.agent_task.agent.name
+          agent_info += "(#{answer.mobile})" if answer.mobile.present?
+        end
+        line_answer = [answer.carnival_user.try(:id) || answer.user.try(:id) || "", answer._id, agent_info.to_s, answer.user.try(:email), answer.user.try(:mobile), answer.remote_ip, QuillCommon::AddressUtility.find_province_city_town_by_code(answer.region), "#{answer_time} 分"]
         begin
           all_questions_id(false).each_with_index do |question, index|
             qindex = index
