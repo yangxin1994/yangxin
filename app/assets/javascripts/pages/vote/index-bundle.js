@@ -37,6 +37,8 @@ jQuery(function(){
 	function vote(el,beingHit){
 		el.click(function(){
 			$(this).closest('li').addClass('voted');
+			$(this).parent().siblings('.shadow-txt').css('height', '230');
+			// console.log($(this).parent().siblings('.shadow-txt'));
 			if($(this).hasClass('want-to-see'))
 			{
 				voteAjax(0,$(this),beingHit);
