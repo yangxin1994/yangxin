@@ -68,6 +68,7 @@ class DataAdapter
     }
 
     def self.convert_single_data(question_type, analysis_result, issue, chart_style, opt = {})
+      return [] if opt[:answer_number] == 0
       # get the type of charts needed to be generated
       chart_styles = []
 
