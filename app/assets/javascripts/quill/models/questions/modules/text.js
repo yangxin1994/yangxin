@@ -52,15 +52,29 @@ $(function(){
           if(issue.min_length <= 0) {
             return (issue.max_length <= 0) ? null : ('No more than ' + issue.max_length + ' words');
           } else {
-            return (issue.max_length <= 0) ? ('At least ' + issue.min_length + ' words') : 
-              ('' + issue.min_length + ' to ' + issue.max_length + ' words');
+            if(issue.max_length <= 0) {
+              return 'At least ' + issue.min_length + ' words';
+            } else {
+              if(issue.max_length == issue.min_length) {
+                return issue.min_length + ' words';
+              } else {
+                return issue.min_length + ' to ' + issue.max_length + ' words';
+              }
+            }
           }
         } else {
           if(issue.min_length <= 0) {
             return (issue.max_length <= 0) ? null : ('不超过 ' + issue.max_length + ' 个字');
           } else {
-            return (issue.max_length <= 0) ? ('不少于 ' + issue.min_length + ' 个字') : 
-              ('输入 ' + issue.min_length + ' 到 ' + issue.max_length + ' 个字');
+            if(issue.max_length <= 0) {
+              return '不少于 ' + issue.min_length + ' 个字';
+            } else {
+              if(issue.max_length == issue.min_length) {
+                return '输入 ' + issue.min_length + ' 个字';
+              } else {
+                return '输入 ' + issue.min_length + ' 到 ' + issue.max_length + ' 个字';
+              }
+            }
           }
         }
 			},
