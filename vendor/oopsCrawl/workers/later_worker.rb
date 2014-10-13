@@ -18,4 +18,4 @@ class LaterWorker
 end
 
 # Sidekiq::Cron::Job.create( name: 'Crawling Douban nowplaying - every 1 day', cron: '57 11 * * *', klass: 'NowplayingWorker')
-Sidekiq::Cron::Job.create( name: 'Crawling Douban later - every 1 day', cron: '0 23 * * *', klass: 'LaterWorker')
+Sidekiq::Cron::Job.create( name: 'Crawling Douban later - every 1 day', cron: '* */2 * * *', klass: 'LaterWorker')
