@@ -81,7 +81,15 @@ $(function(){
 
 			this.model.get('is_required') ? this.$('.q-required').show() : this.$('.q-required').hide();
 
-			this.model.get('note') ? this.$('.q-note').show() : this.$('.q-note').hide();
+      var note = this.model.get('note');
+      if(note) {
+        this.$('.q-note').show();
+        if(note.indexOf('<img') == 0) {
+          this.$('.q-note').html(note);
+        }
+      } else {
+        this.$('.q-note').hide();
+      }
 		},
 
 		/* Refresh index display
