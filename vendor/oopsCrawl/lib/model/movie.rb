@@ -372,10 +372,6 @@ class Movie
   end
 
   def poster
-    Rails.logger.info('=========================')
-    Rails.logger.info("/images/movies/#{subject_id}.jpg")
-    Rails.logger.info(File.exist?("/images/movies/#{subject_id}.jpg"))
-    Rails.logger.info('=========================')
     "/images/movies/#{subject_id}.jpg"
     # _p = photos.where(:title => /海报/)
     # if (_p = photos.where(:title => /海报/).and(:title => /中国/).and(:title => /正式/)).present?
