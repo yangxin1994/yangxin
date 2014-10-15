@@ -99,14 +99,14 @@ class Movie
     rating_ps
   end
 
-  has_many :comments
-  has_many :reviews
-  has_many :trailers
-  has_many :baidu_news
-  has_many :weibos
-  has_and_belongs_to_many :weibo_users, class_name: "WeiboUser"
-  has_and_belongs_to_many :weibo_artists, class_name: "WeiboArtist"
-  has_and_belongs_to_many :brands
+  # has_many :comments
+  # has_many :reviews
+  # has_many :trailers
+  # has_many :baidu_news
+  # has_many :weibos
+  # has_and_belongs_to_many :weibo_users, class_name: "WeiboUser"
+  # has_and_belongs_to_many :weibo_artists, class_name: "WeiboArtist"
+  # has_and_belongs_to_many :brands
   has_many :photos
   has_many :boxes
   has_many :suffrages
