@@ -95,6 +95,8 @@ $(function(){
             // id card
             if(!$.idcard.isValid(answer)) {
               return '请输入有效身份证号';
+            } else {
+              return null;
             }
           }
           if(issue.min_length >= 0 && answer.length < issue.min_length) return '至少输入 ' + issue.min_length + ' 个字';
