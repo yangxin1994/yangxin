@@ -25,8 +25,14 @@
         aDiv.removeClass('dn');
         aDiv.eq($(this).index()).addClass('dn');
       });
-      aLink.click(function() {
-        $(this).parent().html('已参与');
+      aLink.live('click', function(event) {
+        $(this).closest('.button-list').html('已参与');
+      });
+      aLink.live('mouseover', function(event) {
+        $(this).siblings().css('display', 'block');
+      });
+      aLink.live('mouseout', function(event) {
+        aLink.siblings().css('display','none');
       });
     });
   </script>
@@ -110,11 +116,12 @@
   <div class="dashed-box">
     <div class="dashed-box-inner">
       <div class="dashed-box-inner-top">
-        <h3 class="box-title">影片小调查</h3>
+        <!-- <h3 class="box-title">影片小调查</h3> -->
         <ul class="vote-class">
           <li class="active"><a class="left" href="javascript:;">正在热播</a></li>
           <li><a class="right" href="javascript:;">即将上映</a></li>
         </ul>
+        <a href="http://wenjuanba.com/vote/suffrages" target="_blank" class="vote-more">更多</a>
       </div>
       <div class="vote-list dn">
         <ul>
@@ -132,8 +139,14 @@
                 <% if movie['voted'] %>
                   <span>已参与</span>
                 <% else%>
+                <span>
                   <a href="javascript:void(0);" data-t=0 data-id="<%= movie.id.to_s %>" class="btn want-to-see">想看</a>
-                  <a href="javascript:void(0);" data-t=1 data-id="<%= movie.id.to_s %>" class="btn dont-want-to-see">不想看</a>                
+                  <b class="tip"><i></i>仅限影院观看意愿</b>
+                </span>
+                <span>
+                  <a href="javascript:void(0);" data-t=1 data-id="<%= movie.id.to_s %>" class="btn dont-want-to-see">不想看</a>
+                  <b class="tip"><i></i>仅限影院观看意愿</b> 
+                </span>               
                 <% end %>
               </span>
             </li>          
@@ -156,9 +169,18 @@
                 <% if movie['voted'] %>
                   <span>已参与</span>
                 <% else%>
+                <span>
                   <a href="javascript:void(0);" data-t=0 data-id="<%= movie.id.to_s %>" class="btn want-to-see">想看</a>
+                  <b class="tip"><i></i>仅限影院观看意愿</b>
+                </span>
+                <span>
                   <a href="javascript:void(0);" data-t=2 data-id="<%= movie.id.to_s %>" class="btn have-read">看过</a>
-                  <a href="javascript:void(0);" data-t=1 data-id="<%= movie.id.to_s %>" class="btn dont-want-to-see">不想看</a>                
+                  <b class="tip"><i></i>仅限影院观看意愿</b>
+                </span>  
+                <span>
+                  <a href="javascript:void(0);" data-t=1 data-id="<%= movie.id.to_s %>" class="btn dont-want-to-see">不想看</a>
+                  <b class="tip"><i></i>仅限影院观看意愿</b> 
+                </span>          
                 <% end %>              
               </span>
             </li>          
