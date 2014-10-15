@@ -20,23 +20,29 @@ module Spider
               if value.is_a?(Array)
                 _field[key] = value.join('/')  # 主演
               else
-                _field[key] = value
+                if key.to_sym == :info_show_at
+                  time_arr = value.gsub(/年|月|日/,',').split(',')
+                  _field[key] =  Time.new(time_arr[0],time_arr[1],time_arr[2]).to_i
+                else
+                  _field[key] = value
+                end
               end
-              
             end
           end
           _movie.merge!(_field) 
         end
-        movie_model = Movie.find_or_create_by(:subject_id => _movie[:subject_id])
-        begin
-          logger.info('=============start ===============') 
-          logger.info(cresult.inspect) 
-          logger.info('=============end   ===============')           
-          movie_model.update_attributes(_movie)
-          movie_model.save
-        rescue Exception => e
-          binding.pry
+
+        exist_movie = Movie.same_movie?(_movie)
+        unless exist_movie.present?
+          movie_model = Movie.find_or_create_by(:subject_id => _movie[:subject_id])
+          begin       
+            movie_model.update_attributes(_movie)
+            # movie_model.save
+          rescue Exception => e
+            binding.pry
+          end
         end
+
       end
 
       def get_content
@@ -46,12 +52,10 @@ module Spider
         #     url: element.native.attributes['href'].value
         #   }
         # end  
-
         field :subject, ".db_cover.__r_c_>a" do |element|
           {
             url: element.native.attributes['href'].value + 'posters/hot.html',
-            img: element.find('img').native.attributes['src'].value
-            id: element.native.attributes['href'].value
+            img: element.find('img').native.attributes['src'].value,
             id: /\d+/.match(element.native.attributes['href'].value).to_s
           }
         end
@@ -59,8 +63,7 @@ module Spider
         field :title, '.db_head>div>h1'
         field :info_show_at, ".otherbox.__r_c_ a:last" 
         field :info_directors, ".info_l dd:first a"
-        fields :info_actorsactors, '.info_r>dl>dd>p:first>a'
-
+        fields :info_actors, '.info_r>dl>dd>p:first>a'
 
         # field :other_info, '#info' do |element|
         #   # _text = _text.gsub('编剧', 'screenwriters')
@@ -217,22 +220,19 @@ module Spider
 
     def learn_nowplaying(is_weibo)
       @nowplaying_spider.learn do
-
         site 'http://theater.mtime.com/'
         entrance "China_Beijing"
-        sub_url = ['#hotplayContent .moviebox .firstmovie.fl dd h2 a.__r_c_','#hotplayContent .moviebox .othermovie.fr ul li dl dt a.__r_c_','#hotplayContent .moviemore .othermovie ul li dl dt a.__r_c_']
-        sub_url.each_with_index do |u,i|
-          fields :subject, "#{u}" do |subject_url|
-            if _m = Movie.where(:subject_url => subject_url.native.attr("href")).first
-              _m.nowplaying = true and _m.save
-            end          
-          end
+        sub_url = '#hotplayContent .moviemore .othermovie ul li dl dt a.__r_c_'
+        fields :subject, "#{sub_url}" do |subject_url|
+          if _m = Movie.where(:subject_url => subject_url.native.attr("href")).first
+            _m.nowplaying = true and _m.save
+          end          
+        end
   
-          follow "#{u}" do
-            create_action :save do |cresult| self.save_movies(cresult, true, is_weibo) end
-            self.get_content
-            save
-          end
+        follow "#{sub_url}" do
+          create_action :save do |cresult| self.save_movies(cresult, true, is_weibo) end
+          self.get_content
+          save
         end
       end
     end
@@ -240,24 +240,46 @@ module Spider
 
 
     #即将上映
+    # def learn_later(is_weibo)
+    #   @nowplaying_spider.learn do
+    #     site 'http://movie.douban.com/'
+    #     entrance "later"
+
+    #     fields :subject, ".intro h3 a" do |subject_url|
+    #       if _m = Movie.where(:subject_url => subject_url.native.attr("href")).first
+    #         _m.nowplaying = false and _m.save
+    #       end
+    #     end
+
+    #     follow '.intro h3 a' do
+    #       create_action :save do |cresult| self.save_movies(cresult, false, is_weibo) end
+    #       self.get_content
+    #       save
+    #     end
+    #   end
+    # end
+
+
     def learn_later(is_weibo)
       @nowplaying_spider.learn do
-        site 'http://movie.douban.com/'
-        entrance "later"
-
-        fields :subject, ".intro h3 a" do |subject_url|
+        site 'http://theater.mtime.com/'
+        entrance "China_Beijing"
+        sub_url = '#upcomingSlide ul li.i_wantmovie a.img.__r_c_'
+        fields :subject, "#{sub_url}" do |subject_url|
           if _m = Movie.where(:subject_url => subject_url.native.attr("href")).first
             _m.nowplaying = false and _m.save
-          end
+          end          
         end
-
-        follow '.intro h3 a' do
+  
+        follow "#{sub_url}" do
           create_action :save do |cresult| self.save_movies(cresult, false, is_weibo) end
           self.get_content
           save
         end
       end
-    end    
+    end   
+
+
 
     def learn_movie(subject_id)
       # @nowplaying_spider.skip_followers = Movie.all.map{|movie| movie.subject_url + "?from=playing_poster"}

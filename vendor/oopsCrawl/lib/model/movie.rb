@@ -86,6 +86,7 @@ class Movie
   scope :later, -> {where(:nowplaying => false)}
   validates :subject_id, uniqueness: true, presence: true
 
+
   def title_zh
     title.split(' ')[0]
   end
@@ -95,7 +96,7 @@ class Movie
   end
 
   def rating
-    rating_p
+    rating_ps
   end
 
   has_many :comments
@@ -169,6 +170,10 @@ class Movie
       end
     end
     return result    
+  end
+
+  def self.same_movie?(opt)
+    return self.where(title:/#{opt[:title].split(/:|：/).first}/).count > 0
   end
 
 
@@ -367,34 +372,39 @@ class Movie
   end
 
   def poster
-    _p = photos.where(:title => /海报/)
-    if (_p = photos.where(:title => /海报/).and(:title => /中国/).and(:title => /正式/)).present?
-      _p = _p.map{|a| a}.max_by{|a| a.title.match(/(\d+)/).to_s.to_i}
-    elsif (_p = photos.where(:title => /海报/).and(:title => /中国/)).present?
-      _p = _p.map{|a| a}.max_by{|a| a.title.match(/(\d+)/).to_s.to_i}
-    elsif (_p = photos.where(:title => /海报/)).present?
-      _p = _p.map{|a| a}.max_by{|a| a.title.match(/(\d+)/).to_s.to_i}
-    else
-      _p = photos.first
-    end
+    Rails.logger.info('=========================')
+    Rails.logger.info("/images/movies/#{subject_id}.jpg")
+    Rails.logger.info(File.exist?("/images/movies/#{subject_id}.jpg"))
+    Rails.logger.info('=========================')
+    "/images/movies/#{subject_id}.jpg"
+    # _p = photos.where(:title => /海报/)
+    # if (_p = photos.where(:title => /海报/).and(:title => /中国/).and(:title => /正式/)).present?
+    #   _p = _p.map{|a| a}.max_by{|a| a.title.match(/(\d+)/).to_s.to_i}
+    # elsif (_p = photos.where(:title => /海报/).and(:title => /中国/)).present?
+    #   _p = _p.map{|a| a}.max_by{|a| a.title.match(/(\d+)/).to_s.to_i}
+    # elsif (_p = photos.where(:title => /海报/)).present?
+    #   _p = _p.map{|a| a}.max_by{|a| a.title.match(/(\d+)/).to_s.to_i}
+    # else
+    #   _p = photos.first
+    # end
 
-    if _p
-      if !Dir.exist?(Rails.root + "public/images")
-        Dir.mkdir(Rails.root + "public/images")
-      end
-      if !Dir.exist?(Rails.root + "public/images/movies")
-        Dir.mkdir(Rails.root + "public/images/movies")
-      end
-      if !File.exist?(Rails.root + "public/images/movies")
-        Dir.mkdir(Rails.root + "public/images/movies")
-      end
-      _pic = Rails.root + "public/images/movies" + "#{subject_id}.jpg"
-      if !File.exist? _pic
-        `curl -o #{_pic} #{_p.url}` #unless _p.saved
-      end
-      _p.update_attribute(:saved, true)
-      "/images/movies/#{subject_id}.jpg"
-    end
+    # if _p
+    #   if !Dir.exist?(Rails.root + "public/images")
+    #     Dir.mkdir(Rails.root + "public/images")
+    #   end
+    #   if !Dir.exist?(Rails.root + "public/images/movies")
+    #     Dir.mkdir(Rails.root + "public/images/movies")
+    #   end
+    #   if !File.exist?(Rails.root + "public/images/movies")
+    #     Dir.mkdir(Rails.root + "public/images/movies")
+    #   end
+    #   _pic = Rails.root + "public/images/movies" + "#{subject_id}.jpg"
+    #   if !File.exist? _pic
+    #     `curl -o #{_pic} #{_p.url}` #unless _p.saved
+    #   end
+    #   _p.update_attribute(:saved, true)
+    #   "/images/movies/#{subject_id}.jpg"
+    # end
   end
 
   def brands

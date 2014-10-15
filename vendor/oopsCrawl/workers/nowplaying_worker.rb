@@ -4,12 +4,16 @@ class NowplayingWorker
   def perform
     playing_spider = OopSpider.new 
    	playing_spider.crawl_nowplaying
-   	Movie.nowplaying.each do |m|
-   		photo_spider = OopSpider.new(m.subject_id.to_s)
-   		photo_spider.crawl_photos
-   	end
+
+
+    Movie.where(subject_url:/mtime\.com/).each do |m|
+      unless m.photos.length > 0
+        ps = OopSpider.new(m.subject_id.to_s)
+        ps.crawl_photos
+      end
+    end 
   end
 end
 
 # Sidekiq::Cron::Job.create( name: 'Crawling Douban nowplaying - every 1 day', cron: '57 11 * * *', klass: 'NowplayingWorker')
-Sidekiq::Cron::Job.create( name: 'Crawling Douban nowplaying - every 1 day', cron: '* */2 * * *', klass: 'NowplayingWorker')
+Sidekiq::Cron::Job.create( name: 'Crawling Douban nowplaying - every 1 day', cron: '10 22 * * *', klass: 'NowplayingWorker')

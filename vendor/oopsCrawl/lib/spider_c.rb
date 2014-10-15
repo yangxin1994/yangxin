@@ -7,7 +7,7 @@ l = OopSpider.new()
 # s.crawl_reviews 
 # s.crawl_nowplaying
 # l.crawl_later
-# Movie.each do |m|
+# Movie.where(subject_url:/mtime\.com/).each do |m|
 #   if Time.now.to_i > m.info_show_at
 #     m.update_attributes(nowplaying:true)
 #   end
