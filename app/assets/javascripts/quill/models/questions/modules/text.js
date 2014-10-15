@@ -70,7 +70,11 @@ $(function(){
               return '不少于 ' + issue.min_length + ' 个字';
             } else {
               if(issue.max_length == issue.min_length) {
-                return '输入 ' + issue.min_length + ' 个字';
+                if(issue.max_length == 18) {
+                  return '输入有效身份证号';
+                } else {
+                  return '输入 ' + issue.min_length + ' 个字';
+                }
               } else {
                 return '输入 ' + issue.min_length + ' 到 ' + issue.max_length + ' 个字';
               }
@@ -87,6 +91,12 @@ $(function(){
           return null;
         } else {
           if(answer.length == 0) return '请输入内容';
+          if(issue.max_length == issue.min_length && issue.max_length == 18) {
+            // id card
+            if(!$.idcard.isValid(answer)) {
+              return '请输入有效身份证号';
+            }
+          }
           if(issue.min_length >= 0 && answer.length < issue.min_length) return '至少输入 ' + issue.min_length + ' 个字';
           if(issue.max_length >= 0 && answer.length > issue.max_length) return '最多输入 ' + issue.max_length + ' 个字';
           return null;
