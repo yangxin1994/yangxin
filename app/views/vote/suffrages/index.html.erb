@@ -39,8 +39,12 @@
             <% else %>
               <span class="shadow-txt" style="top:-230px;"></span>
               <span class="content" style="top:-230px;">
+              <% if movie.info_show_at < 0%>
+                <span class="time">上映日期: 未知</span>
+              <% else %>
                 <span class="time">上映日期: <%= Time.at(movie.info_show_at).strftime('%F') %></span>
-                <span class="actor">主演:<%=movie.info_actors%></span>
+              <% end %>
+              <span class="actor">主演:<%=movie.info_actors || '未知' %></span>
               </span>
             <% end %>
             <span class="movie-name"><%=movie.title%></span>
@@ -92,8 +96,12 @@
           <% else %>
             <span class="shadow-txt" style="top:-230px;"></span>
             <span class="content" style="top:-230px;">
-              <span class="time">上映日期: <%= Time.at(movie.info_show_at).strftime('%F') %></span>
-              <span class="actor">主演:<%=movie.info_actors%></span>
+              <% if movie.info_show_at < 0%>
+                <span class="time">上映日期: 未知</span>
+              <% else %>
+                <span class="time">上映日期: <%= Time.at(movie.info_show_at).strftime('%F') %></span>
+              <% end %>
+              <span class="actor">主演:<%=movie.info_actors.present? ? movie.info_actors : '未知' %></span>
             </span>
           <% end %>
           </span>

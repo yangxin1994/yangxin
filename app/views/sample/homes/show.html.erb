@@ -129,8 +129,12 @@
             <li <% if idx == 2 %>style="border:none;margin:0;"<% end%> >
               <span class="movie-name"><a href='/vote/suffrages'><%=movie.title%></a></span>
               <span class="movie-img"><img src="<%=movie.poster %>" alt="<%= movie.title%>" /></span>
-              <span class="time">上映日期: <%= Time.at(movie.info_show_at).strftime('%F') %></span>
-              <span class="actor">主演:<%=movie.info_actors%></span>
+              <% if movie.info_show_at < 0%>
+                <span class="time">上映日期: 未知</span>
+              <% else %>
+                <span class="time">上映日期: <%= Time.at(movie.info_show_at).strftime('%F') %></span>
+              <% end %>
+              <span class="actor">主演:<%=movie.info_actors || '未知' %></span>
               <span class="button-list">
                 <% if movie['voted'] %>
                   <span>已参与</span>
@@ -155,8 +159,12 @@
             <li <% if idx == 2 %>style="border:none;margin:0;"<% end%> >
               <span class="movie-name"><a href="/vote/suffrages"><%=movie.title%></a></span>
               <span class="movie-img"><img src="<%=movie.poster %>" alt="<%= movie.title%>" /></span>
-              <span class="time">上映日期: <%= Time.at(movie.info_show_at).strftime('%F') %></span>
-              <span class="actor">主演:<%=movie.info_actors%></span>
+              <% if movie.info_show_at < 0%>
+                <span class="time">上映日期: 未知</span>
+              <% else %>
+                <span class="time">上映日期: <%= Time.at(movie.info_show_at).strftime('%F') %></span>
+              <% end %>
+              <span class="actor">主演:<%=movie.info_actors || '未知' %></span>
               <span class="button-list">
                 <% if movie['voted'] %>
                   <span>已参与</span>
