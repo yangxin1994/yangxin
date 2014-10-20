@@ -182,6 +182,9 @@ $(function() {
                     time = value.estimate_answer_time,
                     redo_count = value.repeat_time,
                     answer_index_all = value.answer_index_all;
+                    if (this.options.is_preview){
+                        time = 0
+                    }
                 if (questions.length == 0) {
                     //该页显示问题数量为0，此时表示题已经加载完最后一道，应该做提交操作
                     this._updateProgress(1); //标识答题进度为100%
