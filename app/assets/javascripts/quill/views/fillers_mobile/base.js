@@ -73,6 +73,10 @@ $(function(){
 			this.$el.addClass('q-' + quill.helpers.QuestionType.getName(this.model.get('question_type')).toLowerCase());
 
 			var info = this.model.getInfo();
+			if (this.model.get('question_type') == 12){
+				info = info.replace(/将右侧选项拖拽至左侧空白处进行排列/,'点击右侧向上或向下箭头进行排序')
+			}
+
 			if(!info)
 				this.$('.q-info').hide();
 			else
