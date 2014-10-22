@@ -216,7 +216,6 @@ $(function() {
 		window.point_value = point;
 
 		var go_on = jduge_order_type(account, value, order_type)
-
 		if (go_on) {
 			if (bt_class == 'exc_login') {
 				popup_login_page()
@@ -292,10 +291,15 @@ $(function() {
 		var spans = $(this).parent('div').prev('div').find('span.order_common');
 		var order_data = {}
 		var options = {}
-		spans.each(function() {
-			name = $(this).attr('name')
-			order_data[name] = $(this).attr('data');
-		})
+		// spans.each(function() {
+		// 	name = $(this).attr('name')
+		// 	order_data[name] = $(this).attr('data');
+		// })
+
+		order_data['gift_id'] = window.exc_order_type
+		order_data['account'] = window.account_value
+		order_data['amount']  = window.amount_value
+		order_data['point']   = window.point_value
 
 		generate_orders($(this), order_data)
 	})
@@ -371,7 +375,7 @@ $(function() {
 	function jduge_order_type(account, value, order_type) {
 		switch (order_type) {
 			case 'phone_num':
-				go_on = check_mobile_number(account, 'click')
+				go_on = check_mobile_number(account, 'click')				
 				break;
 			default:
 				go_on = validate_number(account, value, order_type)
@@ -426,7 +430,9 @@ $(function() {
 		switch (order_type) {
 			case 'ali_num':
 				if (($.regex.isMobile(acc) || $.regex.isEmail(acc)) && (number >= 10 && num_reg.test(number))) {
-					go_on = true
+					if($.inArray(number,[10,20,30,50,100]) >= 0) {
+						go_on = true	
+					}
 				} else {
 					if (!$.regex.isMobile(acc) && !$.regex.isEmail(acc)) {
 						account.parent('div').addClass('error')
@@ -484,6 +490,14 @@ $(function() {
 			}
 
 		}
+
+		if(number_ok && $.inArray(window.amount_value,[10,20,30,50,100]) >= 0) {
+			number_ok = true	
+		}else{
+			number_ok = false	
+		}
+
+
 		return number_ok;
 	}
 
@@ -552,7 +566,6 @@ $(function() {
 				unit = 'Q币'
 				break;
 		}
-
 
 		share_gift_title = window.amount_value + unit;
 		share_gift_point = window.point_value;
