@@ -1,3 +1,4 @@
+<% if @playing_movies.length > 0 %>
 <div id="being-hit" class="vote inner-page">
   <div class="dashed-box">
     <div class="dashed-box-inner">
@@ -54,7 +55,8 @@
     </div>
   </div>
 </div> 
-
+<% end %>
+<% if @later_movies.length > 0 %>
 <div id="upcoming" class="vote inner-page">
   <div class="dashed-box">
     <div class="dashed-box-inner">
@@ -111,7 +113,7 @@
       </ul>
     </div>
   </div>  
-
+<% end %>
 
 <% content_for :head do %>
   <%= stylesheet_link_tag "pages/vote/index-bundle", :media => "all" %>

@@ -111,7 +111,7 @@
     </div>
   </div>
 </div>
-
+<% if @data[:movies].length > 0 %>
 <div id="vote" class="inner-page mt20">
   <div class="dashed-box">
     <div class="dashed-box-inner">
@@ -190,7 +190,7 @@
     </div>
   </div>
 </div>
-
+<% end %>
 <div class="inner-page">
   <% if @data[:express_surveys].present? %>
   <div class="paid-survey">
