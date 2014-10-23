@@ -24,7 +24,11 @@
 				// set welcome message
 				var left_time = <%= @survey.estimate_answer_time %>;
 				if(left_time > 0) {
-					$('#left_time').append($.util.printTimeFriendly(left_time));
+          <% if @survey['_id'].to_s == '53faa7ddeb0e5b58bc000039' %>
+            $('#left_time').append('开始答题（耗时10-15分钟）');
+          <% else %>
+  					$('#left_time').append($.util.printTimeFriendly(left_time));
+          <% end %>
 				};
 
 				var reward_type = <%= @reward_scheme_type %>;
