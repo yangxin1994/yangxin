@@ -75,7 +75,14 @@
 				<p><input id='password_ipt' type="password" placeholder="答题密码" autofocus /></p>
 			<% end %>
 			<p class="error" id="error_msg" style="display:none;">调查问卷尚未发布，请等待问卷发布之后再进行填写。<	/p>
-			<p><a href="javascript:void(0);" id='start_btn' class='btn'>开始答题</a></p>
+			<p>
+				<% if @forbidden_ip %>
+					<a href="javascript:void(0);" id='' class='btn disabled'>IP地址答题次数超过限制</a>
+				<% else %>
+					<a href="javascript:void(0);" id='start_btn' class='btn'>开始答题</a>
+				<% end %>
+				
+			</p>
 			<% unless params[:ati].present? %>
 				<% unless @is_preview %> <!-- 为住建委项目特殊添加-->
 				<p class="tip">
@@ -84,8 +91,6 @@
 				</p>
 				<% end %>
 			<% end %>
-
-
 			<div class="reward_show">
 				<div class="rtype"></div>
 				<div class="type_info">
