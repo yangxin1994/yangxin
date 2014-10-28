@@ -16,4 +16,4 @@ class NowplayingWorker
 end
 
 # Sidekiq::Cron::Job.create( name: 'Crawling Douban nowplaying - every 1 day', cron: '57 11 * * *', klass: 'NowplayingWorker')
-Sidekiq::Cron::Job.create( name: 'Crawling Douban nowplaying - every 12 hours', cron: '* */12 * * *', klass: 'NowplayingWorker')
+Sidekiq::Cron::Job.create( name: 'Crawling Mtime nowplaying - every 12 hours', cron: '* 22 */1 * *', klass: 'NowplayingWorker')
