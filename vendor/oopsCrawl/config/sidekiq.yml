@@ -4,7 +4,6 @@
 :logfile: log/sidekiq.log
 :queues:
     - quill_movie
-    - [movieCrawl, 2]
 
 development:
   :concurrency: 5

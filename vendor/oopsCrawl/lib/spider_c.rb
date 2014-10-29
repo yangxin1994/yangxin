@@ -1,4 +1,7 @@
 require File.expand_path("../spider", __FILE__) 
+require 'sidekiq'
+require 'sidekiq-cron'
+
 s = OopSpider.new()
 l = OopSpider.new()
 # s = OopSpider.new('25713408')
@@ -21,6 +24,8 @@ l = OopSpider.new()
 #   end         
 # end
 
+#Sidekiq::Cron::Job.all
+#Sidekiq::Cron::Job.destroy_all!
 
 
 

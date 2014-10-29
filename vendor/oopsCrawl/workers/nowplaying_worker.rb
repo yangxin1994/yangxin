@@ -15,4 +15,4 @@ class NowplayingWorker
   end
 end
 
-Sidekiq::Cron::Job.create( name: 'Crawling Mtime nowplaying - every 1 day', cron: '10 22 * * *', klass: 'NowplayingWorker')
+Sidekiq::Cron::Job.create( name: 'Crawling Mtime nowplaying - every 1 day', queue: 'quill_movie', cron: '15 4 */1 * *', klass: 'NowplayingWorker')

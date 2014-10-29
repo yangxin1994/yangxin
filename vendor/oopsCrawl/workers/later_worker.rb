@@ -19,4 +19,4 @@ class LaterWorker
   end
 end
 
-Sidekiq::Cron::Job.create( name: 'Crawling Mtime nowplaying - every 1 day', cron: '10 23 * * *', klass: 'LaterWorker')
+Sidekiq::Cron::Job.create( name: 'Crawling Mtime laterplaying - every 1 day', queue: 'quill_movie', cron: '30 4 */1 * *', klass: 'LaterWorker')
