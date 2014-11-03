@@ -266,7 +266,7 @@ $(function() {
                         var old_text = next_btn.text();
 
                         function _update_btn() {
-                            if (time == 0) {
+                            if (time <= 0) {
                                 next_btn.text(old_text);
                                 $.util.enable(next_btn);
                             } else {
