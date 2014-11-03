@@ -326,27 +326,31 @@ class Order
     else
       orders = Order.all.desc(:created_at)
     end
-    if options[:status].present? && options[:status] != 0
-      status_ary = Tool.convert_int_to_base_arr(options[:status])
-      orders = orders.where(:status.in => status_ary)
-    end
-    if options[:source].present? && options[:source] != 0
-      source_ary = Tool.convert_int_to_base_arr(options[:source])
-      orders = orders.where(:source.in => source_ary)
-    end
-    if options[:type].present? && options[:type] != 0
-      type_ary = Tool.convert_int_to_base_arr(options[:type])
-      orders = orders.where(:type.in => type_ary)
-    end 
-    if options[:date_max].present?
-      orders = orders.where(:created_at.lt => Time.parse(options[:date_max]))
-    elsif options[:date_min].present?
-      orders = orders.where(:created_at.gt => Time.parse(options[:date_min]))
-    else
-      if options[:date].present?
-        _qdate = Time.now - options[:date].to_i.days
-        orders = orders.where(:created_at.gt => _qdate)
+    if !orders.blank?
+      if options[:status].present? && options[:status] != 0
+        status_ary = Tool.convert_int_to_base_arr(options[:status])
+        orders = orders.where(:status.in => status_ary)
       end
+      if options[:source].present? && options[:source] != 0
+        source_ary = Tool.convert_int_to_base_arr(options[:source])
+        orders = orders.where(:source.in => source_ary)
+      end
+      if options[:type].present? && options[:type] != 0
+        type_ary = Tool.convert_int_to_base_arr(options[:type])
+        orders = orders.where(:type.in => type_ary)
+      end 
+      if options[:date_max].present?
+        orders = orders.where(:created_at.lt => Time.parse(options[:date_max]))
+      elsif options[:date_min].present?
+        orders = orders.where(:created_at.gt => Time.parse(options[:date_min]))
+      else
+        if options[:date].present?
+          _qdate = Time.now - options[:date].to_i.days
+          orders = orders.where(:created_at.gt => _qdate)
+        end
+      end
+    else
+      orders = []
     end
     return orders      
   end
