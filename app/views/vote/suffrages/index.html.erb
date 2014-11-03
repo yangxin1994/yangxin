@@ -1,3 +1,4 @@
+<% if @data[:playing_movies].length > 0 %>
 <div id="being-hit" class="vote inner-page">
   <div class="dashed-box">
     <div class="dashed-box-inner">
@@ -5,7 +6,7 @@
         <h3 class="box-title">正在热播</h3>
       </div>
       <ul class='li-container'>
-        <% @playing_movies.each do |movie|%>
+        <% @data[:playing_movies].each do |movie|%>
           <li class="<%= movie['voted'] ? 'voted' : '' %>">                                       
             <span class="movie-img"><img src="<%=movie.poster %>" alt="<%= movie.title%>" /></span>
             <% unless movie['voted']%>
@@ -39,8 +40,12 @@
             <% else %>
               <span class="shadow-txt" style="top:-230px;"></span>
               <span class="content" style="top:-230px;">
+              <% if movie.info_show_at < 0%>
+                <span class="time">上映日期: 未知</span>
+              <% else %>
                 <span class="time">上映日期: <%= Time.at(movie.info_show_at).strftime('%F') %></span>
-                <span class="actor">主演:<%=movie.info_actors%></span>
+              <% end %>
+              <span class="actor">主演:<%=movie.info_actors || '未知' %></span>
               </span>
             <% end %>
             <span class="movie-name"><%=movie.title%></span>
@@ -50,7 +55,8 @@
     </div>
   </div>
 </div> 
-
+<% end %>
+<% if @data[:later_movies].length > 0 %>
 <div id="upcoming" class="vote inner-page">
   <div class="dashed-box">
     <div class="dashed-box-inner">
@@ -58,7 +64,7 @@
         <h3 class="box-title">即将上映</h3>
       </div>
       <ul class='li-container'>
-      <% @later_movies.each do |movie|%>
+      <% @data[:later_movies].each do |movie|%>
         <li class="<%= movie['voted'] ? 'voted' : '' %>">                                         
           <span class="movie-img"><img src="<%=movie.poster %>" alt="<%= movie.title%>" /></span>
           <% unless movie['voted']%>
@@ -92,8 +98,12 @@
           <% else %>
             <span class="shadow-txt" style="top:-230px;"></span>
             <span class="content" style="top:-230px;">
-              <span class="time">上映日期: <%= Time.at(movie.info_show_at).strftime('%F') %></span>
-              <span class="actor">主演:<%=movie.info_actors%></span>
+              <% if movie.info_show_at < 0%>
+                <span class="time">上映日期: 未知</span>
+              <% else %>
+                <span class="time">上映日期: <%= Time.at(movie.info_show_at).strftime('%F') %></span>
+              <% end %>
+              <span class="actor">主演:<%=movie.info_actors.present? ? movie.info_actors : '未知' %></span>
             </span>
           <% end %>
           </span>
@@ -103,7 +113,7 @@
       </ul>
     </div>
   </div>  
-
+<% end %>
 
 <% content_for :head do %>
   <%= stylesheet_link_tag "pages/vote/index-bundle", :media => "all" %>

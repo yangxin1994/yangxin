@@ -70,12 +70,12 @@ $(function(){
         }
       } else {
         if(this.issue.min <= 0) {
-          if(this.issue.max <= 0) return '拖放选项进行排列';
-          else return '请最多排出前 ' + this.issue.max + ' 个选项，拖放选项进行排序';
+          if(this.issue.max <= 0) return '将右侧选项拖拽至左侧空白处进行排列';
+          else return '请最多排出前 ' + this.issue.max + ' 个选项，将右侧选项拖拽至左侧空白处进行排列';
         } else {
-          if(this.issue.max <= 0) return '请至少排出前 ' + this.issue.min + ' 个选项，拖放选项进行排序';
-          else if(this.issue.max == this.issue.min) return '请排出前 ' + this.issue.min + ' 个选项，拖放选项进行排序';
-          else return '请排出前 ' + this.issue.min + ' 到 ' + this.issue.max + ' 个选项，拖放选项进行排序';
+          if(this.issue.max <= 0) return '请至少排出前 ' + this.issue.min + ' 个选项，将右侧选项拖拽至左侧空白处进行排列';
+          else if(this.issue.max == this.issue.min) return '请排出前 ' + this.issue.min + ' 个选项，将右侧选项拖拽至左侧空白处进行排列';
+          else return '请排出前 ' + this.issue.min + ' 到 ' + this.issue.max + ' 个选项，将右侧选项拖拽至左侧空白处进行排列';
         }
       }
 		},

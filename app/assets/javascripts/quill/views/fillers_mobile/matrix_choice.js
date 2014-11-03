@@ -26,7 +26,7 @@ $(function(){
 				var row = this.model_issue.rows[row_indexes[i]];
 				var $div = this.hbs({
 					row_id: this.model.id + '_' + row.id,
-					row_text: row.content.text
+					row_text: $.richtext.textToHtml(row.content)
 				}, '/fillers_mobile/matrix', true).appendTo(this.$('.q-content'));
 				this.renderMediaPreviews($('.subhead', $div), row.content);
 

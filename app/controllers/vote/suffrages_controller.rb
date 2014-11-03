@@ -5,6 +5,8 @@ class Vote::SuffragesController < Vote::VoteController
     new_vote
     @playing_movies = Movie.get_playing(cookies[:vote_user_id])
     @later_movies   = Movie.get_later(cookies[:vote_user_id])
+    @data = {playing_movies:@playing_movies,later_movies:@later_movies}
+    fresh_when(:etag => @data)
   end
 
   def statrt_vote

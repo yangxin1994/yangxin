@@ -21,7 +21,7 @@ $(function(){
 				var item = this.model_issue.items[indexes[i]];
 				var $div = this.hbs({
 					item_id: item.id,
-					item_text: item.content.text
+					item_text: $.richtext.textToHtml(item.content)
 				}, '/fillers_mobile/scale', true).appendTo(this.$('.q-content'));
 				this.renderMediaPreviews($('.subhead', $div), item.content);
 

@@ -26,6 +26,7 @@
 				.replace(/<biggest>(.*?)<\/biggest>/igm, '$1')
 				.replace(/<link>([^\s]*?)<\/link>/igm, '$1')
 				.replace(/<link>([^\s]*?)\s(.*?)<\/link>/igm, '$2')
+        .replace(/<img>([^\s]*?)<\/img>/igm, '[图]')
 				+ _.map([['image', '图'], ['video', '视'], ['audio', '音']], function(v) {
 					var title = '';
 					if(rt[v[0]] != null) {
@@ -55,7 +56,8 @@
 				.replace(/(&lt;bigger&gt;)(.*?)(&lt;\/bigger&gt;)/igm, '<span style="font-size: 24px;">$2</span>')
 				.replace(/(&lt;biggest&gt;)(.*?)(&lt;\/biggest&gt;)/igm, '<span style="font-size: 30px;">$2</span>')
 				.replace(/(&lt;link&gt;)([^\s]*?)(&lt;\/link&gt;)/igm, '<a href="$2" style="color:#4183c4" target="_blank">$2</a>')
-				.replace(/(&lt;link&gt;)([^\s]*?)\s(.*?)(&lt;\/link&gt;)/igm, '<a href="$2" style="color:#4183c4" target="_blank">$3</a>');
+				.replace(/(&lt;link&gt;)([^\s]*?)\s(.*?)(&lt;\/link&gt;)/igm, '<a href="$2" style="color:#4183c4" target="_blank">$3</a>')
+        .replace(/(&lt;img&gt;)([^\s]*?)(&lt;\/img&gt;)/igm, '<img src="$2" style="width:100%; display:block;" />');
 			return center ? ('<div ' + (center ? 'style="text-align: center"' : '') + '>' + html + '</div>') : html;
 		}
 	};

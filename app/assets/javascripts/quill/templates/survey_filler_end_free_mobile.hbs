@@ -14,3 +14,16 @@
 		{{/unless}}
 	</div>	
 </div>
+<div class="footer">
+	{{#if allow_pageup}}	
+	<a href="javascript:void(0)" class="prev" id="check_btn" title="返回检查答案"></a>
+	{{/if}}	
+	<i class="footer-divide"></i>
+	{{#if show_restart}}
+	<a href="javascript:void(0)" class="resume" id="restart_btn">重新答题</a>
+	{{else}}
+		{{#if allow_replay}}
+			<a href="javascript:void(0)" class="resume" id="replay">重新答题</a>
+		{{/if}}
+	{{/if}}
+</div>
