@@ -25,6 +25,10 @@ class Sample::GiftsController < Sample::SampleController
   end
 
   def show
+    if params[:id] == '522883d5eb0e5b13b9000001'
+      # hack 1 yuan phone charge gift
+      redirect_to '/gifts' and return
+    end
     gift_rank = Gift.on_shelf.real.limit(5)
     gift = Gift.normal.find_by(id: params[:id])
     render_404 if gift.nil?
