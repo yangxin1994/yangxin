@@ -21,6 +21,7 @@ module ErrorEnum
 	AGENT_NOT_EXIST = "error__8"
 	MOBILE_NOT_EXIST = "error__9"
 	MOBILE_EXIST = "error__10"
+  WRONG_AGENT_TASK_STATUS = "error__14"
 
 	
 	ANSWER_BOUND = "error__11"
