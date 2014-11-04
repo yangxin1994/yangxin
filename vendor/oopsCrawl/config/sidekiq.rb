@@ -1,7 +1,7 @@
 redis_server    = "localhost"
 redis_port      = 6379
 redis_db_num    = 0
-redis_namespace = 'oopsCrawl'
+redis_namespace = 'quillCrawl'
 
 Sidekiq.configure_server do |config|
   p redis_server

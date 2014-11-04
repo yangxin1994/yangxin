@@ -1,9 +1,10 @@
-
-
+# encoding: utf-8
+require File.expand_path("../../../../../app/models/vote_related/suffrage", __FILE__) 
+require File.expand_path("../../../../../app/models/vote_related/vote_user", __FILE__) 
 class Movie
-
+  attr_accessor :voted,:want,:no_want,:seen,:tot
   include Mongoid::Document
-  Nlpir::Mongoid.included(self)
+  # Nlpir::Mongoid.included(self)
 
   field :status, :type => Integer, :default => 0
 
@@ -82,8 +83,9 @@ class Movie
 
 
   scope :nowplaying, ->{ where(:nowplaying => true) }
-
+  scope :later, -> {where(:nowplaying => false)}
   validates :subject_id, uniqueness: true, presence: true
+
 
   def title_zh
     title.split(' ')[0]
@@ -94,19 +96,21 @@ class Movie
   end
 
   def rating
-    rating_p
+    rating_ps
   end
 
-  has_many :comments
-  has_many :reviews
-  has_many :trailers
-  has_many :baidu_news
-  has_many :weibos
-  has_and_belongs_to_many :weibo_users, class_name: "WeiboUser"
-  has_and_belongs_to_many :weibo_artists, class_name: "WeiboArtist"
-  has_and_belongs_to_many :brands
+  # has_many :comments
+  # has_many :reviews
+  # has_many :trailers
+  # has_many :baidu_news
+  # has_many :weibos
+  # has_and_belongs_to_many :weibo_users, class_name: "WeiboUser"
+  # has_and_belongs_to_many :weibo_artists, class_name: "WeiboArtist"
+  # has_and_belongs_to_many :brands
   has_many :photos
   has_many :boxes
+  has_many :suffrages
+
   begin
     MovieIndex
   rescue
@@ -118,6 +122,60 @@ class Movie
       movie.update_attribute(:nowplaying, false)
     end
   end
+
+  def self.rand(user_id=nil)
+    n = self.nowplaying.desc(:info_show_at)[0..2]
+    m = self.later.asc(:info_show_at)[0..2]
+    result = n + m 
+    if user_id.present?
+      result = result.map do |e|
+        e.write_attribute('voted',true) if e.suffrages.where(vote_user_id:user_id).count > 0
+        e
+      end
+    end
+    result
+  end
+
+  def self.get_playing(user_id)
+    result = self.nowplaying.desc(:info_show_at)
+    if user_id.present?
+      result    = result.map do |e|
+        tot     = e.suffrages.count
+        want    = e.suffrages.want.count
+        no_want = e.suffrages.no_want.count
+        seen    = e.suffrages.seen.count
+        e.write_attribute(:voted,true) if e.suffrages.where(vote_user_id:user_id).count > 0
+        e.write_attribute(:tot,tot)
+        e.write_attribute(:want,want)
+        e.write_attribute(:no_want,no_want)
+        e.write_attribute(:seen,seen)
+        e
+      end
+    end
+    return result
+  end
+
+  def self.get_later(user_id)
+    result = self.later.asc(:info_show_at)
+    if user_id.present?
+      result = result.map do |e|
+        tot     = e.suffrages.count
+        want    = e.suffrages.want.count
+        no_want = e.suffrages.no_want.count   
+        e.write_attribute(:voted,true) if e.suffrages.where(vote_user_id:user_id).count > 0
+        e.write_attribute(:tot,tot)
+        e.write_attribute(:want,want)
+        e.write_attribute(:no_want,no_want)
+        e
+      end
+    end
+    return result    
+  end
+
+  def self.same_movie?(opt)
+    return self.where(title:/#{opt[:title].split(/:|：/).first}/).count > 0
+  end
+
 
   def rating
     rating_p
@@ -181,33 +239,7 @@ class Movie
     tags_info.map { |k, v| {text: k, size: v} }
   end
 
-  # def get_approve_co(keyword, page = 0, is_media = false)
-  #   page = page.to_i > 0 ? page.to_i - 1 : 0
-  #   apc = get_approve_co_all(keyword, is_media)
-  #   data = apc.sort_by{|a| a[1]["count"]}.reverse.map { |e| e[1] }
-  #   apc = {
-  #     "all_count" => data.count,
-  #     "data" => data.slice(page * 9, 9),
-  #     "total_page" => (data.count / 9.0).ceil,
-  #     "current_page" => page <= 1 ? 1 : page + 1,
-  #     "success" => true
-  #   }
-  #   apc
-  # end
-  # def get_approve_co(keyword, page = 0, is_media = false)
-  #   page = page.to_i > 0 ? page.to_i - 1 : 0
-  #   apc = get_approve_co_all(keyword, is_media)
-  #   data = apc.sort_by{|a| a[1]["count"]}.reverse.map { |e| e[1] }
-  #   apc = {
-  #     "all_count" => data.count,
-  #     "data" => data.slice(page * 9, 9),
-  #     "total_page" => (data.count / 9.0).ceil,
-  #     "current_page" => page <= 1 ? 1 : page + 1,
-  #     "success" => true
-  #   }
-  #   save
-  #   apc
-  # end
+
 
   def reset_cache
     if need_reset_cache
@@ -340,34 +372,35 @@ class Movie
   end
 
   def poster
-    _p = photos.where(:title => /海报/)
-    if (_p = photos.where(:title => /海报/).and(:title => /中国/).and(:title => /正式/)).present?
-      _p = _p.map{|a| a}.max_by{|a| a.title.match(/(\d+)/).to_s.to_i}
-    elsif (_p = photos.where(:title => /海报/).and(:title => /中国/)).present?
-      _p = _p.map{|a| a}.max_by{|a| a.title.match(/(\d+)/).to_s.to_i}
-    elsif (_p = photos.where(:title => /海报/)).present?
-      _p = _p.map{|a| a}.max_by{|a| a.title.match(/(\d+)/).to_s.to_i}
-    else
-      _p = photos.first
-    end
+    "/images/movies/#{subject_id}.jpg"
+    # _p = photos.where(:title => /海报/)
+    # if (_p = photos.where(:title => /海报/).and(:title => /中国/).and(:title => /正式/)).present?
+    #   _p = _p.map{|a| a}.max_by{|a| a.title.match(/(\d+)/).to_s.to_i}
+    # elsif (_p = photos.where(:title => /海报/).and(:title => /中国/)).present?
+    #   _p = _p.map{|a| a}.max_by{|a| a.title.match(/(\d+)/).to_s.to_i}
+    # elsif (_p = photos.where(:title => /海报/)).present?
+    #   _p = _p.map{|a| a}.max_by{|a| a.title.match(/(\d+)/).to_s.to_i}
+    # else
+    #   _p = photos.first
+    # end
 
-    if _p
-      if !Dir.exist?(Rails.root + "public/images")
-        Dir.mkdir(Rails.root + "public/images")
-      end
-      if !Dir.exist?(Rails.root + "public/images/movies")
-        Dir.mkdir(Rails.root + "public/images/movies")
-      end
-      if !File.exist?(Rails.root + "public/images/movies")
-        Dir.mkdir(Rails.root + "public/images/movies")
-      end
-      _pic = Rails.root + "public/images/movies" + "#{subject_id}.jpg"
-      if !File.exist? _pic
-        `curl -o #{_pic} #{_p.url}` #unless _p.saved
-      end
-      _p.update_attribute(:saved, true)
-      "/images/movies/#{subject_id}.jpg"
-    end
+    # if _p
+    #   if !Dir.exist?(Rails.root + "public/images")
+    #     Dir.mkdir(Rails.root + "public/images")
+    #   end
+    #   if !Dir.exist?(Rails.root + "public/images/movies")
+    #     Dir.mkdir(Rails.root + "public/images/movies")
+    #   end
+    #   if !File.exist?(Rails.root + "public/images/movies")
+    #     Dir.mkdir(Rails.root + "public/images/movies")
+    #   end
+    #   _pic = Rails.root + "public/images/movies" + "#{subject_id}.jpg"
+    #   if !File.exist? _pic
+    #     `curl -o #{_pic} #{_p.url}` #unless _p.saved
+    #   end
+    #   _p.update_attribute(:saved, true)
+    #   "/images/movies/#{subject_id}.jpg"
+    # end
   end
 
   def brands

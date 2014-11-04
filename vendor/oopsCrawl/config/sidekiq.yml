@@ -1,9 +1,9 @@
 :concurrency: 5
+:verbose: false
 :pidfile: tmp/pids/sidekiq.pid
-
+:logfile: log/sidekiq.log
 :queues:
-    - default
-    - [oopsCrawl, 2]
+    - quill_movie
 
 development:
   :concurrency: 5

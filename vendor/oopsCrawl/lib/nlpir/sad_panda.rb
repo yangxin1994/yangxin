@@ -1,3 +1,4 @@
+# encoding: utf-8
 module Nlpir
   class SadPanda
     @@positive = nil

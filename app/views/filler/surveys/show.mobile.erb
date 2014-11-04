@@ -24,7 +24,11 @@
 				// set welcome message
 				var left_time = <%= @survey.estimate_answer_time %>;
 				if(left_time > 0) {
-					$('#left_time').append($.util.printTimeFriendly(left_time));
+          <% if @survey['_id'].to_s == '53faa7ddeb0e5b58bc000039' %>
+            $('#left_time').append('开始答题（耗时10-15分钟）');
+          <% else %>
+  					$('#left_time').append($.util.printTimeFriendly(left_time));
+          <% end %>
 				};
 
 				var reward_type = <%= @reward_scheme_type %>;
@@ -71,15 +75,22 @@
 				<p><input id='password_ipt' type="password" placeholder="答题密码" autofocus /></p>
 			<% end %>
 			<p class="error" id="error_msg" style="display:none;">调查问卷尚未发布，请等待问卷发布之后再进行填写。<	/p>
-			<p><a href="javascript:void(0);" id='start_btn' class='btn'>开始答题</a></p>
+			<p>
+				<% if @forbidden_ip %>
+					<a href="javascript:void(0);" id='' class='btn disabled'>IP地址答题次数超过限制</a>
+				<% else %>
+					<a href="javascript:void(0);" id='start_btn' class='btn'>开始答题</a>
+				<% end %>
+				
+			</p>
 			<% unless params[:ati].present? %>
+				<% unless @is_preview %> <!-- 为住建委项目特殊添加-->
 				<p class="tip">
 					<span class='fl'>耗时<span id="left_time"></span></span>
 					<span class="fr">奖励<span id="reward_info"></span></span>
 				</p>
+				<% end %>
 			<% end %>
-
-
 			<div class="reward_show">
 				<div class="rtype"></div>
 				<div class="type_info">

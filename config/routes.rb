@@ -643,6 +643,14 @@ OopsData::Application.routes.draw do
     end
   end
 
+  namespace :vote do 
+    resources :suffrages do 
+      collection do 
+        get :statrt_vote
+      end
+    end
+  end
+
   # Root: different roots for diffent hosts
   constraints :subdomain => "admin" do
     root :to => 'admin/publishes#index', as: :admin_root

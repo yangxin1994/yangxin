@@ -73,6 +73,15 @@ $(function(){
 			this.$el.addClass('q-' + quill.helpers.QuestionType.getName(this.model.get('question_type')).toLowerCase());
 
 			var info = this.model.getInfo();
+			if (this.model.get('question_type') == 12){ // 住建委项目特殊添加
+				info = info.replace(/将右侧选项拖拽至左侧空白处进行排列/,'点击右侧向上或向下箭头进行排序');
+			}
+
+			if (this.model.get('question_type') == 1){ // 住建委项目特殊添加
+				info = info.replace(/矩阵选择题/,'单选题');
+				info = info.replace(/每行/,'每题');
+			}
+
 			if(!info)
 				this.$('.q-info').hide();
 			else
@@ -80,7 +89,15 @@ $(function(){
 
 			this.model.get('is_required') ? this.$('.q-required').show() : this.$('.q-required').hide();
 
-			this.model.get('note') ? this.$('.q-note').show() : this.$('.q-note').hide();
+      var note = this.model.get('note');
+      if(note) {
+        this.$('.q-note').show();
+        if(note.indexOf('<img') == 0) {
+          this.$('.q-note').html(note);
+        }
+      } else {
+        this.$('.q-note').hide();
+      }
 		},
 
 		/* Refresh index display

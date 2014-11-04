@@ -1,3 +1,4 @@
+# encoding: utf-8
 require File.expand_path('../../spider/weibo_hacks', __FILE__)
 class Weibo
   include Mongoid::Document

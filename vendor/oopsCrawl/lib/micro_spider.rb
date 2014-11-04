@@ -8,12 +8,12 @@ Capybara.current_driver = :mechanize
 Capybara.app = proc { |env| [200, {'Content-Type' => 'text/html'}, 'You need to use MicroSpider#site method to set app host.'] }
 
 # If has capybara-webkit, first priority
-begin
-  require 'capybara-webkit'
-  Capybara.current_driver = :webkit
-rescue Exception => e
-  # Nothing to do.
-end
+# begin
+#   require 'capybara-webkit'
+#   Capybara.current_driver = :webkit
+# rescue Exception => e
+#   # Nothing to do.
+# end
 
 require 'logger'
 require 'set'
@@ -36,7 +36,7 @@ class MicroSpider
     Capybara.configure do |config|
       config.run_server = false
       config.ignore_hidden_elements = false
-      Capybara.current_session.driver.browser.agent.user_agent_alias = 'Mac Safari'
+      #Capybara.current_session.driver.browser.agent.user_agent_alias = 'Mac Safari'
       # Capybara.current_session.driver.browser.agent.set_proxy(@proxy.ip, @proxy.port) if @proxy
       # config.default_driver = :mechanize
       # if proxy = ENV['PROXY']
