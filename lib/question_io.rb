@@ -208,8 +208,8 @@ class ChoiceQuestionIo < QuestionIo
       issue["items"].each_index do |i|
         # blank? row["#{header_prefix}_c#{i+1}"] if row["#{header_prefix}_input"].blank?
         row["#{header_prefix}_c#{i+1}"] = "0" if row["#{header_prefix}_c#{i+1}"].blank?
-	blank? row["#{header_prefix}_c#{i+1}"] if row["#{header_prefix}_input"].blank?
-	if row["#{header_prefix}_c#{i+1}"] == "1"
+        blank? row["#{header_prefix}_c#{i+1}"] if row["#{header_prefix}_input"].blank?
+        if row["#{header_prefix}_c#{i+1}"] == "1"
           @retval["selection"] << get_item_id(i + 1)
           choiced += 1
         end
@@ -228,7 +228,7 @@ class ChoiceQuestionIo < QuestionIo
       if issue["other_item"]["has_other_item"]
         if issue["other_item"]["id"].to_s == get_item_id(row[header_prefix]).to_s
           if row["#{header_prefix}_input"].blank?
-            raise "您选了其他项,但是其他项却没有填写呢>.<"
+            raise "选了其他项,但是其他项却没有填写"
           else
             @retval["text_input"] = row["#{header_prefix}_input"]
           end
@@ -241,11 +241,11 @@ class ChoiceQuestionIo < QuestionIo
     #     choiced += 1 if issue["max_choice"].to_i > 1
     #   end
     # end
-    if choiced < issue["min_choice"]
-      raise "您选择的有点少啊?至少#{issue["min_choice"]}个才可以."
-    elsif choiced > issue["max_choice"]
-      raise "您选择的稍微多了点,只需要#{issue["max_choice"]}个就可以了~"
-    end
+    # if choiced < issue["min_choice"]
+    #   raise "至少#{issue["min_choice"]}个才可以."
+    # elsif choiced > issue["max_choice"]
+    #   raise "只需要选择#{issue["max_choice"]}个"
+    # end
     return { "#{origin_id}" => @retval}
   end
 
@@ -364,11 +364,11 @@ class MatrixChoiceQuestionIo < QuestionIo
             choiced += 1
           end
         end
-        if choiced < issue["min_choice"]
-          raise "您选择的有点少啊?至少#{issue["min_choice"]}个才可以."
-        elsif choiced > issue["max_choice"]
-          raise "您选择的稍微多了点,只需要#{issue["max_choice"]}就可以了~"
-        end
+        # if choiced < issue["min_choice"]
+        #   raise "至少#{issue["min_choice"]}个才可以."
+        # elsif choiced > issue["max_choice"]
+        #   raise "不要超过#{issue["max_choice"]}个"
+        # end
         @retval[item["id"].to_s] = row_choices
       end
 
