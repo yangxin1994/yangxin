@@ -306,7 +306,7 @@ $(function() {
                             }
                         } else {
                             // 3. submit answers
-                            if (time == 0) {
+                            if (time <= 0) {
                                 next_btn.text('正在提交答案...');
                                 $.util.disable(prev_btn, next_btn);
                                 $.postJSON(this._uri('/update_for_mobile'), {
