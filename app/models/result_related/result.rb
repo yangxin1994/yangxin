@@ -367,11 +367,16 @@ class Result
     end
   
     answer_ary.each do |answer|
-      answer["sort_result"].each_with_index do |input_id, sort_index|
-        result.each_key do |k|
-          if k.split(',').include?(input_id)
-            result[k][sort_index] = result[k][sort_index] + 1 if sort_index < input_number
-            break
+      puts "!!!!!!!!!!!!!!!!!!"
+      puts answer.inspect
+      puts "!!!!!!!!!!!!!!!!!!"
+      if !answer["sort_result"].blank?
+        answer["sort_result"].each_with_index do |input_id, sort_index|
+          result.each_key do |k|
+            if k.split(',').include?(input_id)
+              result[k][sort_index] = result[k][sort_index] + 1 if sort_index < input_number
+              break
+            end
           end
         end
       end
