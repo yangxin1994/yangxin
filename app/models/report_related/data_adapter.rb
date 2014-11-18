@@ -148,7 +148,7 @@ class DataAdapter
       return nil if selected_items.blank?
       item_text_ary = selected_items.map { |item| item["content"]["text"] }
       item_text = item_text_ary.join('或')
-      return item_text.remove_style
+      return item_text.try(:remove_style) || ''
     end
 
     def self.convert_single_choice_data(analysis_result, issue, chart_styles, answer_number = nil)
