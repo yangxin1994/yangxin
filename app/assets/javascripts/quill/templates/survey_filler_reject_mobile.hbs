@@ -1,11 +1,9 @@
 <div class="page">
 	<div class="finished-page">
 		<div id="sf_main">
-
 			{{#if quality}}
 			对不起，由于您在两次答题过程中均没有认真答题，系统已经取消您的答题资格，感谢您参加本次调研。
 			{{/if}}
-
 			{{#if filter}}
 			对不起，您不在我们的调研范围内，感谢您参加本次调研。
 			{{/if}}
@@ -17,7 +15,11 @@
 			{{#if review_failed}}
 			很抱歉，您的答卷未通过管理员的审核，原因为“{{reject_reason}}”。如有疑问，请 <a href='/help/aboutus#contact'>联系我们</a> 。
 			{{/if}}
-			<a class="edit-finish" href="javascript:void(0);" id="close_btn">返回首页</a>
+			{{#if agent}}
+				
+			{{else}}
+				<a class="edit-finish" href="javascript:void(0);" id="close_btn">返回首页</a>
+			{{/if}}
 		</div>
 	</div>
 </div>

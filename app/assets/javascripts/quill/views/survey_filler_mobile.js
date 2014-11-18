@@ -549,7 +549,6 @@ $(function() {
             } else if (value.answer_status == 2) {
                 // 被拒绝
                 // reject 1（配额已满），2（未通过自动质控），4（未通过人工质控），8（甄别题）或者16（超时）
-
                 this.hbs({
                     quality: (value.answer_reject_type == 2),
                     review_failed: (value[1] == 2),
@@ -557,6 +556,7 @@ $(function() {
                     timeout: (value.answer_reject_type == 16),
                     review_failed: (value.answer_reject_type == 4),
                     reject_reason: value.answer_audit_message,
+                    agent: this.options.is_agent,
                     show_restart: this.options.is_preview,
                     spreadable: this.options.spread_point > 0,
                     spread_point: this.options.spread_point
