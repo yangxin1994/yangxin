@@ -1266,6 +1266,7 @@ class Answer
         #       ...
         #     ]
         #   }
+        binding.pry
         show_answer.merge!({'question_type_label'=> '排序题'})
         answer["question_content"] << show_answer and next if val.blank?
 
