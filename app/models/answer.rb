@@ -1277,8 +1277,7 @@ class Answer
             next
           end
           if question.issue['other_item'] && question.issue['other_item']['has_other_item'].to_s=='true'
-            item = question.issue['other_item']['has_other_item']
-            show_answer['items'] << {'title'=>val["text_input"]} if item['id'].to_s == id_s
+            show_answer['items'] << {'title'=>val["text_input"]} if question.issue["other_item"]["id"].to_s == id_s
           end
         end
 
