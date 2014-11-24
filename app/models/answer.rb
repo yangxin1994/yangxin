@@ -1266,11 +1266,6 @@ class Answer
         #       ...
         #     ]
         #   }
-        puts '1???????????????????????'
-        puts answer.inspect
-        puts '2???????????????????????'
-        puts question.inspect
-        puts '3???????????????????????'
         show_answer.merge!({'question_type_label'=> '排序题'})
         answer["question_content"] << show_answer and next if val.blank?
 
@@ -1283,7 +1278,7 @@ class Answer
           end
           if question.issue['other_item'] && question.issue['other_item']['has_other_item'].to_s=='true'
             item = question.issue['other_item']['has_other_item']
-            show_answer['items'] << {'title'=>item['content']['text']} if item['id'].to_s == id_s
+            show_answer['items'] << {'title'=>val["text_input"]} if item['id'].to_s == id_s
           end
         end
 
