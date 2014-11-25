@@ -31,7 +31,12 @@
 					</li>
 				<% end %>
 			<% elsif question["question_type"] == QuestionTypeEnum::SORT_QUESTION %>
-				<%= question["items"].map { |e| e["title"] } .join(', ')  %>
+        <% question["items"].try('each') do |item| %>
+          <li>
+            <%= item["title"] + ": " + item["content"].to_s %>
+          </li>
+        <% end %>
+				<%#= question["items"].map { |e| e["title"] } .join(', ')  %>
 			<% elsif question["question_type"] == QuestionTypeEnum::CONST_SUM_QUESTION %>
 				<% question["items"].try('each') do |item| %>
 					<li>

@@ -367,9 +367,9 @@ class Result
     end
   
     answer_ary.each do |answer|
-      puts "!!!!!!!!!!!!!!!!!!"
-      puts answer.inspect
-      puts "!!!!!!!!!!!!!!!!!!"
+      # puts "!!!!!!!!!!!!!!!!!!"
+      # puts answer.inspect
+      # puts "!!!!!!!!!!!!!!!!!!"
       if !answer["sort_result"].blank?
         answer["sort_result"].each_with_index do |input_id, sort_index|
           result.each_key do |k|
