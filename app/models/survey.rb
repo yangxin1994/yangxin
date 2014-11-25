@@ -913,7 +913,7 @@ class Survey
     if survey_obj["agent_promote_info"].present?
       survey_obj["agent_promotable"] = true
     end
-    survey_obj["agent_promote_info"]["agents"] = Agent.all
+    survey_obj["agent_promote_info"]["agents"] = Agent.normal
     survey_obj["agent_promote_info"]["agent_tasks"] = self.agent_tasks
     unless survey_obj["agent_promote_info"]["agent_tasks"].present?
       survey_obj["agent_promote_info"]["agent_tasks"] = [{}]
