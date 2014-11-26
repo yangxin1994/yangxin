@@ -76,12 +76,11 @@ class Filler::AnswersController < Filler::FillerController
     survey = @answer.survey
     agent_answers = survey.answers.select { |e| e.agent_task.present? }
     exist_answer = agent_answers.select{|e| e.mobile == params[:mobile]}
-
-    if exist_answer
-      if exist_answer.status != Answer::EDIT
+    if exist_answer.length > 0
+      if exist_answer.first.status != Answer::EDIT
         render_json_auto ErrorEnum::MOBILE_EXIST and return
       else
-        @answer = exist_answer
+        @answer = exist_answer.first
         render_json_auto @answer.id.to_s and return
       end
     else

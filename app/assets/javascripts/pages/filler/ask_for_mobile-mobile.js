@@ -6,6 +6,7 @@ $(function(){
 			{mobile: mob}, 
 			function(retval){
 				if(retval.success){
+          var aid = retval.value;
 					window.location.href = '/a/' + aid;
 				}else{
 					if('error__10' == retval.value.error_code){
