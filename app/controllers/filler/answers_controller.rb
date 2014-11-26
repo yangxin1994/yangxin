@@ -56,19 +56,44 @@ class Filler::AnswersController < Filler::FillerController
     render_json_auto answer.id.to_s
   end
 
+  # def submit_mobile
+  #   @answer = Answer.find_by_id(params[:id])
+  #   render_404 if @answer.nil?
+  #   survey = @answer.survey
+  #   agent_answers = survey.answers.select { |e| e.agent_task.present? }
+  #   existing_mobiles = agent_answers.map { |e| e.mobile }
+  #   if existing_mobiles.include?(params[:mobile])
+  #     render_json_auto ErrorEnum::MOBILE_EXIST and return
+  #   end
+  #   @answer.mobile = params[:mobile]
+  #   @answer.save
+  #   render_json_auto @answer.id.to_s and return
+  # end
+
   def submit_mobile
     @answer = Answer.find_by_id(params[:id])
     render_404 if @answer.nil?
     survey = @answer.survey
     agent_answers = survey.answers.select { |e| e.agent_task.present? }
-    existing_mobiles = agent_answers.map { |e| e.mobile }
-    if existing_mobiles.include?(params[:mobile])
-      render_json_auto ErrorEnum::MOBILE_EXIST and return
+    exist_answer = agent_answers.select{|e| e.mobile == params[:mobile]}
+
+    if exist_answer
+      if exist_answer.status != Answer::EDIT
+        render_json_auto ErrorEnum::MOBILE_EXIST and return
+      else
+        @answer = exist_answer
+        render_json_auto @answer.id.to_s and return
+      end
+    else
+      @answer.mobile = params[:mobile]
+      @answer.save
+      render_json_auto @answer.id.to_s and return      
     end
-    @answer.mobile = params[:mobile]
-    @answer.save
-    render_json_auto @answer.id.to_s and return
   end
+
+
+
+
 
   def ask_for_mobile
     @answer = Answer.find_by_id(params[:id])
