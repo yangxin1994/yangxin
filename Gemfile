@@ -8,7 +8,7 @@ gem 'rails', '~> 3.2.6'
 gem "binding_of_caller", "~> 0.7.2", :group => :development
 gem 'tilt','~> 1.3.2'
 gem 'httparty', '~> 0.10.2'
-gem 'sidekiq', '~> 2.17.8'
+gem 'sidekiq', '~> 2.8.0'
 gem "kiqstand", '~> 1.0.0'
 gem 'whenever', '~> 0.8.2', :require => false
 gem 'sinatra', require: false
