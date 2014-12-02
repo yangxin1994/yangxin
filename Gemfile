@@ -51,7 +51,7 @@ gem 'carrierwave-mongoid', :require => 'carrierwave/mongoid'
 # about mail
 
 gem 'roadie', '~> 2.3.4'# html email
-gem 'premailer-rails', '~> 1.8.0' #, '~> 1.4.0'
+gem 'premailer-rails', '~> 1.4.0'
 gem 'nokogiri', '~> 1.5.6'
 
 
