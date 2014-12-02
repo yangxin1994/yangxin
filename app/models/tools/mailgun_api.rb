@@ -340,8 +340,12 @@ class MailgunApi
 
     html_template_file_name = "#{Rails.root}/app/views/user_mailer/find_password_email.html.erb"
     text_template_file_name = "#{Rails.root}/app/views/user_mailer/find_password_email.text.erb"
+    puts "=============================?????"
+    puts html_template_file_name
     html_template = ERB.new(File.new(html_template_file_name).read, nil, "%")
+    puts "=============================?????"
     text_template = ERB.new(File.new(text_template_file_name).read, nil, "%")
+    puts "=============================?????"
     premailer = Premailer.new(html_template.result(binding), :warn_level => Premailer::Warnings::SAFE)
     data[:html] = premailer.to_inline_css
     data[:text] = text_template.result(binding)
