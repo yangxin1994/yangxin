@@ -67,6 +67,8 @@ $ ->
             alert_msg.show('error', "操作失败 (╯‵□′)╯︵┻━┻")      
            
   $("#btn_pass").click ->
-    alert_msg.show('info', "处理中, 请稍后...")
-    $('html,body').animate({scrollTop: $('body').offset().top}, 300)
-    review(true, "", this)
+    unless $(this).hasClass('disabled')
+      $(this).addClass('disabled')
+      alert_msg.show('info', "处理中, 请稍后...")
+      $('html,body').animate({scrollTop: $('body').offset().top}, 300)
+      review(true, "", this)
