@@ -261,7 +261,7 @@ $(function() {
                         return a != null;
                     }) != null);
 
-                    if (!has_not_empty_answer) {
+                    if (!this.model.get('style_setting').cancel_time_limit && !has_not_empty_answer) {
                         $.util.disable(next_btn);
                         var old_text = next_btn.text();
 

@@ -237,7 +237,7 @@ $(function() {
                     var has_not_empty_answer = (_.find(answers || [], function(a) {
                         return a != null;
                     }) != null);
-                    if (!this.options.is_preview && (prev_btn.length == 0 || !has_not_empty_answer)) {
+                    if (!this.options.is_preview && !this.model.get('style_setting').cancel_time_limit && (prev_btn.length == 0 || !has_not_empty_answer)) {
                         $.util.disable(next_btn);
                         var old_text = next_btn.text();
 

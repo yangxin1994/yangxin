@@ -40,6 +40,10 @@
           <label><input type='checkbox' class="choice" <%=@style_setting['allow_multianswer'] ? "checked" : "" %> id='more9'/>
           <p>允许游客多次答题</p></label>
         </li>
+        <li>
+          <label><input type='checkbox' class="choice" <%=@style_setting['cancel_time_limit'] ? "checked" : "" %> id='more10'/>
+          <p>取消答题时间限制</p></label>
+        </li>
 				<li>
 					<label><input type='checkbox' class="choice" <%=@style_setting['has_advertisement'] ? "checked=checked" : "" %> id='more5'/>
 					<p>带广告（友好提示：广告不会影响答题结果，支持我们请不要取消）</p></label>

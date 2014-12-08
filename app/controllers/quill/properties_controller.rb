@@ -28,6 +28,7 @@ class Quill::PropertiesController < Quill::QuillController
     style_setting['allow_pageup'] = !!params[:allow_pageup] if params.has_key?(:allow_pageup)
     style_setting['allow_replay'] = !!params[:allow_replay] if params.has_key?(:allow_replay)
     style_setting['allow_multianswer'] = !!params[:allow_multianswer] if params.has_key?(:allow_multianswer)
+    style_setting['cancel_time_limit'] = !!params[:cancel_time_limit] if params.has_key?(:cancel_time_limit)
     style_setting['show_estimated_time'] = !!params[:show_estimated_time] if params.has_key?(:show_estimated_time)
     retval = @survey.update_attributes(style_setting: style_setting)
     render_json_auto retval and return
