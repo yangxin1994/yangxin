@@ -6,6 +6,7 @@
 //=require ui/plugins/od_button_text
 //=require ui/plugins/od_enter
 //=require jquery.scrollTo
+//=require jquery.cookie.js
 //=require ../templates/survey_filler_qs
 //=require ../templates/survey_filler_submit
 //=require ../templates/survey_filler_redo
@@ -92,15 +93,37 @@ $(function() {
         },
 
         _render: function() {
-            // restart preview button
-            $('#pv_bar button').show().click($.proxy(function() {
-                $.deleteJSON(this._uri(this.options.is_preview ? '/destroy_preview' : '/replay'), $.proxy(function(retval) {
-                    if (retval.success)
-                        location.href = (this.options.is_preview ? '/p/' : '/s/') + this.options.reward.id
-                    else
+            if(this.options.is_preview) {
+              // restart preview button
+              $('#pv_bar button.replay-btn').show().click($.proxy(function() {
+                  $.deleteJSON(this._uri('/destroy_preview'), $.proxy(function(retval) {
+                      if (retval.success)
+                        location.href = '/p/' + this.options.reward.id;
+                      else
                         this._error(this.options.lang == 'en' ? 'Error. Please refresh page' : '操作失败，请刷新页面重试。');
-                }, this));
-            }, this));
+                  }, this));
+              }, this));
+            } else {
+              // reanswer or start new answer
+              var restart_ref = '/s/' + this.options.reward.id;
+              if(this.options.is_agent)
+                restart_ref += ('?ati=' + this.options.agent_task_id);
+              $('#pv_bar button.replay-btn').show().click($.proxy(function() {
+                  $.deleteJSON(this._uri('/replay'), $.proxy(function(retval) {
+                      if (retval.success)
+                        location.href = restart_ref;
+                      else
+                        this._error(this.options.lang == 'en' ? 'Error. Please refresh page' : '操作失败，请刷新页面重试。');
+                  }, this));
+              }, this));
+              $('#pv_bar a.signout-btn').show().attr('href', '/account/sign_out?ref=' + restart_ref);
+              $('#pv_bar button.newanswer-btn').show().click($.proxy(function() {
+                // console.log(this.model.get('_id') + '_0');
+                $.cookie(this.model.get('_id') + '_0', null, { path: '/' });
+                // console.log($.cookie(this.model.get('_id') + '_0'));
+                location.href = restart_ref;
+              }, this));
+            }
 
             // Setup page
             this._setup(this.options.data);

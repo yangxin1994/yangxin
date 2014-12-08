@@ -340,22 +340,22 @@ class MailgunApi
 
     html_template_file_name = "#{Rails.root}/app/views/user_mailer/find_password_email.html.erb"
     text_template_file_name = "#{Rails.root}/app/views/user_mailer/find_password_email.text.erb"
-    puts "=============================?????"
-    puts html_template_file_name
+    # puts "=============================?????"
+    # puts html_template_file_name
     html_template = ERB.new(File.new(html_template_file_name).read, nil, "%")
-    puts html_template
-    puts "=============================?????"
+    # puts html_template
+    # puts "=============================?????"
     text_template = ERB.new(File.new(text_template_file_name).read, nil, "%")
-    puts text_template
-    puts "=============================?????"
+    # puts text_template
+    # puts "=============================?????"
     premailer = Premailer.new(html_template.result(binding), :warn_level => Premailer::Warnings::SAFE)
-    puts "=============================?????1"
+    # puts "=============================?????1"
     data[:html] = premailer.to_inline_css
-    puts data[:html]
-    puts "=============================?????2"
+    # puts data[:html]
+    # puts "=============================?????2"
     data[:text] = text_template.result(binding)
-    puts data[:text]
-    puts "=============================?????3"
+    # puts data[:text]
+    # puts "=============================?????3"
 
     data[:subject] = "找回密码"
     data[:subject] += " --- to #{user.email}" if Rails.env != "production" 

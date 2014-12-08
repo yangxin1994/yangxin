@@ -150,6 +150,10 @@ $blue-color: #5691f0;
 			&:hover { background: #89909B; }
 			&:active { background: #555c66; }
 		}
+    >a {
+      display: none;
+      color: #eee;
+    }
 	}
 
 	.sf_banner_top {

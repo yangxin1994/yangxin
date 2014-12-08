@@ -39,14 +39,39 @@
 <div id='sf_banner'>
 	<% if @is_preview %>
 	<div id='pv_bar'>
-		<img src="/assets/filler/preview.png"><span>您正在模拟答题，答案不会被记录。</span><button>重新开始</button>
+		<img src="/assets/filler/preview.png"><span>您正在模拟答题，答案不会被记录。</span>
+    <button class='replay-btn'>重新开始</button>
 	</div>
-	<% elsif @survey['style_setting']['allow_replay'] %>
+	<% elsif (@survey['style_setting']['allow_replay'] or @survey['style_setting']['allow_multianswer'])%>
 	<div id='pv_bar'>
     <% if @survey[:lang] == 'en' %>
-    <span>Please answer seriously. </span><button>Re-answer</button>
+
+    <span>Please answer seriously. </span>
+    <% if @survey['style_setting']['allow_replay'] %>
+    <button class='replay-btn'>Re-answer</button>
+    <% end %>
+    <% if @survey['style_setting']['allow_multianswer'] %>
+    <% if user_signed_in %>
+    <a class='signout-btn' href='javascript:void(0);'>Sign-out</a> to answer again
     <% else %>
-		<span>请认真答题</span><button>重新开始</button>
+    <button class='newanswer-btn'>Answer again</button>
+    <% end %>
+    <% end %>
+
+    <% else %>
+
+		<span>请认真答题</span>
+    <% if @survey['style_setting']['allow_replay'] %>
+    <button class='replay-btn'>重新开始</button>
+    <% end %>
+    <% if @survey['style_setting']['allow_multianswer'] %>
+    <% if user_signed_in %>
+    <a class='signout-btn' href='javascript:void(0);'>退出当前账户进行多次答题</a>
+    <% else %>
+    <button class='newanswer-btn'>再答一份</button>
+    <% end %>
+    <% end %>
+
     <% end %>
 	</div>
 	<% end %>
