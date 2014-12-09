@@ -119,7 +119,10 @@ $(function() {
               $('#pv_bar a.signout-btn').show().attr('href', '/account/sign_out?ref=' + restart_ref);
               $('#pv_bar button.newanswer-btn').show().click($.proxy(function() {
                 // console.log(this.model.get('_id') + '_0');
-                $.cookie(this.model.get('_id') + '_0', null, { path: '/' });
+                // var hn = location.hostname;
+                // console.log($('<a />').attr('href', 'http://www.wenjuanba.com').get(0).host);
+                // console.log('.' + location.hostname);
+                $.cookie(this.model.get('_id') + '_0', null, { domain: '.wenjuanba.com' });
                 // console.log($.cookie(this.model.get('_id') + '_0'));
                 location.href = restart_ref;
               }, this));
