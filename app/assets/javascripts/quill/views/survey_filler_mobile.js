@@ -29,7 +29,6 @@ $(function() {
     quill.quillClass('quill.views.SurveyFiller', quill.views.Base, {
 
         _initialize: function() {
-
             if (this.options.spread_point == undefined) {
                 this.options.spread_point = 0;
             }
@@ -162,6 +161,9 @@ $(function() {
         /* Setup page dom using this.options.data
          * =========================== */
         _setup: function(data) {
+            var restart_ref = '/s/' + this.options.reward.id;
+            if(this.options.is_agent)
+              restart_ref += ('?ati=' + this.options.agent_task_id);
             // If not success
             if (data == null || !data.success) {
                 $.od.odPopup({
@@ -193,6 +195,8 @@ $(function() {
                         remind: redo_count > 0,
                         allow_pageup: this.model.get('style_setting').allow_pageup,
                         show_restart: this.options.is_preview,
+                        signin:this.options.signin,
+                        allow_multianswer:this.model.get('style_setting').allow_multianswer,
                         allow_replay: this.model.get('style_setting').allow_replay
                     }, 'survey_filler_submit_mobile').appendTo($('#f_body'));
 
@@ -227,6 +231,8 @@ $(function() {
                         remind: redo_count > 0,
                         allow_pageup: this.model.get('style_setting').allow_pageup,
                         show_restart: this.options.is_preview,
+                        signin:this.options.signin,
+                        allow_multianswer:this.model.get('style_setting').allow_multianswer,
                         allow_replay: this.model.get('style_setting').allow_replay,
                         welcome: this.model.get('welcome')
                     }, 'survey_filler_qs_mobile').appendTo($('#f_body'));
@@ -353,6 +359,8 @@ $(function() {
                         spreadable: this.options.spread_point > 0,
                         agent: this.options.is_agent,
                         spread_point: this.options.spread_point,
+                        signin:this.options.signin,
+                        allow_multianswer:this.model.get('style_setting').allow_multianswer,
                         show_restart: this.options.is_preview
                     }, 'survey_filler_end_free_mobile').appendTo('#f_body');
 
@@ -479,6 +487,7 @@ $(function() {
                             failed: value.order_status == 8,
                             order_code: value.order_code,
                             signin: this.options.signin,
+                            allow_multianswer:this.model.get('style_setting').allow_multianswer,
                             survey_id: this.model.get('_id'),
                             publish_result: this.model.get('publish_result'),
                             spreadable: this.options.spread_point > 0,
@@ -507,6 +516,8 @@ $(function() {
                         reward_point: this.options.reward.reward_point,
                         signin: this.options.signin,
                         spreadable: this.options.spread_point > 0,
+                        signin:this.options.signin,
+                        allow_multianswer:this.model.get('style_setting').allow_multianswer,
                         spread_point: this.options.spread_point
                     }, 'survey_filler_end_point_finish_mobile').appendTo('#f_body');
 
@@ -525,9 +536,10 @@ $(function() {
                         }
                     }, this))
                 } else if (this.options.reward.reward_scheme_type == 3) {
-
                     this.hbs({
                         spreadable: this.options.spread_point > 0,
+                        signin:this.options.signin,
+                        allow_multianswer:this.model.get('style_setting').allow_multianswer,
                         spread_point: this.options.spread_point
                     }, 'survey_filler_end_lottery_mobile').appendTo('#f_body');
                     $('#rew_next').click($.proxy(function() {
@@ -556,6 +568,8 @@ $(function() {
                     timeout: (value.answer_reject_type == 16),
                     review_failed: (value.answer_reject_type == 4),
                     reject_reason: value.answer_audit_message,
+                    signin:this.options.signin,
+                    allow_multianswer:this.model.get('style_setting').allow_multianswer,
                     agent: this.options.is_agent,
                     show_restart: this.options.is_preview,
                     spreadable: this.options.spread_point > 0,
@@ -587,6 +601,13 @@ $(function() {
                     $.deleteJSON(this._uri('/destroy_preview'), callback);
                 }
             }, this));
+
+            $('.footer a.signout-btn').show().attr('href', '/account/sign_out?ref=' + restart_ref);
+
+            $('.footer button.newanswer-btn').show().click($.proxy(function() {
+              $.cookie(this.model.get('_id') + '_0', null, { path: '/' });
+              location.href = restart_ref;
+            }, this));            
 
             var minHeight = $(window).height() - 114;
             $('.page').css('minHeight', minHeight);

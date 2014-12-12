@@ -25,5 +25,12 @@
 		{{#if allow_replay}}
 			<a href="javascript:void(0)" class="resume" id="replay">重新答题</a>
 		{{/if}}
+		{{#if allow_multianswer}}
+			{{#if signin}}
+				<a class='signout-btn' href='javascript:void(0);'>再答一份</a>
+			{{else}}
+				<button class='newanswer-btn'>再答一份</button>
+			{{/if}}
+		{{/if}}			
 	{{/if}}
 </div>
