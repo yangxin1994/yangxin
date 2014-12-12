@@ -118,9 +118,9 @@ $(function() {
               }, this));
               $('#pv_bar a.signout-btn').show().attr('href', '/account/sign_out?ref=' + restart_ref);
               $('#pv_bar button.newanswer-btn').show().click($.proxy(function() {
-                // console.log(this.model.get('_id') + '_0');
-                $.cookie(this.model.get('_id') + '_0', null, { path: '/' });
-                // console.log($.cookie(this.model.get('_id') + '_0'));
+                // hack to get domain root
+                var hn = location.hostname.split('.');
+                $.cookie(this.model.get('_id') + '_0', null, { domain: '.' + hn[hn.length - 2] + '.' + hn[hn.length - 1], path: '/' });
                 location.href = restart_ref;
               }, this));
             }

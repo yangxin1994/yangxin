@@ -1270,14 +1270,16 @@ class Answer
         answer["question_content"] << show_answer and next if val.blank?
 
         show_answer['items'] = []
-        val['sort_result'].each do |id_s|
-          item = question.issue['items'].select{|elem| elem['id'].to_s == id_s}[0]
-          if item
-            show_answer['items'] << {'title'=>item['content']['text']}
-            next
-          end
-          if question.issue['other_item'] && question.issue['other_item']['has_other_item'].to_s=='true'
-            show_answer['items'] << {'title'=>val["text_input"]} if question.issue["other_item"]["id"].to_s == id_s
+        if !val['sort_result'].blank?
+          val['sort_result'].each do |id_s|
+            item = question.issue['items'].select{|elem| elem['id'].to_s == id_s}[0]
+            if item
+              show_answer['items'] << {'title'=>item['content']['text']}
+              next
+            end
+            if question.issue['other_item'] && question.issue['other_item']['has_other_item'].to_s=='true'
+              show_answer['items'] << {'title'=>val["text_input"]} if question.issue["other_item"]["id"].to_s == id_s
+            end
           end
         end
 
