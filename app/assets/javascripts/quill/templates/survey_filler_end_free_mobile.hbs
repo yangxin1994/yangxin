@@ -6,11 +6,16 @@
 	</div>
 	<div class='free_form'>
 		{{#unless agent}}
-		{{#if spreadable}}
-			<button id="socal_share" class="single">分享问卷得{{spread_point}}积分</button>
-		{{else}}
-		  <button id="socal_share" class="single">分享问卷</button>
-		{{/if}}
+			{{#if link}}
+				<button id='close_btn'>关闭窗口</button>
+			{{else}}
+				{{#if spreadable}}
+					<button id="socal_share" class="single">分享问卷得{{spread_point}}积分</button>
+				{{else}}
+		  			<button id="socal_share" class="single">分享问卷</button>
+				{{/if}}
+			{{/if}}
+
 		{{/unless}}
 	</div>	
 </div>

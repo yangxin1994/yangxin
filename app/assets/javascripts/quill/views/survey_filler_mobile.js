@@ -33,7 +33,6 @@ $(function() {
                 this.options.spread_point = 0;
             }
 
-
             if (this.options.reward == null)
                 this.options.reward = {
                     reward_type: 0
@@ -360,6 +359,7 @@ $(function() {
                         agent: this.options.is_agent,
                         spread_point: this.options.spread_point,
                         signin:this.options.signin,
+                        link:this.model.get('style_setting').redirect_link,
                         allow_multianswer:this.model.get('style_setting').allow_multianswer,
                         show_restart: this.options.is_preview
                     }, 'survey_filler_end_free_mobile').appendTo('#f_body');
