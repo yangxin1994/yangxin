@@ -11,7 +11,7 @@ jQuery(function($) {
 
 	var checkTitle = ['has_progress_bar','is_one_question_per_page',
 		'has_question_number','allow_pageup', 'allow_replay', 'allow_multianswer',
-    'cancel_time_limit', 'has_advertisement','has_oopsdata_link','redirect_link'];
+    'cancel_time_limit', 'cancel_time_shown', 'has_advertisement','has_oopsdata_link','redirect_link'];
 
 	$('.moreSelector .choice').change(function(){
 		var id = $(this).parentsUntil('li').parent().index();
