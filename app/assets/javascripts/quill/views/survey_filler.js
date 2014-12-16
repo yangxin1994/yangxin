@@ -186,7 +186,7 @@ $(function() {
                     check_btn.click($.proxy(function() {
                         $.util.disable(check_btn, submit_btn);
                         check_btn.text(this.options.lang == 'en' ? 'Loading...' : '正在加载问题...');
-                        this.load_questions(-1, true);
+                        this.load_questions(-1, false);
                     }, this));
 
                     // submit answer when click on submit button
