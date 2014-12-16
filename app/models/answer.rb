@@ -450,8 +450,6 @@ class Answer
     end
 
     # if loading pre page, destroy the answers of pre page
-    # NOTE!!! 
-    # 1. TODO: Handling question-item related logic controls
     if self.survey.is_pageup_allowed && !next_page
       # find questions ids until question_id
       page_qids = []
@@ -499,11 +497,10 @@ class Answer
             # 2. if q_id is not in condition or real_remove is false
             self.answer_content[q_id] = nil
             real_remove = true
-            # if q_id is in logic conditions, update logic results
-            _update_logic_control_result()
           end
         end
       end
+      _update_logic_control_result()
       self.save
     end
 
@@ -528,8 +525,6 @@ class Answer
     end
     return load_question_by_ids([])
   end
-  # NOTE:
-  # 1. TODO: Handling question-item related logic controls
   def _update_logic_control_result()
     #init logics
     survey.show_logic_control.each do |rule|
@@ -543,16 +538,17 @@ class Answer
         end
       end
     end
-    # survey.show_logic_control.each do |rule|
-    #   if rule["rule_type"] == Survey::SHOW_ITEM
-    #     rule["result"].each do |ele|
-    #       add_logic_control_result(ele["question_id"], ele["items"], ele["sub_questions"])
-    #     end
-    #   elsif rule["rule_type"] == Survey::SHOW_CORRESPONDING_ITEM
-    #     items_to_be_added = rule["result"]["items"].map { |input_ids| input_ids[1] }
-    #     add_logic_control_result(rule["result"]["question_id_2"], items_to_be_added, [])
-    #   end
-    # end
+    self.logic_control_result = {}
+    survey.show_logic_control.each do |rule|
+      if rule["rule_type"] == Survey::SHOW_ITEM
+        rule["result"].each do |ele|
+          add_logic_control_result(ele["question_id"], ele["items"], ele["sub_questions"])
+        end
+      elsif rule["rule_type"] == Survey::SHOW_CORRESPONDING_ITEM
+        items_to_be_added = rule["result"]["items"].map { |input_ids| input_ids[1] }
+        add_logic_control_result(rule["result"]["question_id_2"], items_to_be_added, [])
+      end
+    end
 
     survey.show_logic_control.each do |logic_control_rule|
       # if the answers submitted have nothing to do with the conditions of this rule, move to the next rule
@@ -576,20 +572,20 @@ class Answer
         # if the rule is satisfied, hide the question (set the answer of the question as {})
         logic_control_rule["result"].each { |q_id| self.answer_content[q_id] ||= {} }
         self.save
-      # when Survey::SHOW_ITEM
-      #   # if the rule is satisfied, show the items (remove from the logic_control_result)
-      #   logic_control_rule["result"].each { |ele| remove_logic_control_result(ele["question_id"], ele["items"], ele["sub_questions"]) }
-      # when Survey::HIDE_ITEM
-      #   # if the rule is satisfied, hide the items (add to the logic_control_result)
-      #   logic_control_rule["result"].each { |ele| add_logic_control_result(ele["question_id"], ele["items"], ele["sub_questions"]) }
-      # when Survey::SHOW_CORRESPONDING_ITEM
-      #   # if the rule is satisfied, show the items (remove from the logic_control_result)
-      #   items_to_be_removed = log_control_rule["result"]["items"].map { |input_ids| input_ids[1] } || []
-      #   remove_logic_control_result(logic_control_rule["result"]["question_id_2"], items_to_be_removed, [])
-      # when Survey::HIDE_CORRESPONDING_ITEM
-      #   # if the rule is satisfied, hide the items (add to the logic_control_result)
-      #   items_to_be_added = log_control_rule["result"]["items"].map { |input_ids| input_ids[1] } || []
-      #   add_logic_control_result(logic_control_rule["result"]["question_id_2"], items_to_be_added, [])
+      when Survey::SHOW_ITEM
+        # if the rule is satisfied, show the items (remove from the logic_control_result)
+        logic_control_rule["result"].each { |ele| remove_logic_control_result(ele["question_id"], ele["items"], ele["sub_questions"]) }
+      when Survey::HIDE_ITEM
+        # if the rule is satisfied, hide the items (add to the logic_control_result)
+        logic_control_rule["result"].each { |ele| add_logic_control_result(ele["question_id"], ele["items"], ele["sub_questions"]) }
+      when Survey::SHOW_CORRESPONDING_ITEM
+        # if the rule is satisfied, show the items (remove from the logic_control_result)
+        items_to_be_removed = log_control_rule["result"]["items"].map { |input_ids| input_ids[1] } || []
+        remove_logic_control_result(logic_control_rule["result"]["question_id_2"], items_to_be_removed, [])
+      when Survey::HIDE_CORRESPONDING_ITEM
+        # if the rule is satisfied, hide the items (add to the logic_control_result)
+        items_to_be_added = log_control_rule["result"]["items"].map { |input_ids| input_ids[1] } || []
+        add_logic_control_result(logic_control_rule["result"]["question_id_2"], items_to_be_added, [])
       end
     end
   end
@@ -796,12 +792,13 @@ class Answer
       next if (new_answer.keys & condition_qid_ary).empty?
       satisfy_rule = true
       logic_control_rule["conditions"].each do |condition|
-        satisfy_rule = false if answer_content[condition["question_id"]].nil?
-        pass_condition = Tool.check_choice_question_answer(condition["question_id"],
-                                answer_content[condition["question_id"]]["selection"],
-                                condition["answer"],
-                                condition["fuzzy"])
-        satisfy_rule = false if !pass_condition
+        if answer_content[condition["question_id"]].nil? or !Tool.check_choice_question_answer(condition["question_id"],
+          answer_content[condition["question_id"]]["selection"],
+          condition["answer"],
+          condition["fuzzy"])
+          satisfy_rule = false
+          break
+        end
       end
       next if !satisfy_rule
       # the conditions of this logic control rule is satisfied
