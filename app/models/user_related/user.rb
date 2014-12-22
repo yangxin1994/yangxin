@@ -762,6 +762,7 @@ class User
 
   def need_update_attribute(attr_name, updated_value)
     sa = SampleAttribute.normal.find_by_name(attr_name)
+    # binding.pry
     return false if sa.nil?
     return true if ![DataType::NUMBER_RANGE, DataType::DATE_RANGE].include?(sa.type)
     sa_value = self.read_sample_attribute(attr_name)
