@@ -207,7 +207,7 @@ $(function() {
                     // check answer from page one when click on check button
                     check_btn.click($.proxy(function() {
                         $.util.disable(check_btn, submit_btn);
-                        this.load_questions(-1, true);
+                        this.load_questions(-1, false);
                     }, this));
 
                     // submit answer when click on submit button

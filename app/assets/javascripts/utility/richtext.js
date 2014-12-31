@@ -41,7 +41,7 @@
 		textToHtml: function(rt) {
 			if(rt == null || rt.text == null) return null;
 			// 1. replace \r and \n
-			var html = rt.text.replace(/\r\n|\r|\n/igm, '<br />');
+			var html = $.trim(rt.text).replace(/\r\n|\r|\n/igm, '<br />');
 			// 2. test whether text align center or not
 			var center = /^<c>.*<\/c>$/igm.test(html);
 			// 3. get real html

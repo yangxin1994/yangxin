@@ -30,7 +30,7 @@
 				</li>
 				<li>
 					<label><input type='checkbox' class="choice" <%=@style_setting['allow_pageup'] ? "checked" : "" %> id='more4'/>
-					<p>允许向前翻页（逻辑控制将失效）</p></label>
+					<p>允许向前翻页</p></label>
 				</li>
 				<li>
 					<label><input type='checkbox' class="choice" <%=@style_setting['allow_replay'] ? "checked" : "" %> id='more8'/>
@@ -43,6 +43,10 @@
         <li>
           <label><input type='checkbox' class="choice" <%=@style_setting['cancel_time_limit'] ? "checked" : "" %> id='more10'/>
           <p>取消答题时间限制</p></label>
+        </li>
+        <li>
+          <label><input type='checkbox' class="choice" <%=@style_setting['cancel_time_shown'] ? "checked" : "" %> id='more11'/>
+          <p>开始按钮不显示答题时间</p></label>
         </li>
 				<li>
 					<label><input type='checkbox' class="choice" <%=@style_setting['has_advertisement'] ? "checked=checked" : "" %> id='more5'/>
