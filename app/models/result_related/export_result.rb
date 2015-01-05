@@ -22,9 +22,6 @@ class ExportResult < Result
   end
 
   def generate_excel(survey, answers, result_key)
-    puts '-------------------------------'
-    puts 'ok'
-    puts '-------------------------------'
 #    if answers.count > 1500
 #      uris = []
 #			page_count = answers.count / 500

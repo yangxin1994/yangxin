@@ -122,7 +122,8 @@ class AnalysisResult < Result
       # re-organize answers
       answer.answer_content.each do |q_id, question_answer|
         answers_transform[q_id] ||= []
-        answers_transform[q_id] << question_answer if !question_answer.blank?
+        # answers_transform[q_id] << question_answer if !question_answer.blank?
+        answers_transform[q_id] << question_answer if question_answer.present?
       end
       if Time.now.to_i != last_time
         Task.set_progress(task_id, "analyze_answer_progress", 0.5 * (index + 1) / answers.length) if !task_id.nil?
