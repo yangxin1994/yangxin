@@ -63,6 +63,7 @@ class AnalysisResult < Result
   end    
 
   def analysis(answers, task_id = nil)
+
     region_result = QuillCommon::AddressUtility.province_hash.merge(QuillCommon::AddressUtility.city_hash).merge(QuillCommon::AddressUtility.county_hash)
     referrer_result = {}
     channel_result = {}
@@ -198,6 +199,7 @@ class AnalysisResult < Result
     self.answers_result = aanswers_result
     self.status = 1
     self.save
+    puts '---------in analysis_result   analysis  methods-----------'
   end
 
   def analyze_one_question_answers(question, answer_ary)
