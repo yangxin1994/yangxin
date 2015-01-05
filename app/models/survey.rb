@@ -601,8 +601,12 @@ class Survey
        "spss_label" => "地点"},
       {"spss_name" => "time",
        "spss_type" => "String",
-       "spss_label" => "答题时长"}
+       "spss_label" => "答题时长"},
+      {"spss_name" => "device",
+       "spss_type" => "String",
+       "spss_label" => "来源"} 
     ]
+
     self.all_questions(false).each_with_index do |e, i|
       headers += e.spss_header("q#{i+1}")
     end
@@ -618,7 +622,7 @@ class Survey
   end
 
   def excel_header
-    headers =["user_id", "answer_id", "is_agent", "email", "mobile", "IP", "地点", "答题时长"]
+    headers =["user_id", "answer_id", "is_agent", "email", "mobile", "IP", "地点", "答题时长","来源"]
     self.all_questions(false).each_with_index do |e, i|
       headers += e.excel_header("q#{i+1}")
     end
@@ -680,7 +684,7 @@ class Survey
       else
         user_id = ""
       end
-      line_answer = [user_id, answer._id, answer.agent_task.present?.to_s, answer.user.try(:email), answer.user.try(:mobile), answer.ip_address, QuillCommon::AddressUtility.find_province_city_town_by_code(answer.region), "#{answer_time} 分"]
+      line_answer = [user_id, answer._id, answer.agent_task.present?.to_s, answer.user.try(:email), answer.user.try(:mobile), answer.ip_address, QuillCommon::AddressUtility.find_province_city_town_by_code(answer.region), "#{answer_time} 分","#{answer.is_mobile_answer}"]
       begin
         all_questions_id(false).each_with_index do |question, index|
           qindex = index

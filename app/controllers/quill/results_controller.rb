@@ -15,6 +15,7 @@ class Quill::ResultsController < Quill::QuillController
     @hide_left_sidebar = true
 
     @survey_questions = get_survey_questions
+
     @filters = @survey.filters || []
 
     @filter_index = params[:fi].to_i
@@ -24,7 +25,9 @@ class Quill::ResultsController < Quill::QuillController
     @include = params[:i].to_b
 
     @job_id = @survey.analysis(@filter_index-1, @include)
+
     @reports = @survey.list_report_mockups
+
   end
 
   # AJAX
