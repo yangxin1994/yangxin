@@ -1,3 +1,4 @@
+# encoding: utf-8
 require 'error_enum'
 require 'array'
 require 'tool'
