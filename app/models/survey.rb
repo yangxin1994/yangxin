@@ -614,7 +614,7 @@ class Survey
   end
 
   def agent_excel_header
-    headers =["agent_user_id", "状态", "IP", "地点", "答题时长"]
+    headers =["agent_user_id", "状态", "IP", "地点", "答题时长","来源"]
     self.all_questions(false).each_with_index do |e, i|
       headers += e.excel_header("q#{i+1}")
     end

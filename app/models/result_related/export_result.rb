@@ -22,6 +22,9 @@ class ExportResult < Result
   end
 
   def generate_excel(survey, answers, result_key)
+    puts '-------------------------------'
+    puts 'ok'
+    puts '-------------------------------'
 #    if answers.count > 1500
 #      uris = []
 #			page_count = answers.count / 500
@@ -53,7 +56,7 @@ class ExportResult < Result
       "header_name" => survey.csv_header,
       "result_key" => result_key
       }.to_json
-    
+      
     
       retval = ConnectDotNet.send_data('/ToExcel.aspx') do
         {'excel_data' => excel_data_json.gsub(/<[^>]*>/, ''), 'job_id' => task_id.to_s}
