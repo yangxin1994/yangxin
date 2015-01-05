@@ -1073,6 +1073,8 @@ jQuery(function($) {
 			return;
 		};
 		$.getJSON('/jobs/' + job_id + '.json', function(retval) {
+			console.log(retval)
+			console.log('---------------------------')
 			if(retval.success && retval.value >= 0) {
 				pb.odProgressbar('option', 'value', retval.value);
 				if(retval.value >= 1) {

@@ -853,6 +853,55 @@ class Survey
     return task_id
   end
 
+
+  def special_analysis(filter_index, include_screened_answer)
+    return ErrorEnum::FILTER_NOT_EXIST if filter_index >= self.filters.length
+    task_id = Task.create(:task_type => "analysis")._id.to_s
+    #---------------
+    #(survey_id, filter_index, include_screened_answer, task_id)
+    survey = Survey.find_by_id(self._id.to_s)
+    return false if survey.nil?
+    # find answers set
+    answers, tot_answer_number, screened_answer_number, ongoing_answer_number, wait_for_review_answer_number = *survey.get_answers(
+      filter_index.to_i,
+      include_screened_answer.to_s == "true",
+      task_id)
+    # generate the result_key
+    result_key = AnalysisResult.generate_result_key(
+      survey.last_update_time,
+      answers,
+      tot_answer_number,
+      screened_answer_number,
+      ongoing_answer_number,
+      wait_for_review_answer_number)
+    existing_analysis_result = AnalysisResult.find_by_result_key(result_key)
+    if existing_analysis_result.nil?
+        # create analysis result
+        analysis_result = AnalysisResult.create(
+          :result_key => result_key,
+          :task_id => task_id,
+          :tot_answer_number => tot_answer_number,
+          :screened_answer_number => screened_answer_number,
+          :ongoing_answer_number => ongoing_answer_number,
+          :wait_for_review_answer_number => wait_for_review_answer_number)
+    else
+        # create analysis result
+        analysis_result = AnalysisResult.create(
+          :result_key => result_key,
+          :task_id => task_id,
+          :tot_answer_number => tot_answer_number,
+          :screened_answer_number => screened_answer_number,
+          :ref_result_id => existing_analysis_result._id,
+          :ongoing_answer_number => ongoing_answer_number,
+          :wait_for_review_answer_number => wait_for_review_answer_number)
+    end
+    survey.analysis_results << analysis_result
+    # analyze and save the analysis result
+    analysis_result.analysis(answers, task_id)
+    #---------------
+    return task_id
+  end
+
   def report(analysis_task_id, report_mockup_id, report_style, report_type)
     if !report_mockup_id.blank?
       report_mockup = self.report_mockups.find_by_id(report_mockup_id)

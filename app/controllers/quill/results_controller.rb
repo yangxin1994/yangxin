@@ -11,6 +11,8 @@ class Quill::ResultsController < Quill::QuillController
   end
 
   # PAGE: show result
+
+  
   def show
     @hide_left_sidebar = true
 
@@ -29,6 +31,25 @@ class Quill::ResultsController < Quill::QuillController
     @reports = @survey.list_report_mockups
 
   end
+
+
+  # def show
+  #   @hide_left_sidebar = true
+
+  #   @survey_questions = get_survey_questions
+
+  #   @filters = @survey.filters || []
+
+  #   @filter_index = params[:fi].to_i
+  #   @filter_index = (@filters.length - 1) if @filter_index > @filters.length
+  #   @filter_index = 0 if @filter_index < 0
+
+  #   @include = params[:i].to_b
+
+  #   @job_id = @survey.special_analysis(@filter_index-1, @include)
+  #   binding.pry
+  #   @reports = @survey.list_report_mockups
+  # end
 
   # AJAX
   def excel

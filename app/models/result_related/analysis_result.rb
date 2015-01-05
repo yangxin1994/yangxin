@@ -63,7 +63,6 @@ class AnalysisResult < Result
   end    
 
   def analysis(answers, task_id = nil)
-
     region_result = QuillCommon::AddressUtility.province_hash.merge(QuillCommon::AddressUtility.city_hash).merge(QuillCommon::AddressUtility.county_hash)
     referrer_result = {}
     channel_result = {}
@@ -123,9 +122,15 @@ class AnalysisResult < Result
       finish_time << answer.finished_at if answer.finished_at
       # re-organize answers
       answer.answer_content.each do |q_id, question_answer|
-        answers_transform[q_id] ||= []
-        # answers_transform[q_id] << question_answer if !question_answer.blank?
-        answers_transform[q_id] << question_answer if question_answer.present?
+        begin
+          answers_transform[q_id] ||= []
+          answers_transform[q_id] << question_answer if question_answer.present?
+        rescue
+          next
+        end
+        #answers_transform[q_id] ||= []
+        #answers_transform[q_id] << question_answer if !question_answer.blank?
+        #answers_transform[q_id] << question_answer if question_answer.present?
       end
       if Time.now.to_i != last_time
         Task.set_progress(task_id, "analyze_answer_progress", 0.5 * (index + 1) / answers.length) if !task_id.nil?
@@ -199,7 +204,6 @@ class AnalysisResult < Result
     self.answers_result = aanswers_result
     self.status = 1
     self.save
-    Rails.logger.info '---------in analysis_result   analysis  methods-----------'
   end
 
   def analyze_one_question_answers(question, answer_ary)
