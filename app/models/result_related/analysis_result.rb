@@ -199,7 +199,7 @@ class AnalysisResult < Result
     self.answers_result = aanswers_result
     self.status = 1
     self.save
-    puts '---------in analysis_result   analysis  methods-----------'
+    Rails.logger.info '---------in analysis_result   analysis  methods-----------'
   end
 
   def analyze_one_question_answers(question, answer_ary)
