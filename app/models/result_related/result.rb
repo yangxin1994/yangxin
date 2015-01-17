@@ -59,11 +59,13 @@ class Result
       result.save
       return ErrorEnum::TASK_NOT_EXIST
     end
+=begin
     if Time.now.to_i - task.updated_at.to_i > 600
       result.status = -1
       result.save
       return ErrorEnum::TASK_TIMEOUT
     end
+=end    
     progress = task.progress
 
     # calculate the status
