@@ -243,12 +243,12 @@ jQuery(function($) {
 		$.getJSON('/questionaires/' + window.survey_id + '/result/' + type + '.json', {
 			analysis_task_id: analysis_task_id
 		}, function(retval) {
-			console.log(retval)
-			console.log('----------------------------')
 			if(retval.success) {
 				// check export progress
 				function _getExportResult(job_id) {
 					$.getJSON('/jobs/' + job_id + '.json', function(retval) {
+						console.log(retval)
+						console.log('----------------------------')						
 						if(retval.success && retval.value >= 0) {
 							export_pb.odProgressbar('option', 'value', retval.value);
 							if(retval.value >= 1) {
