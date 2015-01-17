@@ -48,6 +48,7 @@ class Result
     result = Result.find_by_task_id(task_id)
     # if the result does not exist return 0
     return 0 if result.nil?
+    Rails.logger.info("--------------------dddddd--#{result.status}")
     # the task is finished or there is error, return
     return result.status if result && result.status == 1 || result.status == -1
 
@@ -59,13 +60,15 @@ class Result
       result.save
       return ErrorEnum::TASK_NOT_EXIST
     end
+
 =begin
     if Time.now.to_i - task.updated_at.to_i > 600
       result.status = -1
       result.save
       return ErrorEnum::TASK_TIMEOUT
     end
-=end    
+=end 
+
     progress = task.progress
 
     # calculate the status
