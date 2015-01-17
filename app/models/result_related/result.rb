@@ -49,6 +49,7 @@ class Result
     # if the result does not exist return 0
     return 0 if result.nil?
     # the task is finished or there is error, return
+    Rails.logger.info("datato-status:#{result.status}-------------")
     return result.status if result && result.status == 1 || result.status == -1
 
     # the task has not been finished, check the progress
