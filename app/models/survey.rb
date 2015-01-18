@@ -667,7 +667,7 @@ class Survey
     qindex = 0
     q = self.all_questions_type(false)
 
-    #answers = answers[0..6000]
+    answers = answers[0..6000]
     #answers = answers[6001..12000]
     #answers = answers[12001..18000]
 
