@@ -193,7 +193,11 @@ class ReportResult < Result
         if answers_transform[question_id].nil?
           cur_question_answer = []
         else
-          cur_question_answer = answers_transform[question_id].delete_if { |e| e.blank? }
+          begin
+            cur_question_answer = answers_transform[question_id].delete_if { |e| e.blank? }
+          rescue
+            next
+          end
         end
         pre_text = "共有#{cur_question_answer.length}人回答了本道题。"
         case question.question_type
