@@ -667,10 +667,13 @@ class Survey
     qindex = 0
     q = self.all_questions_type(false)
 
-    answers = answers[0..6000]
-    #answers = answers[6001..12000]
-    #answers = answers[12001..18000]
-
+    answers = answers[0..3000]
+    #answers = answers[3001..6000]
+    #answers = answers[6001..9000]
+    #answers = answers[9001..12000]
+    #answers = answers[12001..15000]
+    #answers = answers[15001..18000]
+    
 
     answer_length = answers.length
     last_time = Time.now.to_i
