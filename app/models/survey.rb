@@ -673,14 +673,14 @@ class Survey
     #answers = answers[9001..12000]
     #answers = answers[12001..15000]
     #answers = answers[15001..18000]
-    
+
 
     answer_length = answers.length
     last_time = Time.now.to_i
     p "======================="
 
     answers.each_with_index do |answer, index|
-
+      p "in_formated_answer ----  #{index}"
       if answer.finished_at.present?
         answer_time = Time.at(answer.finished_at) - answer.created_at
         answer_time = (answer_time.ceil / 60.0).ceil
