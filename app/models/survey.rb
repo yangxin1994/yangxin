@@ -666,12 +666,16 @@ class Survey
     formated_error = []
     qindex = 0
     q = self.all_questions_type(false)
-    answer_length = answers.length
-    last_time = Time.now.to_i
-    p "======================="
+
     answers = answers[0..6000]
     #answers = answers[6001..12000]
     #answers = answers[12001..18000]
+    
+
+    answer_length = answers.length
+    last_time = Time.now.to_i
+    p "======================="
+
     answers.each_with_index do |answer, index|
 
       if answer.finished_at.present?
