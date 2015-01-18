@@ -668,7 +668,7 @@ class Survey
     q = self.all_questions_type(false)
     answer_length = answers.length
     Rails.logger.info('******************************************')
-    Rails.logger.info(answer_length)
+    Rails.logger.info("answer_length:#{answer_length}")
     Rails.logger.info('******************************************')
     last_time = Time.now.to_i
     p "======================="
