@@ -667,6 +667,9 @@ class Survey
     qindex = 0
     q = self.all_questions_type(false)
     answer_length = answers.length
+    Rails.logger.info('******************************************')
+    Rails.logger.info(answer_length)
+    Rails.logger.info('******************************************')
     last_time = Time.now.to_i
     p "======================="
     answers.each_with_index do |answer, index|

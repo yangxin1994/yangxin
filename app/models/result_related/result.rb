@@ -49,7 +49,7 @@ class Result
     # if the result does not exist return 0
     return 0 if result.nil?
     # the task is finished or there is error, return
-    Rails.logger.info("datato-status:#{result.status}-------------")
+    
     return result.status if result && result.status == 1 || result.status == -1
 
     # the task has not been finished, check the progress
@@ -60,6 +60,8 @@ class Result
       result.save
       return ErrorEnum::TASK_NOT_EXIST
     end
+    Rails.logger.info("datato-task_type:#{task.task_type}-------------")
+    Rails.logger.info("datato-status:#{result.status}-------------")
 
 =begin
     if Time.now.to_i - task.updated_at.to_i > 600
