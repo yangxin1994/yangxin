@@ -79,6 +79,7 @@ class ExportResult < Result
   end
 
   def generate_spss(survey, answers, result_key)
+    puts "in_generate_spss-----answers_length:#{answers.length}"
     # #========================
     #   uris = []
     #   20.times do |_count|
@@ -109,6 +110,10 @@ class ExportResult < Result
                       "answer_contents" => survey.formated_answers(answers, result_key, task_id.to_s),
                       "header_name" => survey.csv_header,
                       "result_key" => result_key}.to_json
+
+    puts "answer_contents_length:#{spss_data_json["answer_contents"].length}"
+
+
     retval = ConnectDotNet.send_data('/ToSpss.aspx') do
       {'spss_data' => spss_data_json.gsub(/<[^>]*>/, ''), 'job_id' => task_id.to_s}
     end
