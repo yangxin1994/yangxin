@@ -680,7 +680,7 @@ class Survey
     p "======================="
 
     answers.each_with_index do |answer, index|
-      p "in_formated_answer ----  #{index}"
+      Rails.logger.info("in_formated_answer ----  #{index}") 
       if answer.finished_at.present?
         answer_time = Time.at(answer.finished_at) - answer.created_at
         answer_time = (answer_time.ceil / 60.0).ceil
