@@ -9,6 +9,7 @@ class ToSpssWorker
     return false if data_list == ErrorEnum::RESULT_NOT_EXIST
     answer_info = data_list[:answer_info] || []
     answers = answer_info.map { |e| Answer.find_by_id e["_id"] }
+    Rails.logger.info("answers_length:-----------#{answers.length}")
     # generate result key
     result_key = ExportResult.generate_spss_result_key(survey.last_update_time,answers)
     existing_export_result = ExportResult.find_by_result_key(result_key)
