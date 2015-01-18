@@ -667,12 +667,12 @@ class Survey
     qindex = 0
     q = self.all_questions_type(false)
     answer_length = answers.length
-    p('answer_length_start******************************************')
-    p("answer_length:#{answer_length}")
-    p('answer_length_end******************************************')
     last_time = Time.now.to_i
     p "======================="
-    answers.each_with_index do |answer, index|
+    answers = answers[0..6000]
+    #answers = answers[6001..12000]
+    #answers = answers[12001..18000]
+    #answers.each_with_index do |answer, index|
 
       if answer.finished_at.present?
         answer_time = Time.at(answer.finished_at) - answer.created_at
