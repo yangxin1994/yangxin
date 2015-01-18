@@ -672,7 +672,7 @@ class Survey
     answers = answers[0..6000]
     #answers = answers[6001..12000]
     #answers = answers[12001..18000]
-    #answers.each_with_index do |answer, index|
+    answers.each_with_index do |answer, index|
 
       if answer.finished_at.present?
         answer_time = Time.at(answer.finished_at) - answer.created_at
