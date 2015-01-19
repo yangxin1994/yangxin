@@ -60,16 +60,14 @@ class Result
       result.save
       return ErrorEnum::TASK_NOT_EXIST
     end
-    Rails.logger.info("datato-task_type:#{task.task_type}-------------")
-    Rails.logger.info("datato-status:#{result.status}-------------")
 
-=begin
+
     if Time.now.to_i - task.updated_at.to_i > 600
       result.status = -1
       result.save
       return ErrorEnum::TASK_TIMEOUT
     end
-=end 
+
 
     progress = task.progress
 
@@ -86,7 +84,6 @@ class Result
       s = s1 * 0.3 + s2 * 0.3 + s3 * 0.4
     when "to_spss"
       s1 = progress["data_conversion_progress"].to_f
-      Rails.logger.info("datato-s1:#{s1}-------------")
       if s1 < 1
         s = s1 * 0.6
       else
@@ -94,13 +91,11 @@ class Result
           {}
         end
         s2 = r.body.to_f
-        Rails.logger.info("datato-s2:#{s2}----------")
         if s2 != progress["export_spss_progress"].to_f
           progress["export_spss_progress"] = s2
         end
         s = s1 * 0.6 + s2 * 0.4
       end
-      Rails.logger.info("datato-s:#{s}----------")
     when "to_excel"
       s1 = progress["data_conversion_progress"].to_f
       if s1 < 1

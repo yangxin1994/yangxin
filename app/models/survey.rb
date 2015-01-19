@@ -667,20 +667,11 @@ class Survey
     qindex = 0
     q = self.all_questions_type(false)
 
-    # answers = answers[0..3000]
-    # answers = answers[3001..6000]
-    # answers = answers[6001..9000]
-    # answers = answers[9001..12000]
-    # answers = answers[12001..15000]
-    # answers = answers[15001..18000]
-
-
     answer_length = answers.length
     last_time = Time.now.to_i
     p "===========in formated_answers ============"
 
     answers.each_with_index do |answer, index|
-      Rails.logger.info("in_formated_answer ----  #{index}") 
       if answer.finished_at.present?
         answer_time = Time.at(answer.finished_at) - answer.created_at
         answer_time = (answer_time.ceil / 60.0).ceil

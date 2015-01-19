@@ -79,7 +79,6 @@ class ExportResult < Result
   end
 
   def generate_spss(survey, answers, result_key)
-    puts "in_generate_spss-----answers_length:#{answers.length}"
     # #========================
     #   uris = []
     #   20.times do |_count|
