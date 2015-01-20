@@ -1564,20 +1564,6 @@ class Answer
     self
   end
 
-  #判断某份答案是否是手机答题
-  def is_mobile_answer
-    if self.http_user_agent.present?
-      if (self.http_user_agent.match(/windows/i) || self.http_user_agent.match(/macintosh/i))
-        return 1 #粗略的判断操作系统,windows,macintosh 表示pc
-      else
-        return 0 #其他系统,比如linux android iphone,ipad symbian 等都认为是移动设备
-      end
-    else
-      return 1
-    end
-
-  end
-
   def update_sample_attributes
     # return if no user or attributes already updated
     return false if self.user.blank? || self.sample_attributes_updated

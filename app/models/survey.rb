@@ -601,10 +601,7 @@ class Survey
        "spss_label" => "地点"},
       {"spss_name" => "time",
        "spss_type" => "String",
-       "spss_label" => "答题时长"},
-      {"spss_name" => "device",
-       "spss_type" => "String",
-       "spss_label" => "来源"} 
+       "spss_label" => "答题时长"} 
     ]
 
     self.all_questions(false).each_with_index do |e, i|
@@ -614,7 +611,7 @@ class Survey
   end
 
   def agent_excel_header
-    headers =["agent_user_id", "状态", "IP", "地点", "答题时长","来源"]
+    headers =["agent_user_id", "状态", "IP", "地点", "答题时长"]
     self.all_questions(false).each_with_index do |e, i|
       headers += e.excel_header("q#{i+1}")
     end
@@ -622,7 +619,7 @@ class Survey
   end
 
   def excel_header
-    headers =["user_id", "answer_id", "is_agent", "email", "mobile", "IP", "地点", "答题时长","来源"]
+    headers =["user_id", "answer_id", "is_agent", "email", "mobile", "IP", "地点", "答题时长"]
     self.all_questions(false).each_with_index do |e, i|
       headers += e.excel_header("q#{i+1}")
     end
@@ -685,7 +682,7 @@ class Survey
       else
         user_id = ""
       end
-      line_answer = [user_id, answer._id, answer.agent_task.present?.to_s, answer.user.try(:email), answer.user.try(:mobile), answer.ip_address, QuillCommon::AddressUtility.find_province_city_town_by_code(answer.region), "#{answer_time} 分","#{answer.is_mobile_answer}"]
+      line_answer = [user_id, answer._id, answer.agent_task.present?.to_s, answer.user.try(:email), answer.user.try(:mobile), answer.ip_address, QuillCommon::AddressUtility.find_province_city_town_by_code(answer.region), "#{answer_time} 分"]
       begin
         all_questions_id(false).each_with_index do |question, index|
           qindex = index
@@ -851,55 +848,6 @@ class Survey
     return ErrorEnum::FILTER_NOT_EXIST if filter_index >= self.filters.length
     task_id = Task.create(:task_type => "analysis")._id.to_s
     AnalysisWorker.perform_async(self._id.to_s, filter_index, include_screened_answer, task_id)
-    return task_id
-  end
-
-
-  def special_analysis(filter_index, include_screened_answer)
-    return ErrorEnum::FILTER_NOT_EXIST if filter_index >= self.filters.length
-    task_id = Task.create(:task_type => "analysis")._id.to_s
-    #---------------
-    #(survey_id, filter_index, include_screened_answer, task_id)
-    survey = Survey.find_by_id(self._id.to_s)
-    return false if survey.nil?
-    # find answers set
-    answers, tot_answer_number, screened_answer_number, ongoing_answer_number, wait_for_review_answer_number = *survey.get_answers(
-      filter_index.to_i,
-      include_screened_answer.to_s == "true",
-      task_id)
-    # generate the result_key
-    result_key = AnalysisResult.generate_result_key(
-      survey.last_update_time,
-      answers,
-      tot_answer_number,
-      screened_answer_number,
-      ongoing_answer_number,
-      wait_for_review_answer_number)
-    existing_analysis_result = AnalysisResult.find_by_result_key(result_key)
-    if existing_analysis_result.nil?
-        # create analysis result
-        analysis_result = AnalysisResult.create(
-          :result_key => result_key,
-          :task_id => task_id,
-          :tot_answer_number => tot_answer_number,
-          :screened_answer_number => screened_answer_number,
-          :ongoing_answer_number => ongoing_answer_number,
-          :wait_for_review_answer_number => wait_for_review_answer_number)
-    else
-        # create analysis result
-        analysis_result = AnalysisResult.create(
-          :result_key => result_key,
-          :task_id => task_id,
-          :tot_answer_number => tot_answer_number,
-          :screened_answer_number => screened_answer_number,
-          :ref_result_id => existing_analysis_result._id,
-          :ongoing_answer_number => ongoing_answer_number,
-          :wait_for_review_answer_number => wait_for_review_answer_number)
-    end
-    survey.analysis_results << analysis_result
-    # analyze and save the analysis result
-    analysis_result.analysis(answers, task_id)
-    #---------------
     return task_id
   end
 
