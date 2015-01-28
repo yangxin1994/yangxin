@@ -1426,7 +1426,7 @@ class Answer
           show_answer['items'] << tmp_item
         end
         if question.issue['other_item'] && question.issue['other_item']['has_other_item'].to_s=='true'
-          item = question.issue['other_item']['has_other_item']
+          item = question.issue['other_item']
           tmp_item = {'title'=>item['content']['text']}
           tmp_item_answer = val.select{|k,v| k.to_s==item['id'].to_s}.values.first
           tmp_item.merge!({'content' => tmp_item_answer})

@@ -143,6 +143,7 @@ class InterviewerTask
 	def info_for_interviewer
 		self.quota["amount"] = self.quota["rules"][0]["amount"]
     self.write_attribute(:create_time, self.created_at.to_i)
+    self.write_attribute(:update_time, self.survey.last_update_time)
 		return self
 	end
 end
