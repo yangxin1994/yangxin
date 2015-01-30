@@ -102,12 +102,12 @@ class InterviewerTask
     answers.each do |a|
       # convert the gps or 3g location to a region code
       Rails.logger.info "2&&&&&&&&&&&&&&&&&&&&"
+      region = -1
       begin
         Rails.logger.info "2.1&&&&&&&&&&&&&&&&&&&&"
-        region = QuillCommon::AddressUtility.find_region_code_by_latlng(*a["location"])
+        # region = QuillCommon::AddressUtility.find_region_code_by_latlng(*a["location"])
         Rails.logger.info "2.2&&&&&&&&&&&&&&&&&&&&"
-      rescue => e
-        Rails.logger.info e.inspect
+      rescue
         region = -1
       end
       Rails.logger.info "3&&&&&&&&&&&&&&&&&&&&"
