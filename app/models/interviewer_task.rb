@@ -103,8 +103,11 @@ class InterviewerTask
       # convert the gps or 3g location to a region code
       Rails.logger.info "2&&&&&&&&&&&&&&&&&&&&"
       begin
+        Rails.logger.info "2.1&&&&&&&&&&&&&&&&&&&&"
         region = QuillCommon::AddressUtility.find_region_code_by_latlng(*a["location"])
-      rescue
+        Rails.logger.info "2.2&&&&&&&&&&&&&&&&&&&&"
+      rescue => e
+        Rails.logger.info e.inspect
         region = -1
       end
       Rails.logger.info "3&&&&&&&&&&&&&&&&&&&&"
