@@ -97,19 +97,24 @@ class InterviewerTask
   end
 
   def submit_answers(answers)
+    Rails.logger.info "111&&&&&&&&&&&&&&&&&&&&"
+    Rails.logger.info answers.inspect
     answers.each do |a|
       # convert the gps or 3g location to a region code
+      Rails.logger.info "2&&&&&&&&&&&&&&&&&&&&"
       begin
         region = QuillCommon::AddressUtility.find_region_code_by_latlng(*a["location"])
       rescue
         region = -1
       end
+      Rails.logger.info "3&&&&&&&&&&&&&&&&&&&&"
       if a["status"].to_i == 1
         status = Answer::REJECT
       else
         # status = self.survey.answer_need_review ? Answer::UNDER_REVIEW : Answer::FINISH
         status = Answer::UNDER_REVIEW
       end
+      Rails.logger.info "4&&&&&&&&&&&&&&&&&&&&"
       answer_to_insert = {:interviewer_task_id => self._id,
         :survey_id => self.survey_id,
         :channel => -2,
@@ -122,6 +127,8 @@ class InterviewerTask
         :status => status,
         :reject_type => a["reject_type"].to_i,
         :region => region}
+      Rails.logger.info "4&&&&&&&&&&&&&&&&&&&&"
+      Rails.logger.info answer_to_insert.inspect
       retval = Answer.create(answer_to_insert)
       Rails.logger.info "&&&&&&&&&&&&&&&&&&&&"
       Rails.logger.info retval.inspect
