@@ -1,0 +1,15 @@
+<% content_for :app_head do %>
+	<%= stylesheet_link_tag    "layouts/quill-layout" %>
+	<%= javascript_include_tag "layouts/quill-layout" %>
+	<%= yield :head %>
+<% end %>
+<% content_for :app_content do %>
+<div id='browser'>
+	<span>您的浏览器版本较低，部分功能可能无法使用，推荐您下载最新的谷歌浏览器</span>
+	<a href="http://down.tech.sina.com.cn/content/40975.html" class='chrome' target='_blank' title='点击下载谷歌浏览器'></a>
+	<a href="http://www.firefox.com.cn/download/" class='firefox' target='_blank' title='点击下载火狐浏览器'></a>
+	<a href="http://info.msn.com.cn/ie9/" class='ie' target='_blank' title='点击下载IE9浏览器'></a>
+</div>
+<% end %>
+
+<%= render :template => 'layouts/app' %>
