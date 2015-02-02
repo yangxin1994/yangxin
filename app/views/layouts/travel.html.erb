@@ -82,9 +82,6 @@
 			<div class="account-setting-box dn">
 				<i class="trigon">▲</i>
 				<ul>
-					<% if current_user.is_admin? %>
-					<li><a href="<%=admin_path %>?publish_status=8">管理员操作</a></li>
-					<% end %>
 					<li><a href="<%=setting_users_path %>">账户设置</a></li>
 					<li><a href="<%=notifications_users_path %>">消息中心</a></li>
 					<li><a href="<%= design_doc_path %>">使用帮助</a></li>
