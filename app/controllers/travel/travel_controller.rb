@@ -1,3 +1,3 @@
 class Travel::TravelController < ApplicationController
-	layout 'sample'
+	layout "travel"
 end
