@@ -1,5 +1,6 @@
 <% content_for :head do %>
   <script type="text/javascript" src="http://api.map.baidu.com/api?v=1.5&ak=A9e3c2846f0b707f92a5c6c54dbd9d11"></script>
+  <script type="text/javascript" src="http://developer.baidu.com/map/jsdemo/demo/convertor.js"></script>
   <%= javascript_include_tag "pages/admin/answers/review-bundle" %>
   <script>
     window.latitude = <%= @questions.latitude.to_f %>
