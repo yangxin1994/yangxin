@@ -1,4 +1,4 @@
-class AnswersController < ApplicationController
+class Travel::AnswersController < Travel::TravelController
 	def show
 	end
 end

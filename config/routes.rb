@@ -652,8 +652,11 @@ OopsData::Application.routes.draw do
   end
 
   namespace :travel do 
-    resources :users do 
-      get 'login'
+    resources :users do
+      collection do 
+        get 'login'  
+      end 
+      
     end
 
     resources :cities do 

@@ -1,4 +1,4 @@
-class InterviewersController < ApplicationController
+class Travel::InterviewersController < Travel::TravelController
 	def show
 	end
 end

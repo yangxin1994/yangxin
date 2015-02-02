@@ -1,4 +1,4 @@
-class CitiesController < ApplicationController
+class Travel::CitiesController < Travel::TravelController
 	def index 
 	end
 
