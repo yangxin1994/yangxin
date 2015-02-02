@@ -651,10 +651,34 @@ OopsData::Application.routes.draw do
     end
   end
 
+  namespace :travel do 
+    resources :users do 
+      get 'login'
+    end
+
+    resources :cities do 
+    
+    end
+    
+    resources :interviewers do
+    
+    end
+    
+    resources :surveys do
+    
+    end
+
+    resources :answers do 
+    end
+
+  end
+
   # Root: different roots for diffent hosts
   constraints :subdomain => "admin" do
     root :to => 'admin/publishes#index', as: :admin_root
   end
+
+
   # constraints :subdomain => "quillme" do
   #   root :to => 'sample/homes#show', as: :quillme_root
   # end
