@@ -93,17 +93,7 @@
 </div>
 <!-- 下部分 -->
 <div class="od-container od-body">
-	<% if @hide_left_sidebar %>
 	<%= yield %>
-	<% else %>
-	<div class="left-sidebar" id="left_float_menus">
-		<%= yield :left_menus %>
-	</div>
-	<div class='right-sidebar'>
-		<%= yield %>
-	</div>
-	<% end %>
-	<div class='cl-line'></div>
 </div>
 <% end %>
 
