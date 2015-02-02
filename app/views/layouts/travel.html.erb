@@ -73,7 +73,7 @@
 	<div class="od-container">
 		<a class='logo' href='<%=root_path %>' ></a>
 		<form id="search_form" onsubmit='return false;'>
-			<a class='account-setting' href="javascript:void(0);">
+			<a class='account-setting r' href="javascript:void(0);">
 				<% @unread_messages_count = (user_signed_in ? current_user.unread_messages_count : 0) 
 					if @unread_messages_count > 0 %>
 				<em class="BallonToolTip" ><%=@unread_messages_count %></em>
