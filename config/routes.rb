@@ -386,6 +386,9 @@ OopsData::Application.routes.draw do
         get :review, :to_csv
         put :reject, :batch_reject, :batch_pass, :set_location
       end
+      collection do
+        get :atachement
+      end
     end
 
     resources :rewards do
