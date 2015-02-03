@@ -518,7 +518,7 @@ body{
 		border-top:1px #fff solid;
 		li{
 			padding:10px 15px;
-			&:hover{
+			&:hover,&.active{
 				background: #E3ECFD;
 			}
 			&.thead{
