@@ -1185,11 +1185,31 @@ class Answer
     answer["question_content"] = []
     answer.answer_content.each do |key, val|
       # key is question id
-      # val is like of { "selection" : [ NumberLong("1351400998231222"), NumberLong("3055564856809646") ], "text_input" : "" }
+      # val is like of { "selection" : [ NumberLong("1351400998231222"), NumberLong("3055564856809646") ], "text_input" : "" }      
       question = Question.find_by_id(key)
       next unless question
-      show_answer = {'question_type' => question.question_type, 
-          "title" => question.content["text"]}
+      show_answer = {'question_type' => question.question_type,"title" => question.content["text"]}
+
+      if answer.attributes['attachments'].present?
+        attachements = answer.attachments["#{key}"]
+      end
+      
+      if attachements.present?
+        image_arr = [1,8]
+        audio_arr = [4,32]
+        video_arr = [2,16]
+        atta_data = {'images' => [],'audios' => [],'videos' => []}
+        attachements.each do |attch|
+          material  = Material.find("#{attch}")
+          if material.present?
+            atta_data['images'] << "#{attch}"  if image_arr.include?(material.material_type)
+            atta_data['audios'] << "#{attch}"  if audio_arr.include?(material.material_type)
+            atta_data['videos'] << "#{attch}"  if video_arr.include?(material.material_type)
+          end
+        end
+        show_answer.merge!({'attachements'=> atta_data})
+      end
+
 
       case question.question_type
       when QuestionTypeEnum::CHOICE_QUESTION
@@ -1531,6 +1551,7 @@ class Answer
         answer["question_content"] << show_answer
       end 
     end
+
     answer
   end
 

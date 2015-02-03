@@ -44,6 +44,31 @@
 					</li>
 				<% end %>
       <% end %>
+
+      <% if question['attachements']%>
+        <% if question['attachements']['images'].present?%>
+          <% question['attachements']['images'].each_with_index do |img,idx| %>
+            <li>
+              <a href="/admin/answers/atachement?aid=<%=img%>">下载图片<%= idx + 1 %></a>
+            </li>
+          <% end %>
+        <% end %>
+        <% if question['attachements']['audios'].present?%>
+          <% question['attachements']['audios'].each_with_index do |audio,idx| %>
+            <li>
+              <a href="/admin/answers/atachement?aid=<%=audio%>">下载音频<%= idx + 1 %></a>
+            </li>
+          <% end %>
+        <% end %>
+        <% if question['attachements']['videos'].present?%>
+          <% question['attachements']['videos'].each_with_index do |video,idx| %>
+            <li>
+              <a href="/admin/answers/atachement?aid=<%=video%>">下载视频<%= idx + 1 %></a>
+            </li>
+          <% end %>
+        <% end %>
+      <% end %>
+
 			<p>
 				<%= question["content"] %>
 				<%= question["address"] %>

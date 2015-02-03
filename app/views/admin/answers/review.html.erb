@@ -1,10 +1,48 @@
 <% content_for :head do %>
+  <script type="text/javascript" src="http://api.map.baidu.com/api?v=1.5&ak=A9e3c2846f0b707f92a5c6c54dbd9d11"></script>
+  <script type="text/javascript" src="http://developer.baidu.com/map/jsdemo/demo/convertor.js"></script>
   <%= javascript_include_tag "pages/admin/answers/review-bundle" %>
   <script>
     window.latitude = <%= @questions.latitude.to_f %>
     window.longitude = <%= @questions.longitude.to_f %>
     window.answer_id = "<%= @questions._id.to_s %>"
   </script>
+
+<script type="text/javascript">
+  function loadJScript() {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src = "http://api.map.baidu.com/api?v=2.0&ak=A9e3c2846f0b707f92a5c6c54dbd9d11&callback=init";
+    document.body.appendChild(script);
+  }
+  function init() {
+    var map = new BMap.Map("map");
+    if(window.latitude == 0 && window.longitude == 0){
+      var point = new BMap.Point(116.404, 39.915);
+    }else{
+      var gpsPoint = new BMap.Point(window.latitude,window.longitude);
+
+      translateCallback = function (point){
+        var marker = new BMap.Marker(point);
+        map.addOverlay(marker);
+        map.setCenter(point);
+      }
+
+
+      BMap.Convertor.translate(gpsPoint,0,translateCallback)
+
+    }
+    //map.centerAndZoom(point,15);  
+
+    //var marker = new BMap.Marker(point);
+    //map.addOverlay(marker);
+    //marker.setAnimation(BMAP_ANIMATION_BOUNCE);
+    //map.enableScrollWheelZoom();
+  }  
+  window.onload = loadJScript;
+</script>
+
+
 <% end %>
 
 <% content_for :sidebar do %>
@@ -40,6 +78,7 @@
       <span>右键点击地图设置访问点</span>
       <div id="map" style="height:500px;"></div>
     <%- end %>
+    <div id="map" style="height:500px;"></div>
     <%- if @questions.carnival_user.present? %>
       <span><a href="/admin/answers/<%= @questions.carnival_user.answers.asc(:created_at).first.id.to_s %>/review">嘉年华预调研答案</a></span>
       <%- if @questions.carnival_user.mobile.present? %>
