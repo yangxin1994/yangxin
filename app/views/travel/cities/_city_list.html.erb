@@ -1,0 +1,12 @@
+<% citis.each_pair do |city,value|%>
+	<% unless ['from','to','year','month','quarter'].include?(city)%>
+		<li>
+			<a href="/travel/cities/<%= city%>?from=<%=@from%>&to=<%=@to%>">
+				<span class="city-name"><%= city %></span>
+				<span class="num"><em class="finished"><%= value[:finished] %></em><em class="suffice"><%= value[:checked] %></em>/<%= 	value[:amount] %></span>
+				<span class="progress finished" style="width:<%= value[:finish_percent]%>"></span><!-- 完成 -->
+				<span class="progress suffice" style="width:<%= value[:check_percent] %>"></span><!-- 通过 -->
+			</a>
+		</li>
+	<% end %>		
+<% end %>
