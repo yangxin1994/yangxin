@@ -34,18 +34,24 @@ jQuery(function(){
     });    
   };
 });
+jQuery(function(){ 
 
-jQuery(function(){
-  $('#suffice-finished').on('click', '#suffice', function(event) {
-    $('.city-list').toggleClass('finished');
-  });
-});
+  (function(){
+    //选择城市 完成/审核通过 切换
+    $('#suffice-finished').on('click', '#suffice', function(event) {
+      $('.city-list').toggleClass('finished');
+    });
+  })();
+ 
+  (function(){
+     // 查看问卷 完成/审核通过 切换
+    $('#suffice-finished').on('click', '#suffice', function(event) {
+      $('.answer-list').toggleClass('finished');
+    });
+     // 下拉列表
+    $('.answer-list').on('click','.survey',function(event) {
+      $(this).parent().siblings('dd').slideToggle(400);
+    });
+  })();
 
-jQuery(function(){
-  $('#suffice-finished').on('click', '#suffice', function(event) {
-    $('.answer-list').toggleClass('finished');
-  });
-  $('.answer-list').on('click','.survey',function(event) {
-      $(this).parent().siblings('dd').slideToggle(400)
-  });
 });
