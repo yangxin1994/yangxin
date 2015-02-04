@@ -67,6 +67,12 @@ class ApplicationController < ActionController::Base
     end    
   end
 
+  def require_supervisor
+    unless current_user.is_supervisor?
+      redirect_to tlogin_path({ref: request.url}) and return
+    end
+  end
+
   # sign out
   def _sign_out(ref = nil)
     refresh_session(nil)
