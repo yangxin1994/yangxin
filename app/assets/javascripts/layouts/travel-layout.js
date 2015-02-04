@@ -114,6 +114,24 @@ $(function(){
             year: year,
             month: month,
             checked:checked
+        },function(retval){
+            var list = ''
+            $.each(retval.value, function( key, value ) {
+                if($.inArray(key,['from','to','year','month','quarter']) < 0 ){
+                    list += '<li>\
+                       <a href="/travel/cities/' +  key + '?from=' + retval.value['from'] +  '&to=' + retval.value['to']  + '"> \
+                        <span class="city-name">' + key  + '</span>\
+                        <span class="num"><em class="finished">' + value['finished'] + '</em><em class="suffice">' + value['checked'] + '</em>/' + value['amount'] + '</span>\
+                        <span class="progress finished" style="width:' + value['finish_percent'] + '"></span>\
+                        <span class="progress suffice" style="width:' + value['check_percent'] + '"></span>\
+                        </a>\
+                        </li>'
+                }
+            })
+
+            $('.cur-quarter').text(retval.value['quarter']) 
+            $('#quarter a').attr('year',retval.value['year']).attr('month',retval.value['month'])
+            $('.city-list ul').empty().append(list)
         })
 
 
