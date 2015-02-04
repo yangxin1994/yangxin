@@ -4,6 +4,7 @@
     window.survey_id = <%= raw params[:id].to_json %>;
   <% end %> 
 <% end %>
+
 <% content_for :sidebar do %>
   <ul class="nav nav-list flowy-admin-sidenav">
     <li>
@@ -42,61 +43,50 @@
         绑定样本属性
       </a>
     </li> 
-    <li class="active">
+    <li >
       <a href="/admin/surveys/<%= params[:id]%>/interviewer_task">
         <i class="icon-chevron-right"></i>
         访问员设置
       </a>
-    </li>  
-    <li>
+    </li>
+    <li class="active">
       <a href="/admin/surveys/<%= params[:id]%>/supervisor">
         <i class="icon-chevron-right"></i>
         监督员设置
       </a>
-    </li>     
+    </li>       
   </ul>
 <% end %>
 <div class="well">
   <a href="/admin/surveys/<%= params[:id]%>"><%= @survey.title %></a>
 </div>
-<legend>新增访问任务</legend>
-
-<div class="alert alert-danger alert-dismissable" style="display:none;">
-  <strong>信息有误</strong>
+<div>
+  <a href="/admin/surveys/<%= params[:id]%>/new_supervisor" class="btn btn-primary pull-right">新增监督员
+  </a>
 </div>
-
-<form action="/admin/surveys/<%=params[:id]%>/create_interviewer" class="form-horizontal" method="post">
-  <div class="control-group">
-    <label class="control-label" >访问员姓名:</label>
-    <div class="controls">
-      <div class="btn-group">
-        <button class="btn dropdown-toggle" data-toggle="dropdown" href="#">
-          请选择
-          <span class="caret"></span>
-        </button>
-        <ul class="dropdown-menu dropselect">
-          <% @interviewers.each do |viewer| %>
-            <li><a href="javascript:void(0);" id="<%= viewer.id %>" class="interviewer"><%=viewer.nickname%></a></li>
-          <% end %>
-        </ul>       
-      </div>
-    </div>
-  </div>
-
-  <div class="control-group">
-    <label class="control-label" >负责区域:</label>
-    <div class="controls">
-      <input type="text" name="city" class="input-large" placeholder="城市名称" />
-    </div>
-  </div> 
-  <div class="control-group">
-    <label class="control-label" >要求回收数量:</label>
-    <div class="controls">
-      <input type="text" name="amount" class="input-large" placeholder="回收数量" />
-      <input type="hidden" name="user_id" />
-    </div>
-  </div>   
-  <div class="controls">
-    <button class="btn btn-primary" id="confirm_add">确认添加</button>
-  </div>
-</form>
+<div>
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th >昵称</th>
+        <th >邮箱</th>
+      </tr>
+    </thead>
+    <tfoot>
+      <tr></tr>
+    </tfoot>
+    <tbody>
+      <% @supervisors['data'].each do |supervisor| %>
+      <tr data="<%= supervisor.id%>">
+        <td><%= supervisor.user.nickname %></td>
+        <td><%= supervisor.user.email %></td>
+      </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>
+<div>
+  <span class="pull-right">
+    <%= paginator_mini @supervisors %>
+  </span>  
+</div>

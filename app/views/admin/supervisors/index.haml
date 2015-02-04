@@ -1,0 +1,45 @@
+- content_for :head do
+  = javascript_include_tag "pages/admin/interviewers-bundle"
+  = stylesheet_link_tag "pages/admin/interviewers-bundle", :media => "all"
+
+- content_for :sidebar do
+  %ul.nav.nav-list.flowy-admin-sidenav
+    %li.active
+      %a{href: "/admin/supervisors"}
+        %i.icon-chevron-right
+        访问员列表
+    %li
+      %a{href: "/admin/supervisors/new"}
+        %i.icon-chevron-right
+        新建访问员
+
+%div
+  %span
+    %form.form-search{style: "display:inline"}
+      .input-append
+        %input.span6.search-query{name: "keyword", type: "text"}/
+        %button.btn{type: "submit"} Search
+  %span.pull-right
+    = paginator_mini @supervisors
+    .btn-group
+      %button.btn.dropdown-toggle{"data-toggle" => "dropdown"}
+        %i.icon-filter>
+         
+        %span.caret
+      %ul.dropdown-menu.pull-right
+        %li
+          %a{href: "?"} 全部
+        %li.divider
+
+%div
+  %table.table.table-striped
+    %thead
+      %tr
+        %th 邮箱
+        %th 帐户名
+    %tbody
+      - @supervisors["data"].each do |supervisor|
+        %tr
+          %td
+            =link_to supervisor.email, edit_admin_supervisor_path(supervisor)
+          %td= supervisor.nickname
