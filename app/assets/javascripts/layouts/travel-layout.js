@@ -40,3 +40,12 @@ jQuery(function(){
     $('.city-list').toggleClass('finished');
   });
 });
+
+jQuery(function(){
+  $('#suffice-finished').on('click', '#suffice', function(event) {
+    $('.answer-list').toggleClass('finished');
+  });
+  $('.answer-list').on('click','.survey',function(event) {
+      $(this).parent().siblings('dd').slideToggle(400)
+  });
+});
