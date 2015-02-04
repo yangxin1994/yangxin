@@ -452,6 +452,20 @@ body{
 .answer-list{
 	padding:0 15px 30px 15px;
 	min-height: 400px;
+	.finished{
+		display: none;
+	}
+	.suffice{
+		display: inline-block;
+	}
+	&.finished{
+		.finished{
+			display: inline-block;
+		}
+		.suffice{
+			display: none;
+		}
+	}
 	dl{
 		border-bottom:1px #eee solid;
 		dt{
@@ -461,6 +475,10 @@ body{
 				line-height: 50px;
 				font-size: 16px;
 				padding:0 15px;
+				&.active{
+					background: #E3ECFD;
+					cursor: default;
+				}
 				&:hover{
 					background: #E3ECFD;
 				}
@@ -500,13 +518,11 @@ body{
 					border:1px #ddd solid;
 					.progress{
 						height:16px;
-						display: inline-block;
 						position: absolute;
 						left:-1px;
 						top:-1px;
 						&.finished{background:#C3D1EB;border:1px #B1C0DB solid;}
 						&.suffice{background:#BDE8A0;border:1px #A5D7A6 solid;}
-						&.dn{display: none;}
 					}
 					.num{
 						position: absolute;

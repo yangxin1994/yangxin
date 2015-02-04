@@ -91,6 +91,11 @@ $(function(){
       $('.city-list').toggleClass('finished');
     });
 
+    $('.answer-list').on('click','.survey',function(event) {
+      $(this).parent().siblings('dd').slideToggle(400);
+    });
+
+
     $('#quarter a').click(function(){
         var checked = false;
         var action  = 'prev';
