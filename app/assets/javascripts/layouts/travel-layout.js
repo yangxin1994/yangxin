@@ -54,4 +54,61 @@ jQuery(function(){
     });
   })();
 
+  (function(){
+    // 城市选择 切换季度
+    var prev = $('#quarter .prev'); //上季度
+    var next = $('#quarter .next'); //下季度
+    var content = $('#quarter .cur-quarter');
+
+    var getYearWeek = function (a, b, c) { 
+      var date1 = new Date(a, parseInt(b) - 1, c), date2 = new Date(a, 0, 1), 
+      d = Math.round((date1.valueOf() - date2.valueOf()) / 86400000); 
+      return Math.ceil( (d + ((date2.getDay() + 1) - 1)) / 7 ); 
+    };
+
+    var today = new Date();//获取当前时间
+    var y = today.getFullYear();
+    var m = today.getMonth()+1;
+    var d = today.getDate();
+    var quarter = ""; //获取当前季度
+    var result = getYearWeek(y, m, d);
+    if (m <4) {
+     quarter = 1;
+     week = result;
+    } else if (m < 7) {
+     quarter = 2;
+     week = result - getYearWeek(y, 4, 1);
+     var day = new Date(y, 4, 1);
+     if (day.getDay() > 1) {
+      week += 1;
+     }
+    } else if (m < 10) {
+     quarter = 3;
+     week = result - getYearWeek(y, 7, 1);
+     var day = new Date(y, 7, 1);
+     if (day.getDay() > 1) {
+      week += 1;
+     }
+    } else {
+     quarter = 4;
+     week = result - getYearWeek(y, 10, 1);
+     var day = new Date(y, 10, 1);
+     if (day.getDay() > 1) {
+      week += 1;
+     }
+    }
+    content.html(y+'年第'+quarter+'季度');  
+
+
+  })();
+
 });
+
+
+
+
+
+
+
+
+
