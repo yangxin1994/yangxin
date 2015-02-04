@@ -8,6 +8,7 @@
 //=require jquery-powerFloat-min
 
 $(function(){
+    //登录页相关
 	if( !('placeholder' in document.createElement('input')) ){   
 	  $('input[placeholder],textarea[placeholder]').each(function(){    
 	    var that = $(this),    
@@ -33,10 +34,6 @@ $(function(){
 	  });    
 	};
 
-	$('#suffice-finished').on('click', '#suffice', function(event) {
-	  $('.city-list').toggleClass('finished');
-	});
-
 	$('.user-panel input').focus(function(){
 	$('span.notice').remove();
 	})
@@ -46,7 +43,7 @@ $(function(){
 		if(email.length > 0 && pwd.length > 0){
         	$('.login-btn').html('登录中')
         	$('.login-btn').attr('disabled', true).addClass('disabled')
-        	$.postJSON('/account/login.json', {
+        	$.postJSON('/account/login', {
         	    email_mobile: email,
         	    password: pwd
         	}, function(retval) {
@@ -88,4 +85,33 @@ $(function(){
         }
 
     }
+
+    //城市列表页相关
+    $('#suffice-finished').on('click', '#suffice', function(event) {
+      $('.city-list').toggleClass('finished');
+    });
+
+    $('#quarter a').click(function(){
+        var checked = false;
+        var action  = 'prev';
+        if($('#suffice:checked').length > 0){
+            checked = true
+        }
+        if($(this).hasClass('next')){
+            action = 'next'
+        }
+        
+        var year  = $(this).attr('year')
+        var  month = $(this).attr('month')
+
+        $.getJSON('/travel/cities',{
+            act:action,
+            year: year,
+            month: month,
+            checked:checked
+        })
+
+
+    })
+
 })

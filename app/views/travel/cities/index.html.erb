@@ -8,9 +8,9 @@
 	</div>
 	<div class="option-panel">
 			<div id="quarter">
-				<a href="javascript:void(0);" class="prev"><i class="icon-angle-left"></i></a>
-				<span class="cur-quarter">2015年第1季度</span>
-				<a href="javascript:void(0);" class="next none"><i class="icon-angle-right"></i></a>
+				<a href="javascript:void(0);" class="prev" year="<%= @data['year'] %>" month="<%= @data['month'] %>"><i class="icon-angle-left"></i></a>
+				<span class="cur-quarter"><%= @quarter %></span>
+				<a href="javascript:void(0);" class="next" year="<%= @data['year'] %>" month="<%= @data['month'] %>"><i class="icon-angle-right"></i></a>
 			</div>
 
 			<div id="suffice-finished">
@@ -20,46 +20,7 @@
 		</div>
 	<div class="city-list finished">
 		<ul>
-			<li>
-				<a href="javascript:void(0);">
-					<span class="city-name">北京</span>
-					<span class="num"><em class="finished">151</em><em class="suffice">51</em>/291</span>
-					<span class="progress finished" style="width:100px;"></span><!-- 完成 -->
-					<span class="progress suffice" style="width:100px;"></span><!-- 通过 -->
-				</a>
-			</li>
-			<li>
-				<a href="javascript:void(0);">
-					<span class="city-name">上海</span>
-					<span class="num"><em class="finished">151</em><em class="suffice">51</em>/291</span>
-					<span class="progress finished" style="width:100px;"></span>
-					<span class="progress suffice" style="width:100px;"></span>
-				</a>
-			</li>
-			<li>
-				<a href="javascript:void(0);">
-					<span class="city-name">重庆</span>
-					<span class="num"><em class="finished">151</em><em class="suffice">51</em>/291</span>
-					<span class="progress finished" style="width:200px;"></span>
-					<span class="progress suffice" style="width:100px;"></span>
-				</a>
-			</li>
-			<li>
-				<a href="javascript:void(0);">
-					<span class="city-name">沈阳</span>
-					<span class="num"><em class="finished">151</em><em class="suffice">51</em>/291</span>
-					<span class="progress finished" style="width:60px;"></span>
-					<span class="progress suffice" style="width:100px;"></span>
-				</a>
-			</li>
-			<li>
-				<a href="javascript:void(0);">
-					<span class="city-name">吉林</span>
-					<span class="num"><em class="finished">151</em><em class="suffice">51</em>/291</span>
-					<span class="progress finished" style="width:150px;"></span>
-					<span class="progress suffice" style="width:100px;"></span>
-				</a>
-			</li>
+			<%= render :partial => 'city_list', :locals => { :citis => @data } %>
 		</ul>
 	</div>
 </div>
