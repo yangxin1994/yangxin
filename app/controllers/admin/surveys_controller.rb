@@ -219,6 +219,7 @@ class Admin::SurveysController < Admin::AdminController
 
   def create_supervisor
     Supervisor.create(survey_id:params[:id],user_id:params[:user_id])
+    redirect_to :action => 'supervisor'
   end
 
   private
