@@ -53,13 +53,10 @@ class Travel::CitiesController < Travel::TravelController
 		@data['from']    = @from
 		@data['to']      = @to 
 		@data['quarter'] = @quarter
-		Rails.logger.info('--------------------------------')
-		Rails.logger.info(@data.inspect)
-		Rails.logger.info('--------------------------------')
 
-		# if request.xhr?
-		# 	render_json_auto @data
-		# end
+		if request.xhr?
+			render_json_auto @data
+		end
 
 	end
 
