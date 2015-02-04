@@ -393,6 +393,12 @@ body{
 	}
 	.city-list{
 		min-height:500px;
+		.finished{display: none;}
+		.suffice{display: inline-block;}
+		&.finished{
+			.finished{display: inline-block;}
+			.suffice{display: none;}
+		}
 		ul{
 			overflow: hidden;
 			li{
@@ -427,7 +433,7 @@ body{
 						&.progress{
 							width:412px;
 							height:50px;
-							display: block;
+							// display: block;
 							position: absolute;
 							left:-1px;
 							top:-1px;
@@ -435,7 +441,6 @@ body{
 							filter: alpha(opacity=60);
 							&.finished{background:#C3D1EB;border:1px #B1C0DB solid;}
 							&.suffice{background:#BDE8A0;border:1px #A5D7A6 solid;}
-							&.dn{display: none;}
 						}
 					}
 				}
