@@ -83,5 +83,11 @@ $(function(){
 
   })
 
+  // for supervisor
+
+  $('a.supervisor').click(function(){
+    user_id = $(this).attr('id');
+    $('input[name="user_id"]').val(user_id);
+  })  
 
 })
