@@ -9,17 +9,17 @@ class InterviewerTask
   field :quota, :type => Hash
   # 0(doing), 1(under review), 2(finished)
   field :status, :type => Integer, default: 0
-
   belongs_to :survey
   belongs_to :user
   has_many :answers
 
-  def self.create_interviewer_task(survey_id, user_id, amount)
+  def self.create_interviewer_task(survey_id, user_id, amount,city)
     survey = Survey.find(survey_id)
     interviewer = User.find(user_id)
     return ErrorEnum::INTERVIEWER_NOT_EXIST if !interviewer.is_interviewer?
     quota = {"rules" => [{
         "amount" => amount,
+        "city" => city,
         "finished_count" => 0,
         "submitted_count" => 0}],
       "finished_count" => 0,
@@ -147,6 +147,7 @@ class InterviewerTask
     self.write_attribute(:submitted_count, self.quota["submitted_count"])
     self.write_attribute(:rejected_count, self.quota["rejected_count"])
     self.write_attribute(:interviewer, self.user.nickname)
+    self.write_attribute(:city,self.quota["rules"][0]['city'])
     return self
   end
 

@@ -42,30 +42,31 @@
         绑定样本属性
       </a>
     </li> 
-    <li class="active">
+    <li>
       <a href="/admin/surveys/<%= params[:id]%>/interviewer_task">
         <i class="icon-chevron-right"></i>
         访问员设置
       </a>
-    </li>  
-    <li>
+    </li>
+    <li class="active">
       <a href="/admin/surveys/<%= params[:id]%>/supervisor">
         <i class="icon-chevron-right"></i>
         监督员设置
       </a>
-    </li>     
+    </li>       
   </ul>
 <% end %>
 <div class="well">
   <a href="/admin/surveys/<%= params[:id]%>"><%= @survey.title %></a>
 </div>
-<legend>新增访问任务</legend>
+<legend>新增监督员</legend>
 
 <div class="alert alert-danger alert-dismissable" style="display:none;">
   <strong>信息有误</strong>
 </div>
 
-<form action="/admin/surveys/<%=params[:id]%>/create_interviewer" class="form-horizontal" method="post">
+<form action="/admin/surveys/<%=params[:id]%>/create_supervisor" class="form-horizontal" method="post">
+  <input type="hidden" name="user_id" />
   <div class="control-group">
     <label class="control-label" >访问员姓名:</label>
     <div class="controls">
@@ -75,28 +76,14 @@
           <span class="caret"></span>
         </button>
         <ul class="dropdown-menu dropselect">
-          <% @interviewers.each do |viewer| %>
-            <li><a href="javascript:void(0);" id="<%= viewer.id %>" class="interviewer"><%=viewer.nickname%></a></li>
+          <% @supervisors.each do |supervisor| %>
+            <li><a href="javascript:void(0);" id="<%= supervisor.id %>" class="supervisor"><%=supervisor.nickname%></a></li>
           <% end %>
         </ul>       
       </div>
     </div>
-  </div>
-
-  <div class="control-group">
-    <label class="control-label" >负责区域:</label>
-    <div class="controls">
-      <input type="text" name="city" class="input-large" placeholder="城市名称" />
-    </div>
   </div> 
-  <div class="control-group">
-    <label class="control-label" >要求回收数量:</label>
-    <div class="controls">
-      <input type="text" name="amount" class="input-large" placeholder="回收数量" />
-      <input type="hidden" name="user_id" />
-    </div>
-  </div>   
   <div class="controls">
-    <button class="btn btn-primary" id="confirm_add">确认添加</button>
+    <button class="btn btn-primary" id="confirm_supervisor">确认添加</button>
   </div>
 </form>

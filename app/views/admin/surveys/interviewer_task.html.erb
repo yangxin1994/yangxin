@@ -48,7 +48,13 @@
         <i class="icon-chevron-right"></i>
         访问员设置
       </a>
-    </li>  
+    </li> 
+    <li>
+      <a href="/admin/surveys/<%= params[:id]%>/supervisor">
+        <i class="icon-chevron-right"></i>
+        监督员设置
+      </a>
+    </li>      
   </ul>
 <% end %>
 <div class="well">
@@ -65,6 +71,7 @@
         <th >创建时间</th>
         <th >状态</th>
         <th >访问员姓名</th>
+        <th >负责区域</th>
         <th >目标完成量</th>
         <th >完成量</th>
         <th >提交量</th>
@@ -80,6 +87,7 @@
         <td><%= task.created_at.strftime('%F') %></td>
         <td><%= interviewer_format(task.status.to_i) %></td>
         <td><%= task.interviewer %></td>
+        <td><%= task.city %></td>
         <td id="amount" title="点击修改"><%= task.amount %></td>
         <td><%= task.finished_count %></td>
         <td><%= task.submitted_count %></td>
