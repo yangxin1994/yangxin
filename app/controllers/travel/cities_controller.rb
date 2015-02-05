@@ -63,8 +63,8 @@ class Travel::CitiesController < Travel::TravelController
 
 		@city    = params[:id]
 
-		#tasks   = InterviewerTask.where(:city.ne => nil).select{|task| task.city == @city}
-		tasks   = InterviewerTask.where(:city.ne => nil)
+		tasks   = InterviewerTask.where(:city.ne => nil).select{|task| task.city == @city}
+		#tasks   = InterviewerTask.where(:city.ne => nil)
 
 		@surveys = []
 		tasks.each do |task|
