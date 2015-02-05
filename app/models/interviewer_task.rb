@@ -7,6 +7,7 @@ class InterviewerTask
   include FindTool
   
   field :quota, :type => Hash
+  field :city,:type => String
   # 0(doing), 1(under review), 2(finished)
   field :status, :type => Integer, default: 0
   belongs_to :survey
@@ -19,13 +20,12 @@ class InterviewerTask
     return ErrorEnum::INTERVIEWER_NOT_EXIST if !interviewer.is_interviewer?
     quota = {"rules" => [{
         "amount" => amount,
-        "city" => city,
         "finished_count" => 0,
         "submitted_count" => 0}],
       "finished_count" => 0,
       "submitted_count" => 0,
       "rejected_count" => 0}
-    InterviewerTask.create(quota: quota, user: interviewer, survey: survey)
+    InterviewerTask.create(quota: quota, user: interviewer, survey: survey,city:city)
   end
 
   def update_amount(amount)
@@ -147,7 +147,6 @@ class InterviewerTask
     self.write_attribute(:submitted_count, self.quota["submitted_count"])
     self.write_attribute(:rejected_count, self.quota["rejected_count"])
     self.write_attribute(:interviewer, self.user.nickname)
-    self.write_attribute(:city,self.quota["rules"][0]['city'])
     return self
   end
 
@@ -157,4 +156,31 @@ class InterviewerTask
     self.write_attribute(:update_time, self.survey.last_update_time)
 		return self
 	end
+
+  def interviewer_name
+    self.user.try(:nickname)
+  end
+
+  def amount
+    self.quota["rules"][0]["amount"]
+  end
+
+  def submitted_count
+    self.quota["rules"][0]["submitted_count"]
+  end
+
+
+  def finished_count
+    self.quota["rules"][0]["finished_count"]
+  end
+
+  def  submitted_percent
+    ((submitted_count / amount.to_f) * 100 ).to_s + '%'
+  end
+
+  def  finished_percent
+    ((finished_count / amount.to_f) * 100 ).to_s + '%'
+  end
+  
+
 end

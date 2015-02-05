@@ -89,6 +89,7 @@ $(function(){
     //城市列表页相关
     $('#suffice-finished').on('click', '#suffice', function(event) {
       $('.city-list').toggleClass('finished');
+      $('.answer-list').toggleClass('finished');
     });
 
     $('.answer-list').on('click','.survey',function(event) {
@@ -96,7 +97,7 @@ $(function(){
     });
 
 
-    $('#quarter a').click(function(){
+    $('.cities a').click(function(){
         var checked = false;
         var action  = 'prev';
         if($('#suffice:checked').length > 0){
@@ -115,7 +116,7 @@ $(function(){
             month: month,
             checked:checked
         },function(retval){
-            var list = ''
+            var list = '';
             $.each(retval.value, function( key, value ) {
                 if($.inArray(key,['from','to','year','month','quarter']) < 0 ){
                     list += '<li>\
@@ -131,9 +132,82 @@ $(function(){
 
             $('.cur-quarter').text(retval.value['quarter']) 
             $('#quarter a').attr('year',retval.value['year']).attr('month',retval.value['month'])
-            $('.city-list ul').empty().append(list)
+            if(list.length > 0){
+                $('.city-list ul').empty().append(list)    
+            }else{
+                $('.city-list ul').empty().append('<div class="no-data">没有查到更多数据！</div>')        
+            }
+            
         })
+    })
 
+
+    $('.interviewers a').click(function(){
+        var city    = $('.current_city').text();
+        var checked = false;
+        var action  = 'prev';
+        if($('#suffice:checked').length > 0){
+            checked = true
+        }
+        if($(this).hasClass('next')){
+            action = 'next'
+        }
+        
+        var year  = $(this).attr('year')
+        var  month = $(this).attr('month')
+
+        $.getJSON('/travel/cities/' + city,{
+            act:action,
+            year: year,
+            month: month,
+            checked:checked
+        },function(retval){
+            var dl = '';
+            $.each(retval.value,function(key,value){
+                if(value.from){
+                    $('.cur-quarter').text(value.quarter);
+                    $('.interviewers a').attr('year',value.year).attr('month',value.month);
+                }else{
+                    var interviewers = '';
+                    $.each(value.interviews,function(k,task){
+                        var amount  = task.quota['rules'][0]['amount']
+                        var submit  = task.quota['rules'][0]['submitted_count']
+                        var suffice = task.quota['rules'][0]['finished_count']
+                        var submit_percent  = submit / amount * 100 + '%';
+                        var suffice_percent = suffice / amount * 100 + '%';
+                        interviewers += '<li>\
+                           <a href="javascript:void(0);">\
+                             <span class="name"><i class="icon-user mr5"></i>'  + task.nickname   +  '</span>\
+                             <span class="progress-bar">\
+                                <span class="num"><i class="finished">' +  submit + '</i><i class="suffice">' + suffice + '</i>/' +  amount + '</span>\
+                                <span class="progress finished" style="width:' + submit_percent + ';"></span>\
+                                <span class="progress suffice" style="width:' + suffice_percent +  ';"></span>\
+                             </span>\
+                           </a>\
+                        </li>'
+                    })
+                    dl += '<dl>\
+                        <dt>\
+                            <a class="survey" href="javascript:void(0);">\
+                                <i class="icon-file-text-alt mr5"></i>' + value.title + '<span class="num r"><em class="finished">' + value.finish + '</em><em class="suffice">' + value.suffice + '</em> /' + value.amount + '</span>\
+                            </a>\
+                        </dt>\
+                        <dd class="dn">\
+                            <ul>' +  interviewers  + '</ul>\
+                        </dd>\
+                    </dl>'
+
+
+
+                }
+            })
+            if(dl.length > 0){
+                $('.answer-list').empty().append(dl)
+            }else{
+                $('.answer-list').empty().append('<div class="no-data">没有查到更多数据！</div>')
+            }
+            
+        })
 
     })
 

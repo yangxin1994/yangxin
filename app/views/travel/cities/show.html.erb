@@ -1,0 +1,51 @@
+<div class="container" id="answers">
+	<div class="title">
+		<a href="/travel"><i class="icon icon-map-marker"></i>选择城市</a>
+		<i class="icon-double-angle-right"></i>
+		<a href="javascript:void(0);" class='current_city'><%= @city %></a>
+<!-- 		<i class="icon-double-angle-right"></i>
+		<a class="current" href="javascript:void(0);">访问员A</a> -->
+	</div>
+	<div class="option-panel">
+		<div id="quarter" class='interviewers'>
+			<a href="javascript:void(0);" class="prev" year=<%= @surveys.last[:year]%> month=<%= @surveys.last[:month]%>  ><i class="icon-angle-left"></i></a>
+			<span class="cur-quarter"><%= @surveys.last[:quarter] %></span>
+			<a href="javascript:void(0);" class="next" year=<%= @surveys.last[:year]%> month=<%= @surveys.last[:month]%>   ><i class="icon-angle-right"></i></a>
+		</div>
+		<div id="suffice-finished">
+			<input class="l" type="checkbox" name="" id="suffice">
+			<label class="l" for="suffice">已通过审核</label>
+		</div>
+	</div>
+	<div class="answer-list finished">
+		<% if @surveys.length > 0 %>
+			<% @surveys.each do |survey|%>
+				<% if survey.class == Survey %>
+				<dl>
+					<dt>
+						<a class="survey" href="javascript:void(0);">
+							<i class="icon-file-text-alt mr5"></i><%= survey.title %><span class="num r"><em class="finished"><%= survey.finish %></em><em class="suffice"><%= survey.suffice %></em> / <%= survey.amount%></span>
+						</a>
+					</dt>
+					<dd class="dn">
+						<ul>
+							<% survey.interviewer_tasks.each do |task|%>
+								<li>
+									<a href="javascript:void(0);">
+										<span class="name"><i class="icon-user mr5"></i><%= task.user.nickname %></span>
+										<span class="progress-bar">
+											<span class="num"><i class="finished"><%= task.quota['rules'][0]['submitted_count']%></i><i class="suffice"><%= task.quota['rules'][0]['finished_count']%></i>/<%= task.quota['rules'][0]['amount']%></span>
+											<span class="progress finished" style="width:<%= survey.finish_percent %>;"></span><!-- 完成 -->
+											<span class="progress suffice" style="width:<%= survey.suffice_percent %>;"></span><!-- 通过 -->
+										</span>
+									</a>
+								</li>	
+							<% end %>
+						</ul>
+					</dd>
+				</dl>
+				<% end %>
+			<% end %>
+		<% end %>
+	</div>
+</div>
