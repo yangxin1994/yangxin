@@ -96,8 +96,8 @@ $(function(){
       $(this).parent().siblings('dd').slideToggle(400);
     });
 
-
     $('.cities a').click(function(){
+
         var checked = false;
         var action  = 'prev';
         if($('#suffice:checked').length > 0){
@@ -195,10 +195,7 @@ $(function(){
                         <dd class="dn">\
                             <ul>' +  interviewers  + '</ul>\
                         </dd>\
-                    </dl>'
-
-
-
+                    </dl>';
                 }
             })
             if(dl.length > 0){
@@ -208,7 +205,6 @@ $(function(){
             }
             
         })
-
     })
 
 })
