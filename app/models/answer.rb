@@ -1674,4 +1674,21 @@ class Answer
   end
 
 
+  def travel_info
+    self.write_attribute('create_time', self.created_at.strftime('%Y%m%d %H:%M:%S'))
+    self.write_attribute('during', ((self.finished_at.to_i - self.created_at.to_i) / 60.0 ).ceil)
+    if self.region
+      self.write_attribute('area', QuillCommon::AddressUtility.find_province_city_town_by_code(self.region))
+    else
+      self.write_attribute('area', '未知')
+    end
+    latlng = QuillCommon::AddressUtility.find_latlng_by_region_code(self.region)
+    lat    = latlng['lat']
+    lng    = latlng['lng'] 
+    self.write_attribute('rlat',lat)
+    self.write_attribute('rlng',lng)
+    return self
+  end
+
+
 end

@@ -31,7 +31,7 @@
 						<ul>
 							<% survey.interviewer_tasks.each do |task|%>
 								<li>
-									<a href="javascript:void(0);">
+									<a href="/travel/surveys/<%= survey.id.to_s %>/interviewers/<%= task.id.to_s %>">
 										<span class="name"><i class="icon-user mr5"></i><%= task.user.nickname %></span>
 										<span class="progress-bar">
 											<span class="num"><i class="finished"><%= task.quota['rules'][0]['submitted_count']%></i><i class="suffice"><%= task.quota['rules'][0]['finished_count']%></i>/<%= task.quota['rules'][0]['amount']%></span>

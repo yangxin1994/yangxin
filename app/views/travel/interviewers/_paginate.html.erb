@@ -1,0 +1,34 @@
+<% if common["total_page"] > 1 %>
+<div class="page">
+	<div>
+		<% 
+			extend_string = ""
+			extend_string ="&per_page=#{params[:per_page]}" if params[:per_page]
+			extend_string += "&status=#{params[:status]}" if params[:status]
+			extend_string += "&reward_type=#{params[:reward_type]}" if params[:reward_type]
+			extend_string += "&answer_status=#{params[:answer_status]}" if params[:answer_status]
+			extend_string += "&suffice=#{params[:suffice] || false }"
+		%>
+		<a href="<%= path %>?page=<%= common["previous_page"] %><%= extend_string %>" class="prev" ><i class="icon-double-angle-left"></i></a>
+		<!-- ... -->
+		<% if (common["current_page"]-2) > 1 %>
+			<a onclick="return false;" href="#">...</a>
+		<% end %>
+		<!-- two before pages -->
+		<% ((common["current_page"]-2)...common["current_page"]).select{|e| e > 0}.each do |e|	 %>
+			<a href="<%= path %>?page=<%= e %><%= extend_string %>"><%= e %></a>
+		<% end %>
+		<!-- current page -->
+		<a href="<%= path %>?page=<%= common["current_page"] %><%= extend_string %>" class="current"><%= common["current_page"] %></a>
+		<!-- two after pages -->
+		<% ((common["current_page"]+1)..(common["current_page"]+2)).select{|e| e <= common["total_page"]}.each do |e| %>
+			<a href="<%= path %>?page=<%= e %><%= extend_string %>"><%= e %></a>
+		<% end %>
+		<!-- ... -->
+		<% if (common["current_page"]+2) < common["total_page"] %>
+			<a onclick="return false;" href="#">...</a>
+		<% end %>
+		<a href="<%= path %>?page=<%= common["next_page"] %><%= extend_string %>" class="next"><i class="icon-double-angle-right"></i></a>
+	</div>
+</div>
+<% end %>

@@ -25,6 +25,14 @@ body{
 	background: #ddd;
 }
 
+.survey-title{
+	padding: 0 25px;
+	height: 40px;
+	line-height: 40px;
+	font-size: 16px;
+	background: #E3ECFD;	
+}
+
 #banner {
 	height: 32px;
 	padding: 14px 0;
@@ -397,6 +405,32 @@ body{
 			&.current{
 				color:#5E8FF2;
 			}
+			margin-right:20px;
+		}
+		.map-container{
+			border-top: 1px solid #ddd;
+			margin: 0px -20px;
+			background: #fff;	
+			.well{
+				padding: 0px 20px;
+				@include clearfix;
+				p.info{
+					width:50%;
+					float:left;
+					
+				}
+			}	
+			.answer-info{
+				border-top:1px solid #ddd;
+				ul>li{
+					height:30px;
+					line-height:30px;
+				}
+				p.line{
+					height:30px;
+					line-height:30px;
+				}
+			}				
 		}
 	}
 	.city-list{

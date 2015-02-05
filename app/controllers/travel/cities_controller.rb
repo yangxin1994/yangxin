@@ -63,7 +63,8 @@ class Travel::CitiesController < Travel::TravelController
 
 		@city    = params[:id]
 
-		tasks   = InterviewerTask.where(:city.ne => nil).select{|task| task.city == @city}
+		#tasks   = InterviewerTask.where(:city.ne => nil).select{|task| task.city == @city}
+		tasks   = InterviewerTask.where(:city.ne => nil)
 
 		@surveys = []
 		tasks.each do |task|
@@ -80,6 +81,7 @@ class Travel::CitiesController < Travel::TravelController
 			if survey.created_at.strftime('%F') >= @from && survey.created_at.strftime('%F') <= @to
 				@surveys << task.survey  if task.survey.title.match(/全国游客满意度调查/) && ! @surveys.include?(survey)
 			end
+			@surveys << task.survey  if task.survey.title.match(/全国游客满意度调查/) && ! @surveys.include?(survey)
 		end
 
 		@surveys << {year:@year,month:@month,from:@from,to:@to,quarter:@quarter,city:@city}

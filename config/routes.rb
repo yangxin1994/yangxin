@@ -669,13 +669,10 @@ OopsData::Application.routes.draw do
     resources :cities do 
     
     end
-    
-    resources :interviewers do
-    
-    end
-    
+
     resources :surveys do
-    
+      resources :interviewers do
+      end    
     end
 
     resources :answers do 

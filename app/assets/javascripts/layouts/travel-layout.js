@@ -141,7 +141,6 @@ $(function(){
         })
     })
 
-
     $('.interviewers a').click(function(){
         var city    = $('.current_city').text();
         var checked = false;
@@ -169,14 +168,14 @@ $(function(){
                     $('.interviewers a').attr('year',value.year).attr('month',value.month);
                 }else{
                     var interviewers = '';
-                    $.each(value.interviews,function(k,task){
+                    $.each(value.interviews,function(k,task){                     
                         var amount  = task.quota['rules'][0]['amount']
                         var submit  = task.quota['rules'][0]['submitted_count']
                         var suffice = task.quota['rules'][0]['finished_count']
                         var submit_percent  = submit / amount * 100 + '%';
                         var suffice_percent = suffice / amount * 100 + '%';
                         interviewers += '<li>\
-                           <a href="javascript:void(0);">\
+                           <a href="/travel/surveys/' + value['_id'] + '/interviewers/' + task['_id'] + '">\
                              <span class="name"><i class="icon-user mr5"></i>'  + task.nickname   +  '</span>\
                              <span class="progress-bar">\
                                 <span class="num"><i class="finished">' +  submit + '</i><i class="suffice">' + suffice + '</i>/' +  amount + '</span>\
@@ -205,6 +204,24 @@ $(function(){
             }
             
         })
+    })
+
+    //访问员页面，鼠标在不同的答案之间hover,引起地图marker的变化
+    $('li.real-data').hover(function(){
+        init($(this));//每次都会重新显示当前的答案的答题地址,并重新标注
+    })
+    //访问员详细页,点击复选框触发请求
+    $('.task_finished').click(function(){
+        str = window.location.href.split('&')[0]
+
+        if($('#suffice:checked').length > 0){
+            str += '&suffice=true'
+        }else{
+            str += '&suffice=false'
+        }
+
+        window.location.href = str
+
     })
 
 })
