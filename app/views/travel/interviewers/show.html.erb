@@ -57,6 +57,25 @@
   	map.addOverlay(mkr);
   }
 
+  function refresh_marker(map,obj){
+    var icon = new BMap.Icon("/assets/c_locate.jpg", new BMap.Size(40, 40), {imageSize: new BMap.Size(40, 30),anchor: new BMap.Size(20, 30)});
+
+  	if(!obj){
+  		obj = $('li.real-data:first');   			
+  	}  		
+  	lat =  obj.attr('lat');
+  	lng =  obj.attr('lng');
+  	if(!lat && !lng){
+  		lat =  obj.attr('rlat');
+  		lng =  obj.attr('rlng'); 
+  	}
+
+  	var point = new BMap.Point(lat,lng);
+  	var marker = new BMap.Marker(point,{icon:icon});
+  	map.addOverlay(marker);
+  	get_other_point(map,obj);
+  }
+
   function get_other_point(map,obj){
   	$('li.real-data').not(obj).each(function(){
   		var lat = $(this).attr('lat');
