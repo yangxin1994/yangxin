@@ -33,17 +33,17 @@
     map.addOverlay(marker);
     map.enableScrollWheelZoom();
 
-	get_other_point(obj);
+	get_other_point(map,obj);
 
   }
 
-  function addMarker(point){
+  function addMarker(map,point){
   	icon = new BMap.Icon("/assets/locate.png", new BMap.Size(30, 30), {imageSize: new BMap.Size(30, 30),anchor: new BMap.Size(15, 30),});
   	mkr  = new BMap.Marker(point, {icon: icon});
   	map.addOverlay(mkr);
   }
 
-  function get_other_point(obj){
+  function get_other_point(map,obj){
   	$('li.real-data').not(obj).each(function(){
   		var lat = $(this).attr('lat');
   		var lng = $(this).attr('lng');
@@ -53,7 +53,7 @@
   		}
   		if(lat && lng){
   			var point = new BMap.Point(lat,lng);	
-  			addMarker(point);
+  			addMarker(map,point);
   		}
   	})
   }
