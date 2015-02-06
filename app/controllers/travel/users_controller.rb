@@ -1,3 +1,4 @@
+# encoding: utf-8
 class Travel::UsersController < Travel::TravelController
 	layout false
 	def login

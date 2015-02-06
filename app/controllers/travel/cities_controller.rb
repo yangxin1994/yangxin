@@ -1,3 +1,4 @@
+# encoding: utf-8
 class Travel::CitiesController < Travel::TravelController
 	def index
 		if request.xhr?

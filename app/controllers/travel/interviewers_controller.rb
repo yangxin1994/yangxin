@@ -1,3 +1,4 @@
+# encoding: utf-8
 class Travel::InterviewersController < Travel::TravelController
 	def show
 		@survey = Survey.find(params[:survey_id])
