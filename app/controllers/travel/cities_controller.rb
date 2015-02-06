@@ -65,11 +65,7 @@ class Travel::CitiesController < Travel::TravelController
 
 		@city   = CGI::unescape(params[:id])
 		tasks   = InterviewerTask.where(:city.ne => nil).select{|task| task.city.match(/^#{@city}$/)}
-		Rails.logger.info('------------------------------------')
-		tasks.each do |task|
-			Rails.logger.info(task.inspect)
-		end
-		Rails.logger.info('------------------------------------')
+
 		@surveys = []
 		tasks.each do |task|
 			survey = task.survey
@@ -83,7 +79,7 @@ class Travel::CitiesController < Travel::TravelController
 				t.write_attributes(finish_percent:finish_percent)
 				t.write_attributes(suffice_percent:suffice_percent)
 			end
-			survey.write_attributes(interviews:survey.interviewer_tasks)
+			survey.write_attributes(interviews:survey.interviewer_tasks.where(:city => /^#{@city}$/))
 			if survey.created_at >= @from && survey.created_at <= @to
 				@surveys << task.survey  if task.survey.title.match(/全国游客满意度调查/) && ! @surveys.include?(survey)
 			end
