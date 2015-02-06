@@ -44,12 +44,12 @@
 
 	mkr.addEventListener("mouseover", function(e){
 		icon = new BMap.Icon("/assets/c_locate.jpg", new BMap.Size(40, 40), {imageSize: new BMap.Size(40, 30),anchor: new BMap.Size(20, 30)});
-		mkr.setIcon(icon);
+		this.setIcon(icon);
 	});
 
 	mkr.addEventListener("mouseout", function(e){
 		icon = new BMap.Icon("/assets/locate.png", new BMap.Size(30, 30), {imageSize: new BMap.Size(30, 30),anchor: new BMap.Size(15, 30),});
-		mkr.setIcon(icon);
+		this.setIcon(icon);
 	});
 
 	
