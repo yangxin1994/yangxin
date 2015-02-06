@@ -66,7 +66,6 @@
       <span>右键点击地图设置访问点</span>
       <div id="map" style="height:500px;"></div>
     <%- end %>
-    <div id="map" style="height:500px;"></div>
     <%- if @questions.carnival_user.present? %>
       <span><a href="/admin/answers/<%= @questions.carnival_user.answers.asc(:created_at).first.id.to_s %>/review">嘉年华预调研答案</a></span>
       <%- if @questions.carnival_user.mobile.present? %>
