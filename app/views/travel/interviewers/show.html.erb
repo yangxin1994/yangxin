@@ -40,6 +40,12 @@
   function addMarker(map,point){
   	icon = new BMap.Icon("/assets/locate.png", new BMap.Size(30, 30), {imageSize: new BMap.Size(30, 30),anchor: new BMap.Size(15, 30),});
   	mkr  = new BMap.Marker(point, {icon: icon});
+
+	mkr.addEventListener("mouseover", function(e){
+		console.log($(this))
+		console.log('-------------------')
+	});
+
   	map.addOverlay(mkr);
   }
 
