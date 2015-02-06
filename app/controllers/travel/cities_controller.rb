@@ -74,14 +74,16 @@ class Travel::CitiesController < Travel::TravelController
 				survey.write_attributes(amount:interviewer_tasks.map{|t| t.quota['rules'][0]['amount']}.inject{|sum,x| sum + x})
 				survey.write_attributes(finish:interviewer_tasks.map{|t| t.quota['submitted_count']}.inject{|sum,x| sum + x})
 				survey.write_attributes(suffice:interviewer_tasks.map{|t| t.quota['finished_count']}.inject{|sum,x| sum + x})
-				interviewer_tasks = interviewer_tasks.map! do |t|
+				interviews = []
+				interviewer_tasks.map! do |t|
 					t.write_attributes(nickname:t.user.nickname)
 					finish_percent = ( ( (t.quota['submitted_count'] / t.quota['rules'][0]['amount'].to_f) * 100 ).to_s + '%' )
 					suffice_percent = ( ( (t.quota['finished_count'] / t.quota['rules'][0]['amount'].to_f) * 100 ).to_s + '%' )
 					t.write_attributes(finish_percent:finish_percent)
 					t.write_attributes(suffice_percent:suffice_percent)
+					interviews << t
 				end
-				survey.write_attributes(interviews:interviewer_tasks)
+				survey.write_attributes(interviews:interviews)
 				@surveys << task.survey  if !@surveys.include?(survey)
 			end
 		end
