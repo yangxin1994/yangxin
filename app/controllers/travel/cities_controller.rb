@@ -70,7 +70,7 @@ class Travel::CitiesController < Travel::TravelController
 		tasks.each do |task|
 			survey = task.survey
 			if survey.created_at >= @from && survey.created_at <= @to && survey.title.match(/全国游客满意度调查/)
-				interviewer_tasks = survey.interviewer_tasks.where(title:/^#{@city}$/)
+				interviewer_tasks = survey.interviewer_tasks.where(city:/^#{@city}$/)
 				survey.write_attributes(amount:interviewer_tasks.map{|t| t.quota['rules'][0]['amount']}.inject{|sum,x| sum + x})
 				survey.write_attributes(finish:interviewer_tasks.map{|t| t.quota['submitted_count']}.inject{|sum,x| sum + x})
 				survey.write_attributes(suffice:interviewer_tasks.map{|t| t.quota['finished_count']}.inject{|sum,x| sum + x})
