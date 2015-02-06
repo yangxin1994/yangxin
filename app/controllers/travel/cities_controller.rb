@@ -88,7 +88,9 @@ class Travel::CitiesController < Travel::TravelController
 		end
 
 		@surveys << {year:@year,month:@month,from:@from,to:@to,quarter:@quarter,city:@city}
-
+		Rails.logger.info('=============================================')
+		Rails.logger.info(@surveys.inspect)
+		Rails.logger.info('=============================================')
 		if request.xhr?
 			render_json_auto @surveys
 		end
