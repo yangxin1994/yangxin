@@ -71,8 +71,8 @@ class Travel::CitiesController < Travel::TravelController
 		tasks.each do |task|
 			survey = task.survey
 			survey.write_attributes(amount:survey.interviewer_tasks.map{|t| t.quota['rules'][0]['amount']}.inject{|sum,x| sum + x})
-			survey.write_attributes(finish:survey.interviewer_tasks.map{|t| t.quota['rules'][0]['submitted_count']}.inject{|sum,x| sum + x})
-			survey.write_attributes(suffice:survey.interviewer_tasks.map{|t| t.quota['rules'][0]['finished_count']}.inject{|sum,x| sum + x})
+			survey.write_attributes(finish:survey.interviewer_tasks.map{|t| t.quota['submitted_count']}.inject{|sum,x| sum + x})
+			survey.write_attributes(suffice:survey.interviewer_tasks.map{|t| t.quota['finished_count']}.inject{|sum,x| sum + x})
 			survey.write_attributes(finish_percent: ((survey.finish / survey.amount.to_f) * 100).to_s + '%')
 			survey.write_attributes(suffice_percent:((survey.suffice / survey.amount.to_f) * 100).to_s + '%')
 			survey.interviewer_tasks.each do |t|
@@ -82,7 +82,6 @@ class Travel::CitiesController < Travel::TravelController
 			if survey.created_at >= @from && survey.created_at <= @to
 				@surveys << task.survey  if task.survey.title.match(/全国游客满意度调查/) && ! @surveys.include?(survey)
 			end
-			@surveys << task.survey  if task.survey.title.match(/全国游客满意度调查/) && ! @surveys.include?(survey)
 		end
 
 		@surveys << {year:@year,month:@month,from:@from,to:@to,quarter:@quarter,city:@city}
