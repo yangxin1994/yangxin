@@ -63,13 +63,13 @@ class Travel::CitiesController < Travel::TravelController
 		@to        = range_arr[1]
 		@quarter   = range_arr[2]		
 
-		#@city    = params[:id]
-		@city   = CGI::parse("id=#{params[:id]}")
-		Rails.logger.info('================================')
-		Rails.logger.info(@city)
-		Rails.logger.info('================================')
-		tasks   = InterviewerTask.where(:city.ne => nil).select{|task| task.city == @city}
-
+		@city   = CGI::unescape(params[:id])
+		tasks   = InterviewerTask.where(:city.ne => nil).select{|task| task.city.match(/^#{@city}$/)}
+		Rails.logger.info('------------------------------------')
+		tasks.each do |task|
+			Rails.logger.info(task.inspect)
+		end
+		Rails.logger.info('------------------------------------')
 		@surveys = []
 		tasks.each do |task|
 			survey = task.survey
