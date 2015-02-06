@@ -26,8 +26,8 @@ class Travel::CitiesController < Travel::TravelController
 		tasks.each do |task|
 			@data[task.city]             = {amount:0,finished:0,checked:0} if @data[task.city] == 0 	
 			@data[task.city][:amount]   += task.quota['rules'][0]['amount']
-			@data[task.city][:finished] += task.quota['rules'][0]['submitted_count']
-			@data[task.city][:checked]  += task.quota['rules'][0]['finished_count']
+			@data[task.city][:finished] += task.quota['submitted_count']
+			@data[task.city][:checked]  += task.quota['finished_count']
 			@data[task.city][:finish_percent] = ((@data[task.city][:finished] / @data[task.city][:amount].to_f) * 100).to_s + '%'
 			@data[task.city][:check_percent] = ((@data[task.city][:checked] / @data[task.city][:amount].to_f) * 100).to_s + '%'
 		end
