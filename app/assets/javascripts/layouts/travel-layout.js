@@ -209,7 +209,7 @@ $(function(){
     //访问员页面，鼠标在不同的答案之间hover,引起地图marker的变化
     $('li.real-data').hover(function(){
         $(this).addClass('active').siblings().removeClass('active');
-        refresh_marker(window.map,$(this);//每次都会重新显示当前的答案的答题地址,并重新标注
+        refresh_marker(window.map,$(this));//每次都会重新显示当前的答案的答题地址,并重新标注
     });
 
     //访问员详细页,点击复选框触发请求
