@@ -105,7 +105,7 @@ class InterviewerTask
       region = -1
       begin
         Rails.logger.info "2.1&&&&&&&&&&&&&&&&&&&&"
-        # region = QuillCommon::AddressUtility.find_region_code_by_latlng(*a["location"])
+        region = QuillCommon::AddressUtility.find_region_code_by_latlng(*a["location"])
         Rails.logger.info "2.2&&&&&&&&&&&&&&&&&&&&"
       rescue
         region = -1
