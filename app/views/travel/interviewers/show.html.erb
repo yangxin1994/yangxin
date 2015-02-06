@@ -29,6 +29,7 @@
   	var point = new BMap.Point(lat,lng);
   	var marker = new BMap.Marker(point,{icon:icon});
     var map = new BMap.Map("map");
+    window.map = map;
     map.centerAndZoom(point,11);
     map.addOverlay(marker);
     map.enableScrollWheelZoom();
@@ -42,9 +43,16 @@
   	mkr  = new BMap.Marker(point, {icon: icon});
 
 	mkr.addEventListener("mouseover", function(e){
-		console.log($(this))
-		console.log('-------------------')
+		var icon = new BMap.Icon("/assets/c_locate.jpg", new BMap.Size(40, 40), {imageSize: new BMap.Size(40, 30),anchor: new BMap.Size(20, 30)});
+		$(this).setIcon(icon);
 	});
+
+	mkr.addEventListener("mouseout", function(e){
+		icon = new BMap.Icon("/assets/locate.png", new BMap.Size(30, 30), {imageSize: new BMap.Size(30, 30),anchor: new BMap.Size(15, 30),});
+		$(this).setIcon(icon);
+	});
+
+	
 
   	map.addOverlay(mkr);
   }
