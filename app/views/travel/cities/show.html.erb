@@ -34,9 +34,9 @@
 									<a href="/travel/surveys/<%= survey.id.to_s %>/interviewers/<%= task.id.to_s %>">
 										<span class="name"><i class="icon-user mr5"></i><%= task.user.nickname %></span>
 										<span class="progress-bar">
-											<span class="num"><i class="finished"><%= task.quota['rules'][0]['submitted_count']%></i><i class="suffice"><%= task.quota['rules'][0]['finished_count']%></i>/<%= task.quota['rules'][0]['amount']%></span>
-											<span class="progress finished" style="width:<%= survey.finish_percent %>;"></span><!-- 完成 -->
-											<span class="progress suffice" style="width:<%= survey.suffice_percent %>;"></span><!-- 通过 -->
+											<span class="num"><i class="finished"><%= task.quota['submitted_count']%></i><i class="suffice"><%= task.quota['finished_count']%></i>/<%= task.quota['rules'][0]['amount']%></span>
+											<span class="progress finished" style="width:<%= task.finish_percent %>;"></span><!-- 完成 -->
+											<span class="progress suffice" style="width:<%= task.suffice_percent %>;"></span><!-- 通过 -->
 										</span>
 									</a>
 								</li>	

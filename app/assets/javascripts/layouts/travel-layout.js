@@ -168,10 +168,10 @@ $(function(){
                     $('.interviewers a').attr('year',value.year).attr('month',value.month);
                 }else{
                     var interviewers = '';
-                    $.each(value.interviews,function(k,task){                     
-                        var amount  = task.quota['rules'][0]['amount']
-                        var submit  = task.quota['rules'][0]['submitted_count']
-                        var suffice = task.quota['rules'][0]['finished_count']
+                    $.each(value.interviews,function(k,task){                   
+                        var amount  = task.quota['rules'][0]['amount'];
+                        var submit  = task.quota['submitted_count'];
+                        var suffice = task.quota['finished_count'];
                         var submit_percent  = submit / amount * 100 + '%';
                         var suffice_percent = suffice / amount * 100 + '%';
                         interviewers += '<li>\
