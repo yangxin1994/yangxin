@@ -79,7 +79,7 @@ class Travel::CitiesController < Travel::TravelController
 				t.write_attributes(nickname:t.user.nickname)
 			end
 			survey.write_attributes(interviews:survey.interviewer_tasks)
-			if survey.created_at.strftime('%F') >= @from && survey.created_at.strftime('%F') <= @to
+			if survey.created_at >= @from && survey.created_at <= @to
 				@surveys << task.survey  if task.survey.title.match(/全国游客满意度调查/) && ! @surveys.include?(survey)
 			end
 			@surveys << task.survey  if task.survey.title.match(/全国游客满意度调查/) && ! @surveys.include?(survey)
