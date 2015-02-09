@@ -211,6 +211,7 @@ $(function(){
         $(this).addClass('active').siblings().removeClass('active');
         refresh_marker(window.map,$(this),true);//每次都会重新显示当前的答案的答题地址,并重新标注
     },function(){
+        console.log('-------hover out -------------')
         refresh_marker(window.map,$(this));
     });
 
