@@ -211,7 +211,7 @@ $(function(){
         $(this).addClass('active').siblings().removeClass('active');
         refresh_marker(window.map,$(this),true);//每次都会重新显示当前的答案的答题地址,并重新标注
     },function(){
-        refresh_marker(window.map,$(this),false);
+        refresh_marker(window.map,$(this));
     });
 
     //访问员详细页,点击复选框触发请求
