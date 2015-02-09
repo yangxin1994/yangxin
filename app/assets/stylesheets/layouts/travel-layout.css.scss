@@ -411,15 +411,14 @@ body{
 			border-top: 1px solid #ddd;
 			margin: 0px -20px;
 			background: #fff;	
-			// .well{
-			// 	padding: 0px 20px;
-			// 	@include clearfix;
-			// 	p.info{
-			// 		width:50%;
-			// 		float:left;
-					
-			// 	}
-			// }	
+			.well{
+				padding: 0px 20px;
+				@include clearfix;
+				// p.info{
+				// 	width:50%;
+				// 	float:left;
+				// }
+			}	
 			.answer-info{
 				border-top:1px solid #ddd;
 				ul>li{
