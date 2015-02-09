@@ -58,7 +58,7 @@
   	map.addOverlay(mkr);
   }
 
-  function refresh_marker(map,obj,mark=false){
+  function refresh_marker(map,obj,mark){
   	if(mark){
   		zindex = 9999;
   		var icon = new BMap.Icon("/assets/c_locate.png", new BMap.Size(30, 30), {imageSize: new BMap.Size(30, 30),anchor: new BMap.Size(15, 30)});
@@ -89,7 +89,7 @@
 		icon = new BMap.Icon("/assets/locate.png", new BMap.Size(30, 30), {imageSize: new BMap.Size(30, 30),anchor: new BMap.Size(15, 30),});
 		this.setIcon(icon);
 	}); 
-	 	
+
   	marker.setZIndex(zindex);
   	map.addOverlay(marker);
   	get_other_point(map,obj);
