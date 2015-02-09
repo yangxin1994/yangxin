@@ -60,10 +60,8 @@
 
   function refresh_marker(map,obj,mark){
   	if(mark){
-  		zindex = 9999;
   		var icon = new BMap.Icon("/assets/c_locate.png", new BMap.Size(30, 30), {imageSize: new BMap.Size(30, 30),anchor: new BMap.Size(15, 30)});
   	}else{
-  		zindex = 999;
   		var icon = new BMap.Icon("/assets/locate.png", new BMap.Size(30, 30), {imageSize: new BMap.Size(30, 30),anchor: new BMap.Size(15, 30)});
   	}
 
@@ -79,9 +77,6 @@
 
   	var point = new BMap.Point(lat,lng);
   	var marker = new BMap.Marker(point,{icon:icon});
-  	console.log('----------------------------------')
-  	console.log(marker)
-  	console.log('----------------------------------')
 	marker.addEventListener("mouseover", function(e){
 		icon = new BMap.Icon("/assets/c_locate.png", new BMap.Size(30, 30), {imageSize: new BMap.Size(30, 30),anchor: new BMap.Size(15, 30)});
 		this.setIcon(icon);
@@ -92,9 +87,9 @@
 		this.setIcon(icon);
 	}); 
 
-  	marker.setZIndex(zindex);
+  	marker.setZIndex(9999);
   	map.addOverlay(marker);
-  	get_other_point(map,obj);
+  	//get_other_point(map,obj);
   }
 
   function get_other_point(map,obj){
