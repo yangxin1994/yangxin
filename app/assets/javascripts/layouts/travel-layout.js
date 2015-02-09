@@ -209,7 +209,31 @@ $(function(){
     //访问员页面，鼠标在不同的答案之间hover,引起地图marker的变化
     $('li.real-data').hover(function(){
         $(this).addClass('active').siblings().removeClass('active');
-        refresh_marker(window.map,$(this));//每次都会重新显示当前的答案的答题地址,并重新标注
+        lat =  $(this).attr('lat');
+        lng =  $(this).attr('lng');
+        if(!lat && !lng){
+            lat =  $(this).attr('rlat');
+            lng =  $(this).attr('rlng'); 
+        }
+    
+        var point = new BMap.Point(lat,lng);
+        var marker = new BMap.Marker(point,{icon:icon});
+        var icon = new BMap.Icon("/assets/c_locate.png", new BMap.Size(30, 30), {imageSize: new BMap.Size(30, 30),anchor: new BMap.Size(15, 30)});
+        marker.getIcon();
+        marker.setZIndex(99999);        
+    },function(){
+        lat =  $(this).attr('lat');
+        lng =  $(this).attr('lng');
+        if(!lat && !lng){
+            lat =  $(this).attr('rlat');
+            lng =  $(this).attr('rlng'); 
+        }
+    
+        var point = new BMap.Point(lat,lng);
+        var marker = new BMap.Marker(point,{icon:icon});
+        var icon = new BMap.Icon("/assets/locate.png", new BMap.Size(30, 30), {imageSize: new BMap.Size(30, 30),anchor: new BMap.Size(15, 30)});
+        marker.getIcon();
+        marker.setZIndex(999);  
     });
 
     //访问员详细页,点击复选框触发请求
