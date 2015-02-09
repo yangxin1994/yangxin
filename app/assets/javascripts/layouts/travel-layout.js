@@ -206,26 +206,34 @@ $(function(){
         })
     })
 
-    function return_marker(obj){
+    //访问员页面，鼠标在不同的答案之间hover,引起地图marker的变化
+    $('li.real-data').hover(function(){
+        $(this).addClass('active').siblings().removeClass('active');
         lat =  obj.attr('lat');
         lng =  obj.attr('lng');
         if(!lat && !lng){
             lat =  obj.attr('rlat');
             lng =  obj.attr('rlng'); 
         }
+    
         var point = new BMap.Point(lat,lng);
         var marker = new BMap.Marker(point,{icon:icon});
-        return marker;
-    }
-
-    //访问员页面，鼠标在不同的答案之间hover,引起地图marker的变化
-    $('li.real-data').hover(function(){
-        $(this).addClass('active').siblings().removeClass('active');
-        marker = return_marker($(this));
-        marker.mouseover();    
+        var icon = new BMap.Icon("/assets/c_locate.png", new BMap.Size(30, 30), {imageSize: new BMap.Size(30, 30),anchor: new BMap.Size(15, 30)});
+        marker.setIcon(icon);
+        marker.setZIndex(99999);
     },function(){
-        marker = return_marker($(this));
-        marker.mouseout(); 
+        lat =  obj.attr('lat');
+        lng =  obj.attr('lng');
+        if(!lat && !lng){
+            lat =  obj.attr('rlat');
+            lng =  obj.attr('rlng'); 
+        }
+    
+        var point = new BMap.Point(lat,lng);
+        var marker = new BMap.Marker(point,{icon:icon});
+        var icon = new BMap.Icon("/assets/locate.png", new BMap.Size(30, 30), {imageSize: new BMap.Size(30, 30),anchor: new BMap.Size(15, 30)});
+        marker.setIcon(icon);
+        marker.setZIndex(999); 
     });
 
     //访问员详细页,点击复选框触发请求
