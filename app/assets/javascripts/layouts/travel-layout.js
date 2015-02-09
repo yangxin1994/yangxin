@@ -215,6 +215,7 @@ $(function(){
         }
         var point = new BMap.Point(lat,lng);
         var marker = new BMap.Marker(point,{icon:icon});
+        return marker;
     }
 
     //访问员页面，鼠标在不同的答案之间hover,引起地图marker的变化
