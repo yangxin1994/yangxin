@@ -43,7 +43,7 @@
   	mkr  = new BMap.Marker(point, {icon: icon});
 
 	mkr.addEventListener("mouseover", function(e){
-		icon = new BMap.Icon("/assets/c_locate.png", new BMap.Size(40, 40), {imageSize: new BMap.Size(40, 30),anchor: new BMap.Size(20, 30)});
+		icon = new BMap.Icon("/assets/c_locate.png", new BMap.Size(30, 30), {imageSize: new BMap.Size(30, 30),anchor: new BMap.Size(15, 30)});
 		this.setIcon(icon);
 	});
 
@@ -58,7 +58,7 @@
   }
 
   function refresh_marker(map,obj){
-    var icon = new BMap.Icon("/assets/c_locate.png", new BMap.Size(40, 40), {imageSize: new BMap.Size(40, 30),anchor: new BMap.Size(20, 30)});
+    var icon = new BMap.Icon("/assets/c_locate.png", new BMap.Size(30, 30), {imageSize: new BMap.Size(30, 30),anchor: new BMap.Size(15, 30)});
 
   	if(!obj){
   		obj = $('li.real-data:first');   			
