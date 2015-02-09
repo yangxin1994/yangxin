@@ -79,7 +79,9 @@
 
   	var point = new BMap.Point(lat,lng);
   	var marker = new BMap.Marker(point,{icon:icon});
-
+  	console.log('----------------------------------')
+  	console.log(marker)
+  	console.log('----------------------------------')
 	marker.addEventListener("mouseover", function(e){
 		icon = new BMap.Icon("/assets/c_locate.png", new BMap.Size(30, 30), {imageSize: new BMap.Size(30, 30),anchor: new BMap.Size(15, 30)});
 		this.setIcon(icon);
