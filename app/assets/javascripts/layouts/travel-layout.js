@@ -209,11 +209,11 @@ $(function(){
     //访问员页面，鼠标在不同的答案之间hover,引起地图marker的变化
     $('li.real-data').hover(function(){
         $(this).addClass('active').siblings().removeClass('active');
-        lat =  obj.attr('lat');
-        lng =  obj.attr('lng');
+        lat =  $(this).attr('lat');
+        lng =  $(this).attr('lng');
         if(!lat && !lng){
-            lat =  obj.attr('rlat');
-            lng =  obj.attr('rlng'); 
+            lat =  $(this).attr('rlat');
+            lng =  $(this).attr('rlng'); 
         }
     
         var point = new BMap.Point(lat,lng);
@@ -222,11 +222,11 @@ $(function(){
         marker.setIcon(icon);
         marker.setZIndex(99999);
     },function(){
-        lat =  obj.attr('lat');
-        lng =  obj.attr('lng');
+        lat =  $(this).attr('lat');
+        lng =  $(this).attr('lng');
         if(!lat && !lng){
-            lat =  obj.attr('rlat');
-            lng =  obj.attr('rlng'); 
+            lat =  $(this).attr('rlat');
+            lng =  $(this).attr('rlng'); 
         }
     
         var point = new BMap.Point(lat,lng);
