@@ -58,8 +58,14 @@
   	map.addOverlay(mkr);
   }
 
-  function refresh_marker(map,obj){
-    var icon = new BMap.Icon("/assets/c_locate.png", new BMap.Size(30, 30), {imageSize: new BMap.Size(30, 30),anchor: new BMap.Size(15, 30)});
+  function refresh_marker(map,obj,mark=false){
+  	if(mark){
+  		zindex = 9999;
+  		var icon = new BMap.Icon("/assets/c_locate.png", new BMap.Size(30, 30), {imageSize: new BMap.Size(30, 30),anchor: new BMap.Size(15, 30)});
+  	}else{
+  		zindex = 999;
+  		var icon = new BMap.Icon("/assets/locate.png", new BMap.Size(30, 30), {imageSize: new BMap.Size(30, 30),anchor: new BMap.Size(15, 30)});
+  	}
 
   	if(!obj){
   		obj = $('li.real-data:first');   			
@@ -73,7 +79,18 @@
 
   	var point = new BMap.Point(lat,lng);
   	var marker = new BMap.Marker(point,{icon:icon});
-  	marker.setZIndex(99999);
+
+	marker.addEventListener("mouseover", function(e){
+		icon = new BMap.Icon("/assets/c_locate.png", new BMap.Size(30, 30), {imageSize: new BMap.Size(30, 30),anchor: new BMap.Size(15, 30)});
+		this.setIcon(icon);
+	});
+
+	marker.addEventListener("mouseout", function(e){
+		icon = new BMap.Icon("/assets/locate.png", new BMap.Size(30, 30), {imageSize: new BMap.Size(30, 30),anchor: new BMap.Size(15, 30),});
+		this.setIcon(icon);
+	}); 
+	 	
+  	marker.setZIndex(zindex);
   	map.addOverlay(marker);
   	get_other_point(map,obj);
   }
