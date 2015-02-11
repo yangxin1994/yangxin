@@ -218,7 +218,12 @@ class Admin::SurveysController < Admin::AdminController
   end
 
   def create_supervisor
-    Supervisor.create(survey_id:params[:id],user_id:params[:user_id])
+    s = Survey.find(params[:id])
+    supervisor = Supervisor.where(user_id:params[:user_id]).first
+    supervisor = Supervisor.create(user_id:params[:user_id]) unless supervisor.present?
+    s.supervisors << supervisor
+    s.save
+    
     redirect_to :action => 'supervisor'
   end
 

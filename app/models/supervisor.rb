@@ -7,8 +7,7 @@ class Supervisor
   DELETED = 0
 
   field :status,    :type => Integer,default:NORMAL
-
-  belongs_to :survey
+  has_and_belongs_to_many :surveys
   belongs_to :user
 
 

@@ -19,8 +19,9 @@ class Travel::CitiesController < Travel::TravelController
 
 
 		@data = Hash.new(0)
-
-		survey_ids = Survey.where(title:/全国游客满意度调查/,:created_at.gte => @from,:created_at.lte => @to).map(&:id)
+		supervisor = Supervisor.where(user_id:current_user.id.to_s).first
+		survey_ids = supervisor.surveys.where(:created_at.gte => @from,:created_at.lte => @to).map(&:id)
+		# survey_ids = Survey.where(title:/全国游客满意度调查/,:created_at.gte => @from,:created_at.lte => @to).map(&:id)
 
 		tasks      = InterviewerTask.where(:survey_id.in => survey_ids)
 
