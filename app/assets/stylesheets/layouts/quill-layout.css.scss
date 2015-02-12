@@ -97,7 +97,7 @@ body {text-align: center;}
 		@include inline-block;
 		vertical-align: middle;
 		@include size(36px, 16px);
-		margin-right: 20px;
+		// margin-right: 20px;
 		@include od-button-sprite(option);
 		.BallonToolTip{
 			width:21px;
