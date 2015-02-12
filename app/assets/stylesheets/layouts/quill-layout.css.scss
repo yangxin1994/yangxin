@@ -43,12 +43,12 @@ body {text-align: center;}
 	a.logo {
 		float: left;
 		background: image-url("logo.png") no-repeat 0 0;
-		@include size(248px, 32px);
+		@include size(460px, 32px);
 	}
 
 	ul.menus {
 		float: left;
-		margin-left: 50px;
+		// margin-left: 50px;
 		li {
 			float: left;
 			a {
@@ -74,11 +74,13 @@ body {text-align: center;}
 /*搜索框*/
 #search_form {
 	float: right;
-	width:300px;
+	// width:300px;
+	width:250px;
 	margin-top: 12px;
 	input.search{
 		height:16px;
-		width:180px;
+		// width:180px;
+		width:136px;
 		margin-right:3px;
 		padding-left:5px;
 	}
