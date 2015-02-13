@@ -7,14 +7,14 @@ class InterviewerTask
   include FindTool
   
   field :quota, :type => Hash
+  field :city,:type => String
   # 0(doing), 1(under review), 2(finished)
   field :status, :type => Integer, default: 0
-
   belongs_to :survey
   belongs_to :user
   has_many :answers
 
-  def self.create_interviewer_task(survey_id, user_id, amount)
+  def self.create_interviewer_task(survey_id, user_id, amount,city)
     survey = Survey.find(survey_id)
     interviewer = User.find(user_id)
     return ErrorEnum::INTERVIEWER_NOT_EXIST if !interviewer.is_interviewer?
@@ -25,7 +25,7 @@ class InterviewerTask
       "finished_count" => 0,
       "submitted_count" => 0,
       "rejected_count" => 0}
-    InterviewerTask.create(quota: quota, user: interviewer, survey: survey)
+    InterviewerTask.create(quota: quota, user: interviewer, survey: survey,city:city)
   end
 
   def update_amount(amount)
@@ -105,7 +105,7 @@ class InterviewerTask
       region = -1
       begin
         Rails.logger.info "2.1&&&&&&&&&&&&&&&&&&&&"
-        # region = QuillCommon::AddressUtility.find_region_code_by_latlng(*a["location"])
+        region = QuillCommon::AddressUtility.find_region_code_by_latlng(*a["location"])
         Rails.logger.info "2.2&&&&&&&&&&&&&&&&&&&&"
       rescue
         region = -1
@@ -156,4 +156,31 @@ class InterviewerTask
     self.write_attribute(:update_time, self.survey.last_update_time)
 		return self
 	end
+
+  def interviewer_name
+    self.user.try(:nickname)
+  end
+
+  def amount
+    self.quota["rules"][0]["amount"]
+  end
+
+  def submitted_count
+    self.quota["rules"][0]["submitted_count"]
+  end
+
+
+  def finished_count
+    self.quota["rules"][0]["finished_count"]
+  end
+
+  def  submitted_percent
+    ((submitted_count / amount.to_f) * 100 ).to_s + '%'
+  end
+
+  def  finished_percent
+    ((finished_count / amount.to_f) * 100 ).to_s + '%'
+  end
+  
+
 end

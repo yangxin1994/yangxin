@@ -1,0 +1,30 @@
+<% content_for :app_head do %>
+	<%= stylesheet_link_tag    "layouts/travel-layout" %>
+	<%= javascript_include_tag "layouts/travel-layout" %>
+	<%= yield :head %>
+<% end %>
+<% content_for :app_content do %>
+
+<div class="user-panel">
+	<div class="logo">
+		<b>全国游客满意度调查</b>
+		<p>现场问卷调查PAD调研系统</p>
+	</div>
+	<form action="javascript:void(0);">
+		<input type="text" name="email" id="login_email" placeholder="邮箱">
+		<input type="password" name="password" id="login_password" placeholder="密码">
+<!-- 		
+		<div class="autoLogin">
+			<input class="l" type="checkbox" name="" id="autoLogin">
+			<label class="l" for="autoLogin">下次自动登录</label>
+			<a href="javascript:void(0);" class="forget-password r">忘记密码了？</a>
+		</div> 
+-->
+		<input class="od-button login-btn" type="submit" value="登录">
+	</form>
+</div>
+
+<% end %>
+
+<%= render :template => 'layouts/app' %>
+

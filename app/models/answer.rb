@@ -121,9 +121,13 @@ class Answer
 
 
   after_create do |doc|
-    doc.region = QuillCommon::AddressUtility.find_address_code_by_ip(doc.ip_address) 
-    doc.save
+    unless doc.region.present?
+      doc.region = QuillCommon::AddressUtility.find_address_code_by_ip(doc.ip_address) 
+      doc.save
+    end
   end
+
+
 
 
   public
@@ -1190,11 +1194,31 @@ class Answer
     answer["question_content"] = []
     answer.answer_content.each do |key, val|
       # key is question id
-      # val is like of { "selection" : [ NumberLong("1351400998231222"), NumberLong("3055564856809646") ], "text_input" : "" }
+      # val is like of { "selection" : [ NumberLong("1351400998231222"), NumberLong("3055564856809646") ], "text_input" : "" }      
       question = Question.find_by_id(key)
       next unless question
-      show_answer = {'question_type' => question.question_type, 
-          "title" => question.content["text"]}
+      show_answer = {'question_type' => question.question_type,"title" => question.content["text"]}
+
+      if answer.attributes['attachments'].present?
+        attachements = answer.attachments["#{key}"]
+      end
+      
+      if attachements.present?
+        image_arr = [1,8]
+        audio_arr = [4,32]
+        video_arr = [2,16]
+        atta_data = {'images' => [],'audios' => [],'videos' => []}
+        attachements.each do |attch|
+          material  = Material.find("#{attch}")
+          if material.present?
+            atta_data['images'] << "#{attch}"  if image_arr.include?(material.material_type)
+            atta_data['audios'] << "#{attch}"  if audio_arr.include?(material.material_type)
+            atta_data['videos'] << "#{attch}"  if video_arr.include?(material.material_type)
+          end
+        end
+        show_answer.merge!({'attachements'=> atta_data})
+      end
+
 
       case question.question_type
       when QuestionTypeEnum::CHOICE_QUESTION
@@ -1536,6 +1560,7 @@ class Answer
         answer["question_content"] << show_answer
       end 
     end
+
     answer
   end
 
@@ -1688,4 +1713,19 @@ class Answer
     end
   end
 
+  def travel_info
+    self.write_attribute('create_time', self.created_at.strftime('%Y%m%d %H:%M:%S'))
+    self.write_attribute('during', ((self.finished_at.to_i - self.created_at.to_i) / 60.0 ).ceil)
+    if self.region
+      self.write_attribute('area', QuillCommon::AddressUtility.find_province_city_town_by_code(self.region))
+    else
+      self.write_attribute('area', '未知')
+    end
+    latlng = QuillCommon::AddressUtility.find_latlng_by_region_code(self.region)
+    lat    = latlng['lat']
+    lng    = latlng['lng'] 
+    self.write_attribute('rlat',lat)
+    self.write_attribute('rlng',lng)
+    return self
+  end
 end

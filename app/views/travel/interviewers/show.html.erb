@@ -1,0 +1,157 @@
+<% content_for :head do %>
+  <%= javascript_include_tag "pages/admin/answers/review-bundle" %>
+  <script>
+
+  </script>
+
+<script type="text/javascript">
+  function loadJScript() {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src = "http://api.map.baidu.com/api?v=2.0&ak=A9e3c2846f0b707f92a5c6c54dbd9d11&callback=init";
+    document.body.appendChild(script);
+  }
+
+  function init(obj) {
+
+    var icon = new BMap.Icon("/assets/c_locate.png", new BMap.Size(30, 30), {imageSize: new BMap.Size(30, 30),anchor: new BMap.Size(15, 30)});
+
+  	if(!obj){
+  		obj = $('li.real-data:first');   			
+  	}  		
+  	lat =  obj.attr('lat');
+  	lng =  obj.attr('lng');
+  	if(!lat && !lng){
+  		lat =  obj.attr('rlat');
+  		lng =  obj.attr('rlng'); 
+  	}
+
+  	var point = new BMap.Point(lat,lng);
+  	var marker = new BMap.Marker(point,{icon:icon});
+  	marker.setZIndex(99999);
+    var map = new BMap.Map("map");
+    window.map = map;
+    map.centerAndZoom(point,11);
+    map.addOverlay(marker);
+    map.enableScrollWheelZoom();
+
+	get_other_point(map,obj);
+
+  }
+
+  function addMarker(map,point){
+  	icon = new BMap.Icon("/assets/locate.png", new BMap.Size(30, 30), {imageSize: new BMap.Size(30, 30),anchor: new BMap.Size(15, 30),});
+  	mkr  = new BMap.Marker(point, {icon: icon});
+
+	mkr.addEventListener("mouseover", function(e){
+		icon = new BMap.Icon("/assets/c_locate.png", new BMap.Size(30, 30), {imageSize: new BMap.Size(30, 30),anchor: new BMap.Size(15, 30)});
+		this.setIcon(icon);
+	});
+
+	mkr.addEventListener("mouseout", function(e){
+		icon = new BMap.Icon("/assets/locate.png", new BMap.Size(30, 30), {imageSize: new BMap.Size(30, 30),anchor: new BMap.Size(15, 30),});
+		this.setIcon(icon);
+	});
+
+	
+	mkr.setZIndex(999);
+  	map.addOverlay(mkr);
+  }
+
+  function refresh_marker(map,obj,mark){
+  	if(mark){
+  		var icon = new BMap.Icon("/assets/c_locate.png", new BMap.Size(30, 30), {imageSize: new BMap.Size(30, 30),anchor: new BMap.Size(15, 30)});
+  	}else{
+  		var icon = new BMap.Icon("/assets/locate.png", new BMap.Size(30, 30), {imageSize: new BMap.Size(30, 30),anchor: new BMap.Size(15, 30)});
+  	}
+
+  	if(!obj){
+  		obj = $('li.real-data:first');   			
+  	}  		
+  	lat =  obj.attr('lat');
+  	lng =  obj.attr('lng');
+  	if(!lat && !lng){
+  		lat =  obj.attr('rlat');
+  		lng =  obj.attr('rlng'); 
+  	}
+
+  	var point = new BMap.Point(lat,lng);
+  	var marker = new BMap.Marker(point,{icon:icon});
+	marker.addEventListener("mouseover", function(e){
+		icon = new BMap.Icon("/assets/c_locate.png", new BMap.Size(30, 30), {imageSize: new BMap.Size(30, 30),anchor: new BMap.Size(15, 30)});
+		this.setIcon(icon);
+	});
+
+	marker.addEventListener("mouseout", function(e){
+		icon = new BMap.Icon("/assets/locate.png", new BMap.Size(30, 30), {imageSize: new BMap.Size(30, 30),anchor: new BMap.Size(15, 30),});
+		this.setIcon(icon);
+	}); 
+
+  	marker.setZIndex(9999);
+  	map.addOverlay(marker);
+  	//get_other_point(map,obj);
+  }
+
+  function get_other_point(map,obj){
+  	$('li.real-data').not(obj).each(function(){
+  		var lat = $(this).attr('lat');
+  		var lng = $(this).attr('lng');
+  		if(!lat && !lng){
+  			lat = $(this).attr('rlat');
+  			lng = $(this).attr('rlng');
+  		}
+  		if(lat && lng){
+  			var point = new BMap.Point(lat,lng);	
+  			addMarker(map,point);
+  		}
+  	})
+  }
+
+  window.onload = loadJScript;
+</script>
+
+
+<% end %>
+<div class="container" id="answers">
+	<div class="title">
+		<a href="/travel"><i class="icon icon-map-marker"></i>选择城市</a>
+		<i class="icon-double-angle-right"></i>
+		<a href="javascript:history.back();" class='current-city'><%= @task.city %></a>
+		<i class="icon-double-angle-right"></i>
+		<a class="current" href="javascript:void(0);"><%= @task.user.try(:nickname)%></a>
+	</div>
+	<div class="survey-title">
+		<%= @survey.title %>
+	</div>	
+	<div class="option-panel">
+		<div id="suffice-finished" class='task_finished'>
+			<input class="l" type="checkbox" name="" id="suffice" <% if params[:suffice] == 'true'%> checked='checked' <% end %>>
+			<label class="l" for="suffice">已通过审核</label>
+		</div>
+	</div>
+	<div class="map" id='map'>
+		
+	</div>
+	<div class="survey-list">
+		<ul>
+			<li class="thead">
+				<span class="date">日期</span>
+				<span class="address">访问地点</span>
+				<span class="time">用时</span>
+				<span class="view">查看</span>
+			</li>
+			<% @answers['data'].each_with_index do |answer,index|%>
+				<li class="real-data <%= 'active' if index == 0%>" lat="<%= answer.latitude%>" lng="<%= answer.longitude %>" rlat="<%= answer.rlat%>" rlng="<%= answer.rlng %>">
+					<span class="date"><%= answer.create_time %></span>
+					<span class="address"><%= answer.area %></span>
+					<span class="time"><%= answer.during %>分钟</span>
+					<span class="view">
+						<a href="/travel/answers/<%=answer.id.to_s%>"><i class="icon-search"></i></a>
+						<!-- <a href="javascript:void(0);"><i class="icon-download-alt"></i></a> -->
+					</span>
+				</li>			
+			<% end %>
+		</ul>
+		<%= render :partial => "paginate", :locals => {:common => @answers, :path => request.url.split('?').first} %>
+	</div>
+</div>

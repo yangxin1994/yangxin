@@ -1,0 +1,22 @@
+<div id="cities">
+	<div class="title">
+		<a href="javascript:void(0);"><i class="icon icon-map-marker"></i>选择城市</a>
+	</div>
+	<div class="option-panel">
+			<div id="quarter" class='cities'>
+				<a href="javascript:void(0);" class="prev" year="<%= @data['year'] %>" month="<%= @data['month'] %>"><i class="icon-angle-left"></i></a>
+				<span class="cur-quarter"><%= @quarter %></span>
+				<a href="javascript:void(0);" class="next" year="<%= @data['year'] %>" month="<%= @data['month'] %>"><i class="icon-angle-right"></i></a>
+			</div>
+
+			<div id="suffice-finished">
+				<input class="l" type="checkbox" name="" id="suffice">
+				<label class="l" for="suffice">已通过审核</label>
+			</div>
+		</div>
+	<div class="city-list finished">
+		<ul>
+			<%= render :partial => 'city_list', :locals => { :citis => @data } %>
+		</ul>
+	</div>
+</div>

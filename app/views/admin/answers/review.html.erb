@@ -5,6 +5,32 @@
     window.longitude = <%= @questions.longitude.to_f %>
     window.answer_id = "<%= @questions._id.to_s %>"
   </script>
+
+<script type="text/javascript">
+  function loadJScript() {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src = "http://api.map.baidu.com/api?v=2.0&ak=A9e3c2846f0b707f92a5c6c54dbd9d11&callback=init";
+    document.body.appendChild(script);
+  }
+  function init() {
+    var map = new BMap.Map("map");
+    if(window.latitude == 0 && window.longitude == 0){
+      var point = new BMap.Point(116.404, 39.915);
+    }else{
+      var point = new BMap.Point(window.latitude, window.longitude);
+    }
+    map.centerAndZoom(point,15);  
+
+    var marker = new BMap.Marker(point);
+    map.addOverlay(marker);
+    marker.setAnimation(BMAP_ANIMATION_BOUNCE);
+    map.enableScrollWheelZoom();
+  }  
+  window.onload = loadJScript;
+</script>
+
+
 <% end %>
 
 <% content_for :sidebar do %>

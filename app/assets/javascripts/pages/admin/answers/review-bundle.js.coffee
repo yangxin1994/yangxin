@@ -1,30 +1,22 @@
-#= require soso_map
 $ ->
   mark = null
-  if window.latitude == 0 && window.longitude == 0
-    map = new soso.maps.Map(document.getElementById('map'))
-  else
-    center = new soso.maps.LatLng(window.latitude, window.longitude)
-    map = new soso.maps.Map(document.getElementById('map'),{center: center, zoom: 12})
-    marker = new soso.maps.Marker({position: center, map: map})
-
-  soso.maps.event.addListener(map, "rightclick", (event) ->
-    answer_id = window.answer_id
-    $.ajax
-      url: "/admin/answers/#{answer_id}/set_location"
-      data: { lat: event.latLng.getLat(), lng: event.latLng.getLng()}
-      method:"PUT"
-      success: (ret)->
-        if ret.success
-          alert_msg.show('success', '成功设置访问点: [' + event.latLng.getLat() + ', ' + event.latLng.getLng() + ']')
-          point = new soso.maps.LatLng(event.latLng.getLat(), event.latLng.getLng())
-          marker.setVisible(false)
-          marker = new soso.maps.Marker({position: point, map: map})
-        else
-          alert_msg.show('error', "操作失败-#{ret.value.error_code}-#{ret.value.error_code}")
-      error: (ret)->
-          alert_msg.show('error', "操作失败 (╯‵□′)╯︵┻━┻")
-  )
+  # soso.maps.event.addListener(map, "rightclick", (event) ->
+  #   answer_id = window.answer_id
+  #   $.ajax
+  #     url: "/admin/answers/#{answer_id}/set_location"
+  #     data: { lat: event.latLng.getLat(), lng: event.latLng.getLng()}
+  #     method:"PUT"
+  #     success: (ret)->
+  #       if ret.success
+  #         alert_msg.show('success', '成功设置访问点: [' + event.latLng.getLat() + ', ' + event.latLng.getLng() + ']')
+  #         point = new soso.maps.LatLng(event.latLng.getLat(), event.latLng.getLng())
+  #         marker.setVisible(false)
+  #         marker = new soso.maps.Marker({position: point, map: map})
+  #       else
+  #         alert_msg.show('error', "操作失败-#{ret.value.error_code}-#{ret.value.error_code}")
+  #     error: (ret)->
+  #         alert_msg.show('error', "操作失败 (╯‵□′)╯︵┻━┻")
+  # )
 
   review = (is_pass, message_content, _this)->
     $this = $(_this)

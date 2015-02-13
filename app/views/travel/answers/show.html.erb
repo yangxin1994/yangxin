@@ -1,0 +1,141 @@
+<% content_for :head do %>
+  <%= javascript_include_tag "pages/admin/answers/review-bundle" %>
+  <script>
+    window.latitude = <%= @questions.latitude.to_f %>
+    window.longitude = <%= @questions.longitude.to_f %>
+    window.answer_id = "<%= @questions._id.to_s %>"
+  </script>
+
+<script type="text/javascript">
+  function loadJScript() {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src = "http://api.map.baidu.com/api?v=2.0&ak=A9e3c2846f0b707f92a5c6c54dbd9d11&callback=init";
+    document.body.appendChild(script);
+  }
+  function init() {
+    var map = new BMap.Map("map");
+    if(window.latitude == 0 && window.longitude == 0){
+      var point = new BMap.Point(116.404, 39.915);
+    }else{
+      var point = new BMap.Point(window.latitude, window.longitude);
+    }
+    map.centerAndZoom(point,15);  
+
+    var marker = new BMap.Marker(point);
+    map.addOverlay(marker);
+    marker.setAnimation(BMAP_ANIMATION_BOUNCE);
+    map.enableScrollWheelZoom();
+  }  
+  window.onload = loadJScript;
+</script>
+
+
+<% end %>
+
+<div class="container">
+  <div class="title">
+    <a href="javascript:history.back();"><i class="icon icon-circle-arrow-left"></i>返回</a>
+    <%= @survey.title %>
+    <div class='map-container'>
+        <div class="well well-small">
+          <%- if @questions.interviewer_task.present? %>
+            <p class='info'> 访问员:<%= @questions.interviewer_task.user.email  %></p>
+          <%- end %>
+          <p class='info'> 开始答题时间:<%= @questions.created_at.strftime('%Y-%m-%d %H:%M:%S')  %></p>
+          <p class='info'> 答题时长: <%= ((@questions.finished_at - @questions.created_at.to_i) / 60.0 ).ceil if @questions.finished_at.present?   %> 分钟</p>
+          <p class='info'> IP地址: <%= @questions.ip_address %> <%= QuillCommon::AddressUtility.find_province_city_town_by_code(@questions.region)  %></p>
+          <p class="red info "> <%= @questions.audit_message %> </p>
+          <%- if @questions.interviewer_task.present? %>
+            <div id="map" style="height:500px;"></div>
+          <%- end %>
+        </div>
+        <% qcount = 0 %>
+        <div class='answer-info'>
+        <% @questions['question_content'].each do |question| %>
+          <div class="well well-small">
+            <p> Q<%= "#{qcount += 1}. <#{question['question_type_label']}> #{"[逻辑控制]" if question['is_logic_control']} #{question['title']}" %> 
+            </p>
+            <ul>
+              <% question["choices"].try('each') do |choice| %>
+              <li>
+                <%= choice %> 
+              </li>
+              <% end -%>
+              <p>-----------</p>
+              <% if question["rows"].present? %>
+                <% question["rows"].each_with_index do |row, i| %>
+                  <li>
+                    <%= "#{row} : #{question["rows_selected_choices"][i][0]}" %>
+                  </li>
+                <% end %>
+              <% elsif question["selected_choices"].present? %>
+                <% question["selected_choices"].try('each') do |choice| %>
+                <li>
+                  <%= choice %>
+                </li>
+                <% end -%>
+              <% elsif question["selected_labels"].present? %>
+                <% question["selected_labels"].try('each_with_index') do |label, index| %>
+                  <li>
+                    <%= question["choices"][index] + ": " + label %>
+                  </li>
+                <% end %>
+              <% elsif question["question_type"] == QuestionTypeEnum::SORT_QUESTION %>
+                <% question["items"].try('each') do |item| %>
+                  <li>
+                    <%= item["title"] + ": " + item["content"].to_s %>
+                  </li>
+                <% end %>
+              <% elsif question["question_type"] == QuestionTypeEnum::CONST_SUM_QUESTION %>
+                <% question["items"].try('each') do |item| %>
+                  <li>
+                    <%= item["title"] + ": " + item["content"].to_s %>
+                  </li>
+                <% end %>
+              <% end %>
+        
+              <% if question['attachements']%>
+                <% if question['attachements']['images'].present?%>
+                  <% question['attachements']['images'].each_with_index do |img,idx| %>
+                    <li>
+                      <a href="/admin/answers/atachement?aid=<%=img%>">下载图片<%= idx + 1 %></a>
+                    </li>
+                  <% end %>
+                <% end %>
+                <% if question['attachements']['audios'].present?%>
+                  <% question['attachements']['audios'].each_with_index do |audio,idx| %>
+                    <li>
+                      <a href="/admin/answers/atachement?aid=<%=audio%>">下载音频<%= idx + 1 %></a>
+                    </li>
+                  <% end %>
+                <% end %>
+                <% if question['attachements']['videos'].present?%>
+                  <% question['attachements']['videos'].each_with_index do |video,idx| %>
+                    <li>
+                      <a href="/admin/answers/atachement?aid=<%=video%>">下载视频<%= idx + 1 %></a>
+                    </li>
+                  <% end %>
+                <% end %>
+              <% end %>
+        
+              <p>
+                <%= question["content"] %>
+                <%= question["address"] %>
+                <%= question["detail"] %>
+                <%= question["postcode"] %>
+              </p>
+        
+            </ul>
+          </div>
+        <% end -%>          
+        </div>
+
+
+
+    
+    </div>
+  </div>
+</div>
+
+

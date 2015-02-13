@@ -16,6 +16,13 @@ class Admin::AnswersController < Admin::AdminController
     end
   end
 
+  def atachement  
+    m = Material.find_by_id(params[:aid])
+    if m.present?
+      send_file "#{Rails.root.to_s}/public/" + m.value
+    end
+  end
+
   def show
     if current_user.is_admin?
       survey = Survey.find(params[:id])

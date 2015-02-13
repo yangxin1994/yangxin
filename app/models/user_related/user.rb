@@ -23,7 +23,8 @@ class User
   CLIENT = 2
   ADMIN = 4
   ANSWER_AUDITOR = 8
-  INTERVIEWER = 16  
+  INTERVIEWER = 16
+  SUPERVISOR = 32  
 
   field :email, :type => String
   field :email_activation, :type => Boolean, default: false
@@ -61,9 +62,10 @@ class User
   # interviewer
   # entry clerk
 
-  # 1 for sample, 2 for client, 4 for admin, 8 for answer auditor, 16 for interviewer
+  # 1 for sample, 2 for client, 4 for admin, 8 for answer auditor, 16 for interviewer  32 for supervisor
   field :user_role, :type => Integer, default: 1
   field :interviewer, :type => Boolean, default: false
+  field :supervisor, :type => Boolean, default: false
   field :is_block, :type => Boolean, default: false
 
   # 0 normal users
@@ -629,6 +631,11 @@ class User
 
   def is_interviewer?
     return (self.user_role.to_i & INTERVIEWER) > 0
+  end
+
+  def is_supervisor?
+    return true if self.user_role.to_i == SUPERVISOR || [4,5,7].include?(self.user_role.to_i)
+    return false
   end
 
   def make_mobile_rss_activate(code)

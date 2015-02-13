@@ -242,7 +242,7 @@ class Order
     return false if self.status != WAIT
     return false if self.type != MOBILE_CHARGE
     self.status = HANDLE
-    self.esai_status = ESAI_HANDLE
+    #self.esai_status = ESAI_HANDLE
     self.handled_at = Time.now
     self.save
 

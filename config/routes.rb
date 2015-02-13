@@ -345,6 +345,8 @@ OopsData::Application.routes.draw do
       member do
         get :reward_schemes, :promote, :more_info, :bind_question, :cost_info, :promote_info, :sample_attributes, :interviewer_task, :new_interviewer, :questions, :presurvey, :prequestions
         post :update_promote, :create_interviewer
+        get :supervisor,:new_supervisor
+        post :create_supervisor
         put :update_promote, :set_info, :bind_question, :star, :update_sample_attribute_for_promote, :update_amount
         delete :destroy_attributes, :bind_question, :remove_sample_attribute_for_promote
       end
@@ -386,6 +388,9 @@ OopsData::Application.routes.draw do
       member do
         get :review, :to_csv
         put :reject, :batch_reject, :batch_pass, :set_location
+      end
+      collection do
+        get :atachement
       end
     end
 
@@ -504,6 +509,8 @@ OopsData::Application.routes.draw do
     resources :sample_servers
 
     resources :interviewers do
+    end
+    resources :supervisors do 
     end
 
   end
@@ -652,10 +659,34 @@ OopsData::Application.routes.draw do
     end
   end
 
+  namespace :travel do 
+    resources :users do
+      collection do 
+        get 'login'  
+      end 
+      
+    end
+
+    resources :cities do 
+    
+    end
+
+    resources :surveys do
+      resources :interviewers do
+      end    
+    end
+
+    resources :answers do 
+    end
+
+  end
+
   # Root: different roots for diffent hosts
   constraints :subdomain => "admin" do
     root :to => 'admin/publishes#index', as: :admin_root
   end
+
+
   # constraints :subdomain => "quillme" do
   #   root :to => 'sample/homes#show', as: :quillme_root
   # end
@@ -674,6 +705,10 @@ OopsData::Application.routes.draw do
 
 
   ########
+
+  match 'travel', to: 'travel/cities#index',:via => [:get]
+  match 'tlogin', to: 'travel/users#login',:via => [:get]
+
   match 'quillu/login', to: 'quillu#login', :via => [:get, :post]
   match 'quillu/interviewer/interviewer_tasks', to: 'quillu#list_tasks', :via => [:get, :post]
   match 'quillu/interviewer/interviewer_tasks/:id', to: 'quillu#show_task', :via => [:get, :post]

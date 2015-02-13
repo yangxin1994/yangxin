@@ -1,4 +1,3 @@
-//= require utility/ajax
 $(function(){
   num_reg = /^[0-9]*[1-9][0-9]*$/;
   $('tbody td#amount').click(function(){
@@ -62,10 +61,17 @@ $(function(){
   $('#confirm_add').click(function(){
     user_id = $('input[name="user_id"]').val();
     amount  = $('input[name="amount"]').val();
+    city    = $.trim($('input[name="city"]').val());
 
     if(user_id.length < 1){
       $('.alert-danger').find('span').remove();
       $('.alert-danger').append('<span>请选择访问员</span>').show();
+      return false;
+    }
+
+    if(city.length < 1){
+      $('.alert-danger').find('span').remove();
+      $('.alert-danger').append('<span>请填写负责区域</span>').show();
       return false;
     }
 
@@ -74,7 +80,14 @@ $(function(){
       $('.alert-danger').append('<span>回收数量必须是大于0的整数</span>').show();
       return false;
     }
+
   })
 
+  // for supervisor
+
+  $('a.supervisor').click(function(){
+    user_id = $(this).attr('id');
+    $('input[name="user_id"]').val(user_id);
+  })  
 
 })

@@ -110,6 +110,7 @@ class Survey
   has_many :interviewer_tasks
   has_many :agent_tasks
   has_many :pre_surveys
+  has_and_belongs_to_many :supervisors
   has_and_belongs_to_many :answer_auditors, class_name: "User", inverse_of: :answer_auditor_allocated_surveys
   belongs_to :user, class_name: "User", inverse_of: :surveys
   belongs_to :client

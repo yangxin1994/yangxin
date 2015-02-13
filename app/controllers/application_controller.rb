@@ -56,6 +56,23 @@ class ApplicationController < ActionController::Base
       end
     end
   end
+
+
+  #全国旅游满意度调查问卷登录
+  def require_travel_sign_in
+    if !user_signed_in
+      respond_to do |format|
+        format.html { redirect_to tlogin_path({ref: request.url}) and return }
+      end
+    end    
+  end
+
+  def require_supervisor
+    unless current_user.is_supervisor?
+      redirect_to tlogin_path({ref: request.url}) and return
+    end
+  end
+
   # sign out
   def _sign_out(ref = nil)
     refresh_session(nil)

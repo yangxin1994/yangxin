@@ -196,13 +196,35 @@ class Admin::SurveysController < Admin::AdminController
 
   def new_interviewer
     @survey = Survey.find_by_id(params[:id])
-    # @interviewers = User.for_js("this.user_role & 0x10")
+
     @interviewers = User.where(interviewer: true)
   end
 
   def create_interviewer
-    InterviewerTask.create_interviewer_task(params[:id], params[:user_id], params[:amount].to_i)
+    InterviewerTask.create_interviewer_task(params[:id], params[:user_id], params[:amount].to_i,params[:city])
     redirect_to :action => 'interviewer_task'
+  end
+
+
+  def supervisor
+    @survey = Survey.find_by_id(params[:id])
+    supervisors = @survey.supervisors
+    @supervisors = auto_paginate(supervisors)
+  end
+
+  def new_supervisor
+    @survey = Survey.find_by_id(params[:id])
+    @supervisors = User.where(supervisor: true)
+  end
+
+  def create_supervisor
+    s = Survey.find(params[:id])
+    supervisor = Supervisor.where(user_id:params[:user_id]).first
+    supervisor = Supervisor.create(user_id:params[:user_id]) unless supervisor.present?
+    s.supervisors << supervisor
+    s.save
+    
+    redirect_to :action => 'supervisor'
   end
 
   private
