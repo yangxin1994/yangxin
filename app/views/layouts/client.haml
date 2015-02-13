@@ -1,0 +1,30 @@
+- content_for :app_head do
+  = stylesheet_link_tag "pages/client/client-bundle", :media => "all"
+  = javascript_include_tag "pages/client/client-bundle"
+  = yield :head
+- content_for :app_content do
+  .navbar-wrapper
+    .navbar-container
+      .navbar.navbar-default{role: "navigation"}
+        .navbar-header
+          %a.navbar-brand{href: "#"} 全国游客满意度调查数据回收系统
+        .collapse.navbar-collapse#navbar-collapse
+          %ul.nav.navbar-nav.navbar-right
+            %li.dropdown
+              - if client_signed_in
+                %a.dropdown-toggle{href: "#", data: {toggle: "dropdown"}}
+                  = current_client.email
+                  %b.caret
+                %ul.dropdown-menu
+                  %li
+                    %a{href: "/client/signout", rel: "nofollow"} 退出
+              - else
+                %a.dropdown-toggle{href: "#", data: {toggle: "dropdown"}}
+                  账户
+                  %b.caret
+                %ul.dropdown-menu
+                  %li
+                    %a{href: "/client/signin"} 登录
+  = yield
+
+= render :template => 'layouts/app'

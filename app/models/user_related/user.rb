@@ -1,5 +1,6 @@
 require 'data_type'
 require 'encryption'
+require 'quill_common/encryption'
 require 'error_enum'
 require 'tool'
 require 'array'
@@ -39,7 +40,7 @@ class User
   field :lock, :type => Boolean, default: false
   field :last_login_time, :type => Integer
   field :last_login_ip, :type => String
-  field :last_login_client_type, :type => String
+  field :last_login_client_type, :type => String, default: 'web'
   field :login_count, :type => Integer, default: 0
   field :sms_verification_code, :type => String
   field :sms_verification_expiration_time, :type => Integer,default:  -> {(Time.now + 1.minutes).to_i }
@@ -70,9 +71,12 @@ class User
   # 2 in the black list
   field :auth_key, :type => String
   field :auth_key_expire_time, :type => Integer
+  field :auth_key_remote, :type => String
+  field :auth_key_remote_expire, :type => Boolean, :default => true
   field :level, :type => Integer, default: 0
   field :level_expire_time, :type => Integer, default: -1
   field :point, :type => Integer, :default => 0
+  field :carnival_email_sent, :type => Boolean, default: false
 
 
   has_and_belongs_to_many :messages, class_name: "Message", inverse_of: :receiver
@@ -128,6 +132,31 @@ class User
       user.refresh_auth_key
       return nil
     end
+  end
+
+  def self.auth_remote(akr, notoken = false)
+    if user = self.where(:auth_key_remote => akr).first
+      unless user.auth_key_remote_expire
+        user.auth_key_remote_expire = true
+        user.save
+        if notoken
+          {token: true}
+        else
+          {token: QuillCommon::Encryption.encrypt_qauth_key("#{user.password}&#{Time.now.to_i.to_s}")}
+        end
+      end
+    else
+      nil
+    end
+  end
+
+  def get_auth_remote_key
+    if auth_key_remote_expire
+      self.auth_key_remote = QuillCommon::Encryption.encrypt_qauth_key("#{self.email}&#{Time.now.to_i.to_s}")
+      self.auth_key_remote_expire = false
+      self.save
+    end
+    self.auth_key_remote 
   end
 
   def refresh_auth_key
@@ -733,6 +762,7 @@ class User
 
   def need_update_attribute(attr_name, updated_value)
     sa = SampleAttribute.normal.find_by_name(attr_name)
+    # binding.pry
     return false if sa.nil?
     return true if ![DataType::NUMBER_RANGE, DataType::DATE_RANGE].include?(sa.type)
     sa_value = self.read_sample_attribute(attr_name)

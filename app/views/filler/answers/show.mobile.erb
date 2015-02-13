@@ -31,7 +31,8 @@
 				<% end %>
 			},
 			answer_id: '<%="#{params[:id]}" %>',
-			data: <%=@data ? (raw @data.to_json) : 'null' %>,
+			is_agent:<%= @answer.agent_task.present? %>,
+			data: <%=@data ? (raw @data.to_json.gsub("</", "<\\/")) : 'null' %>, // 避免script标签
 			signin: <%= user_signed_in %>,
 			email: <%= raw current_user.try(:email).to_json %>,
 			mobile: <%= raw current_user.try(:mobile).to_json %>,

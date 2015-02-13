@@ -1,6 +1,8 @@
 require 'sidekiq/web'
 OopsData::Application.routes.draw do
 
+  mount Sidekiq::Web, at: "/sidekiq"
+
   # match '*path' => 'welcome#index'
   # get '/:unique_key' => 'utility/short_urls#show', :constraints => { :unique_key => /~.+/ }
   match '/:unique_key' => 'mongoid_shortener/shortened_urls#translate', :via => :get, :constraints => { :unique_key => /~.+/ }
@@ -49,6 +51,7 @@ OopsData::Application.routes.draw do
     resource :home, :only => [:show] do
       collection do
         get :i
+        get :gifts 
       end
     end
 
@@ -141,8 +144,13 @@ OopsData::Application.routes.draw do
       end
     end
     
-    resources :public_notices, :only => [:index,:show]      
+    resources :public_notices, :only => [:index,:show]
+
+    resources :campaigns, :only => [:index]      
   end
+
+  resources :realogs
+
 
   # surveys, pages and questions
   scope :module => "quill" do
@@ -231,6 +239,22 @@ OopsData::Application.routes.draw do
     end
   end
 
+  # api
+
+  namespace :api do
+    
+    resources :survey_tasks
+    resources :answer_tasks do
+
+    end
+    resources :users do
+      collection do
+        post :qauth
+      end
+    end
+
+  end
+
   # admin
   namespace :admin do
 
@@ -239,6 +263,17 @@ OopsData::Application.routes.draw do
     get "sample_attributes/bind_question/:id" => "sample_attributes#bind_question"
     put "sample_attributes/bind_question/:id" => "sample_attributes#bind_question"
     delete "sample_attributes/bind_question/:id" => "sample_attributes#bind_question", as: :sample_attribute_bind
+
+    resources :carnivals do
+      collection do
+        get :pre_surveys, :surveys, :orders, :region_quota, :recharge_fail_mobile, :check_order_result
+        post :update_quota
+      end
+
+      member do
+        put :handle, :finish, :update_express_info, :update_remark
+      end
+    end
 
     resources :reviews do
       member do
@@ -308,7 +343,7 @@ OopsData::Application.routes.draw do
 
     resources :surveys, :as => :s do
       member do
-        get :reward_schemes, :promote, :more_info, :bind_question, :cost_info, :promote_info, :sample_attributes, :interviewer_task, :new_interviewer, :questions
+        get :reward_schemes, :promote, :more_info, :bind_question, :cost_info, :promote_info, :sample_attributes, :interviewer_task, :new_interviewer, :questions, :presurvey, :prequestions
         post :update_promote, :create_interviewer
         put :update_promote, :set_info, :bind_question, :star, :update_sample_attribute_for_promote, :update_amount
         delete :destroy_attributes, :bind_question, :remove_sample_attribute_for_promote
@@ -316,6 +351,17 @@ OopsData::Application.routes.draw do
 
       collection do
 
+      end
+      resources :pre_surveys do
+        collection do
+          get :questions
+        end
+      end      
+    end
+    
+    resources :survey_tasks do
+      member do
+        get :task_info
       end
     end
 
@@ -339,7 +385,7 @@ OopsData::Application.routes.draw do
     resources :answers do
       member do
         get :review, :to_csv
-        put :reject
+        put :reject, :batch_reject, :batch_pass, :set_location
       end
     end
 
@@ -353,10 +399,12 @@ OopsData::Application.routes.draw do
       collection do
         get :to_excel
         put :batch
+        get :recharge_fail_mobile
       end
 
       member do
         put :handle, :bulk_handle, :finish, :bulk_finish, :update_express_info, :update_remark
+        get :check_result
       end
     end
     
@@ -455,6 +503,9 @@ OopsData::Application.routes.draw do
 
     resources :sample_servers
 
+    resources :interviewers do
+    end
+
   end
 
   # utility
@@ -471,6 +522,8 @@ OopsData::Application.routes.draw do
       collection do
         get :video_upload_path
         post :create_image
+        post :create_video
+        post :create_audio
       end
 
       member do
@@ -507,6 +560,25 @@ OopsData::Application.routes.draw do
     end
   end
 
+  namespace :client do
+    resources :surveys do
+    end
+    resources :cities do
+      member do
+        get :records
+        get :set_location
+        get :batch_set_location
+        put :update_location
+        put :batch_update_location
+      end
+    end
+    scope :module => :sessions do
+      resources :signin
+      resources :signout
+      resources :reset_password
+    end
+  end
+
   namespace :agent do
     scope :module => :sessions do
       resources :signin
@@ -516,6 +588,7 @@ OopsData::Application.routes.draw do
     resources :answers do
       member do
         put :review
+        get :to_csv
       end
     end
     resources :tasks do
@@ -546,9 +619,37 @@ OopsData::Application.routes.draw do
         post :select_reward_for_mobile
         post :start_bind
         post :update_for_mobile
+        get :ask_for_mobile
+        post :submit_mobile
       end
     end
     resource :bind_sample, :only => [:show]
+  end
+
+  namespace :carnival do
+    resources :users do
+      collection do
+        post :login, :draw_lottery, :update
+        get :draw_lottery
+        post :send_mobile
+      end
+    end
+    resources :agents do
+    end
+    resources :campaigns do 
+      collection do 
+        get :index
+        get :proxy
+      end
+    end
+  end
+
+  namespace :vote do 
+    resources :suffrages do 
+      collection do 
+        get :statrt_vote
+      end
+    end
   end
 
   # Root: different roots for diffent hosts
@@ -586,4 +687,6 @@ OopsData::Application.routes.draw do
   match 'quillu/interviewer/materials', to: 'quillu#submit_material', :via => [:get, :post]
   match 'quillu/materials/:material_id/preview', to: 'quillu#preview_material', :via => [:get, :post]
   match 'quillu/materials/:material_id', to: 'quillu#show_material', :via => [:get, :post]
+
+  match 'esai/callback', to: 'esai#callback', :via => [:get, :post]
 end

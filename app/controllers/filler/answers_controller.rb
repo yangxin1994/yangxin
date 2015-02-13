@@ -9,10 +9,17 @@ class Filler::AnswersController < Filler::FillerController
       render_json_auto answer_id and return if answer_id.present?
     end
 
+    if params[:agent_task_id] && params[:agent_user_id].present?
+      agent_task = AgentTask.find(params[:agent_task_id])
+      answer = agent_task.answers.where(agent_user_id: params[:agent_user_id]).first
+      render_json_auto answer.id.to_s and return if answer.present?
+    end
+
     survey = Survey.normal.find_by_id(params[:survey_id])
-    render_json_e ErrorEnum::MAX_NUM_PER_IP_REACHED and return if !params[:is_preview] && survey.max_num_per_ip_reached?(request.remote_ip)
     answer = Answer.find_by_survey_id_sample_id_is_preview(params[:survey_id], current_user.try(:_id), params[:is_preview] || false)
+    answer ||= Answer.find_by_survey_id_carnival_user_id_is_preview(params[:survey_id], current_carnival_user.try(:_id), params[:is_preview] || false)
     render_json_s(answer._id.to_s) and return if !answer.nil?
+    render_json_e ErrorEnum::MAX_NUM_PER_IP_REACHED and return if !params[:is_preview] && survey.max_num_per_ip_reached?(request.remote_ip)
     retval = survey.check_password(params[:username], params[:password], params[:is_preview] || false)
     render_json_e ErrorEnum::WRONG_SURVEY_PASSWORD and return if retval != true
     answer = { is_preview: params[:is_preview] || false,
@@ -27,8 +34,15 @@ class Filler::AnswersController < Filler::FillerController
       params[:reward_scheme_id],
       params[:introducer_id],
       params[:agent_task_id],
+      params[:agent_user_id],
+      params[:task_id],
       answer )
-    current_user.answers << answer if current_user.present?
+    if Carnival::ALL_SURVEY.include?(params[:survey_id])
+      current_carnival_user.answers << answer if current_carnival_user.present?
+      current_carnival_user.fill_answer(answer) if current_carnival_user.present?
+    else
+      current_user.answers << answer if current_user.present?
+    end
     answer.check_channel_ip_address_quota
     if !user_signed_in
       # If a new answer for the survey is created, and the user is not signed in
@@ -42,10 +56,59 @@ class Filler::AnswersController < Filler::FillerController
     render_json_auto answer.id.to_s
   end
 
+  # def submit_mobile
+  #   @answer = Answer.find_by_id(params[:id])
+  #   render_404 if @answer.nil?
+  #   survey = @answer.survey
+  #   agent_answers = survey.answers.select { |e| e.agent_task.present? }
+  #   existing_mobiles = agent_answers.map { |e| e.mobile }
+  #   if existing_mobiles.include?(params[:mobile])
+  #     render_json_auto ErrorEnum::MOBILE_EXIST and return
+  #   end
+  #   @answer.mobile = params[:mobile]
+  #   @answer.save
+  #   render_json_auto @answer.id.to_s and return
+  # end
+
+  def submit_mobile
+    @answer = Answer.find_by_id(params[:id])
+    render_404 if @answer.nil?
+    survey = @answer.survey
+    agent_answers = survey.answers.select { |e| e.agent_task.present? }
+    exist_answer = agent_answers.select{|e| e.mobile == params[:mobile]}
+    if exist_answer.length > 0
+      if exist_answer.first.status != Answer::EDIT
+        render_json_auto ErrorEnum::MOBILE_EXIST and return
+      else
+        @answer = exist_answer.first
+        render_json_auto @answer.id.to_s and return
+      end
+    else
+      @answer.mobile = params[:mobile]
+      @answer.save
+      render_json_auto @answer.id.to_s and return      
+    end
+  end
+
+
+
+
+
+  def ask_for_mobile
+    @answer = Answer.find_by_id(params[:id])
+    ensure_survey(@answer.survey_id)
+  end
+
   def show
     # get answer
     @answer = Answer.find_by_id(params[:id])
     render_404 if @answer.nil?
+    redirect_to "/" and return if @answer.is_a? AnswerTask
+
+    # if the sample is from an agent, check whether the mobile has been submitted
+    if @answer.agent_task.present? && @answer.mobile.blank?
+      redirect_to ask_for_mobile_answer_path(:id => params[:id]) and return
+    end
 
     # load data
     redirect_to sign_in_account_path({ref: request.url}) and return if @answer.user.present? && @answer.user != current_user
@@ -93,6 +156,15 @@ class Filler::AnswersController < Filler::FillerController
 
     ensure_spread(@survey, @answer.reward_scheme_id)
 
+    if @answer.carnival_user_id.present?
+      cookies[:carnival_user_id] = {
+        :value => @answer.carnival_user_id,
+        :expires => 12.months.from_now,
+        :domain => :all
+      }
+    end
+
+
     @binded = user_signed_in ? (current_user.email_activation || current_user.mobile_activation) : false
   end
 
@@ -117,7 +189,11 @@ class Filler::AnswersController < Filler::FillerController
 
   def clear
     @answer = Answer.find(params[:id])
-    render_json_auto @answer.clear and return
+    @answer.clear
+    if @answer.carnival_user.present?
+      @answer.carnival_user.fill_answer(@answer)
+    end
+    render_json_auto true and return
   end
 
 
@@ -132,16 +208,22 @@ class Filler::AnswersController < Filler::FillerController
     render_json_e(ErrorEnum::WRONG_ANSWER_STATUS) and return if !@answer.is_edit
     # 1. update the answer content
     @answer.update_answer(params[:answer_content] || {})
+	  logger.info @answer.answer_content.inspect
     # 2. check quality control
     passed = @answer.check_quality_control(params[:answer_content] || {})
+	  logger.info @answer.answer_content.inspect
     # 3. check screen questions
     passed &&= @answer.check_screen(params[:answer_content] || {})
+	  logger.info @answer.answer_content.inspect
     # 4. check quota questions (skip for previewing)
     passed &&= @answer.check_question_quota(params[:answer_content] || {}) if !@answer.is_preview
+	  logger.info @answer.answer_content.inspect
     # 5. update the logic control result
     @answer.update_logic_control_result(params[:answer_content] || {}) if passed
+	  logger.info @answer.answer_content.inspect
     # 6. automatically finish the answers that do not allow pageup
     @answer.finish(true) if passed
+	  logger.info @answer.answer_content.inspect
     render_json_s and return
   end
 

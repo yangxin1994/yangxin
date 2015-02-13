@@ -30,9 +30,9 @@ $ ->
           alert_msg.show('success', "操作完成!")
         else
           console.log ret
-          alert_msg.show('error', "处理失败,请稍后重试 (╯‵□′)╯︵┻━┻ ")
+          alert_msg.show('error', "处理失败,请稍后重试")
       error: (ret)->
-          alert_msg.show('error', "处理失败,请稍后重试 (╯‵□′)╯︵┻━┻ ")
+          alert_msg.show('error', "处理失败,请稍后重试")
 
   $(".finishs").click ->
     $this = $(this)
@@ -49,9 +49,9 @@ $ ->
           alert_msg.show('success', "操作完成!")
         else
           console.log ret
-          alert_msg.show('error', "处理失败,请稍后重试 (╯‵□′)╯︵┻━┻ ")
+          alert_msg.show('error', "处理失败,请稍后重试")
       error: (ret)->
-          alert_msg.show('error', "处理失败,请稍后重试 (╯‵□′)╯︵┻━┻ ")
+          alert_msg.show('error', "处理失败,请稍后重试")
 
 
   $(".finishf").click ->
@@ -72,9 +72,9 @@ $ ->
             alert_msg.show('success', "操作完成!")
           else
             console.log ret
-            alert_msg.show('error', "处理失败,请稍后重试 (╯‵□′)╯︵┻━┻ ")
+            alert_msg.show('error', "处理失败,请稍后重试")
         error: (ret)->
-            alert_msg.show('error', "处理失败,请稍后重试 (╯‵□′)╯︵┻━┻ ")
+            alert_msg.show('error', "处理失败,请稍后重试")
 
   $(".batch").click ->
     $this = $(this)
@@ -123,9 +123,9 @@ $ ->
           alert_msg.show('success', "操作完成!")
         else
           console.log ret
-          alert_msg.show('error', "处理失败,请稍后重试 (╯‵□′)╯︵┻━┻ ")
+          alert_msg.show('error', "处理失败,请稍后重试")
       error: (ret)->
-          alert_msg.show('error', "处理失败,请稍后重试 (╯‵□′)╯︵┻━┻ ")
+          alert_msg.show('error', "处理失败,请稍后重试")
 
   $(".express").click ->
     $this = $(this)
@@ -158,10 +158,29 @@ $ ->
           alert_msg.show('success', "操作完成!")
         else
           console.log ret
-          alert_msg.show('error', "处理失败,请稍后重试 (╯‵□′)╯︵┻━┻ ")        
+          alert_msg.show('error', "处理失败,请稍后重试")        
       error: ->
-          alert_msg.show('error', "处理失败,请稍后重试 (╯‵□′)╯︵┻━┻ ")
+          alert_msg.show('error', "处理失败,请稍后重试")
 
-
-
+  $(".refresh_esai").click ->
+    order_id = $(this).data("id")
+    $this = $(this)
+    $.ajax
+      url: "/admin/orders/#{order_id}/check_result"
+      type: 'GET'
+      success: (ret)->
+        if ret.success
+          if ret.value == 3
+            $this.closest("td").find("span").text("正在处理")
+          else if ret.value == 4
+            $this.closest("td").find("span").text("已成功")
+            $this.hide()
+          else if ret.value == 5
+            $this.closest("td").find("span").text("已失败")
+            $this.hide()
+        else
+          console.log ret
+          alert_msg.show('error', "处理失败,请稍后重试")
+      error: (ret)->
+          alert_msg.show('error', "处理失败,请稍后重试")
 

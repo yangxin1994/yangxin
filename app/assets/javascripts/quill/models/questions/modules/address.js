@@ -46,18 +46,18 @@ $(function(){
 				model.trigger('change:address:format', handler);
 			},
 
-			_getInfo: function() {
+			_getInfo: function(lang) {
 				if(issue.format == 15) {
-					return issue.has_postcode ? '请填写详细地址和邮编' : '请填写详细地址';
+					return issue.has_postcode ? (lang == 'en' ? 'Input address and postcode' : '请填写详细地址和邮编') : (lang == 'en' ? 'Input address' : '请填写详细地址');
 				} else {
-					return issue.has_postcode ? '请选择地址并输入邮编' : '请选择地址';
+					return issue.has_postcode ? (lang == 'en' ? 'Select address and postcode' : '请选择地址并输入邮编') : (lang == 'en' ? 'Select address' : '请选择地址');
 				}
 			},
 
-			_checkAnswer: function(answer) {
-				if(answer.address == undefined || answer.address < 0) return '请选择地址';
-				if(handler.getFormat() == 3 && !answer.detail) return '请输入详细地址';
-				if(issue.has_postcode && !$.regex.isPostcode(answer.postcode)) return '请输入正确邮编';
+			_checkAnswer: function(answer, lang) {
+				if(answer.address == undefined || answer.address < 0) return lang == 'en' ? 'Please select address' : '请选择地址';
+				if(handler.getFormat() == 3 && !answer.detail) return lang == 'en' ? 'Please input address' : '请输入详细地址';
+				if(issue.has_postcode && !$.regex.isPostcode(answer.postcode)) return lang == 'en' ? 'Please input correct postcode' : '请输入正确邮编';
 				return null;
 			}
 			

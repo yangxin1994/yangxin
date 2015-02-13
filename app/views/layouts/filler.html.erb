@@ -11,9 +11,11 @@
 		window.is_preview = <%= @is_preview.blank? ? 'false' : @is_preview %>;
 		window.spread_url = <%= raw @spread_url.to_json %>;	//TODO: spread url is not used
 		window.current_user_id = <%=  raw (current_user.nil? ? nil.to_json : current_user._id.to_s.to_json) %>;
+    window.survey_lang = <%= raw @survey[:lang].to_json %>;
 	</script>
 
-	<% if @survey['_id'].to_s == '52a59fc6eb0e5bb2c5000007' %>
+	<% if ["52a59fc6eb0e5bb2c5000007", "54365c14eb0e5bba58000204", "544a0602eb0e5b829e000016", 
+    "544a0ab5eb0e5bfab700019d", "544b6d8eeb0e5bef46000006",'547fb68beb0e5b4cc4000016'].include?(@survey['_id'].to_s) %>
 	<!-- hack gonganbu to hide logo -->
 		<style type="text/css">
 			#logo { display: none; }
@@ -37,18 +39,73 @@
 <div id='sf_banner'>
 	<% if @is_preview %>
 	<div id='pv_bar'>
-		<img src="/assets/filler/preview.png"><span>您正在模拟答题，答案不会被记录。</span><button>重新开始</button>
+		<img src="/assets/filler/preview.png"><span>您正在模拟答题，答案不会被记录。</span>
+    <button class='replay-btn'>重新开始</button>
 	</div>
-	<% elsif @survey['style_setting']['allow_replay'] %>
+	<% elsif (@survey['style_setting']['allow_replay'] or @survey['style_setting']['allow_multianswer'])%>
 	<div id='pv_bar'>
-		<span>请认真答题</span><button>重新开始</button>
+    <% if @survey[:lang] == 'en' %>
+
+    <span>Please answer seriously. </span>
+    <% if @survey['style_setting']['allow_replay'] %>
+    <button class='replay-btn'>Re-answer</button>
+    <% end %>
+    <% if @survey['style_setting']['allow_multianswer'] %>
+    <% if user_signed_in %>
+    <a class='signout-btn' href='javascript:void(0);'>Sign-out</a> to answer again
+    <% else %>
+    <button class='newanswer-btn'>Answer again</button>
+    <% end %>
+    <% end %>
+
+    <% else %>
+
+		<span>请认真答题</span>
+    <% if @survey['style_setting']['allow_replay'] %>
+    <button class='replay-btn'>重新开始</button>
+    <% end %>
+    <% if @survey['style_setting']['allow_multianswer'] %>
+    <% if user_signed_in %>
+    <a class='signout-btn' href='javascript:void(0);'>退出当前账户进行多次答题</a>
+    <% else %>
+    <button class='newanswer-btn'>再答一份</button>
+    <% end %>
+    <% end %>
+
+    <% end %>
 	</div>
 	<% end %>
-	<div class='sf_banner_top'>
+  <!-- hack for trip survey -->
+  <% trip_id = '537e9abdeb0e5b357b000096' %>
+  <% if @survey['_id'].to_s == trip_id %> 
+  <style type="text/css">
+    #sf_banner .sf_banner_top > .inner #progress_con {
+      color: #FFC800;
+    }
+    #sf_banner .sf_banner_top > .inner #progress_bar {
+      border-color: #FFC800;
+    }
+    #sf_banner .sf_banner_top > .inner #progress_bar em {
+      background-color: #FFC800;
+    }
+  </style>
+  <% end %>
+  <!-- hack for trip survey -->
+	<div class='sf_banner_top' <% if @survey['_id'].to_s == trip_id %> style='background:#fff;' <% end %>>
 		<div class='inner'>
-			<a id='logo' href="http://oopsdata.com">
-				<img src="/assets/filler/default/logo.png" />
-			</a>
+      <% if ["530ecc12eb0e5be18500001a", "5372c7f6eb0e5b41fc000003"].include?(@survey['_id'].to_s) %>
+      <a id='logo' href="http://netranking.cn">
+        <img src="/assets/filler/default/logo-nr.png" />
+      </a>
+      <% elsif @survey['_id'].to_s == trip_id %>
+      <a id='logo' href="http://www.shanxichina.gov.cn/zh/index.shtml">
+        <img src="/sxlyj.png" />
+      </a>
+      <% else %>
+      <a id='logo' href="http://oopsdata.com">
+        <img src="/assets/filler/default/logo.png" />
+      </a>
+      <% end %>
 			<% if @survey['style_setting']['has_progress_bar'] %>
 			<div id='progress_con'>
 				<div id='progress_info'></div>
@@ -66,7 +123,11 @@
 
 <div id='sf_footer'>
 	<% if @survey['style_setting']['has_oopsdata_link'] %>
-	<a href='/' target="_blank">技术支持 <%= corp_name %></a>
+    <% if @survey[:lang] == 'en' %>
+	<a href='/' target="_blank">Tech Support: http://wenjuanba.com</a>
+    <% else %>
+  <a href='/' target="_blank">技术支持 <%= corp_name %></a>
+    <% end %>
 	<% end %>
 	<% if @survey['style_setting']['has_advertisement'] %>
 	<div class='ad'></div>

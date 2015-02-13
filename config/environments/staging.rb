@@ -123,11 +123,11 @@ OopsData::Application.configure do
   config.dotnet_web_service_uri = 'http://export.oopsdata.com'
 
 	# configuration for quill and quillme
-	config.quill_host = 'http://s.oopsdata.com'
+	config.quill_host = 'http://wenjuanba.com'
 	config.quillme_host = 'http://staging.wenjuanba.com'
 
 	# configuration for roadie
-	config.action_mailer.default_url_options = {:host => 'res.oopsdata.com'}
+	config.action_mailer.default_url_options = {:host => 'wenjuanba.com'}
 
   config.mailgun_api_key = 'key-9zcv6-e7j8aratn9viu3unvbn2zc92j3'
   config.survey_email_domain = 'wenjuanba.net'
@@ -137,4 +137,9 @@ OopsData::Application.configure do
   config.ofcard_service_uri = "http://api2.ofpay.com/"
   config.ofcard_key_str = "OFCARD"
   config.ret_url = "http://staging.wenjuanba.com/orders/confirm"
+  config.diaoyan = 'http://staging.diaoyan.me'
+
+  # esai uri
+  config.esai_service_uri = "http://www.esaipai.com/IF/EIFPHONE/"
+
 end

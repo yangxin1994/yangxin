@@ -1,9 +1,40 @@
 <% content_for :head do %>
   <%= stylesheet_link_tag "pages/sample/homes-bundle", :media => "all" %>
+  <%= javascript_include_tag "pages/sample/homes-bundle", :media => "all" %>
   <script type="text/javascript">
     <% if user_signed_in %>
       window.current_user_id = "<%= current_user.id %>"
     <% end %>   
+    jQuery(function(){
+      // carnival
+      setTimeout(function() {
+        $('#carnival').slideDown(1500);
+        setTimeout(function() {
+          $('#carnival').slideUp(1500);
+        }, 15000);
+      }, 500);
+      });
+    jQuery(function(){
+      //投票Tab
+      var aLi = $('.vote-class li');
+      var aDiv = $('.vote-list');
+      var aLink = $('.button-list a');
+      aLi.click(function() {
+        aLi.removeClass('active');
+        $(this).addClass('active');
+        aDiv.removeClass('dn');
+        aDiv.eq($(this).index()).addClass('dn');
+      });
+      aLink.live('click', function(event) {
+        $(this).closest('.button-list').html('已参与');
+      });
+      aLink.live('mouseover', function(event) {
+        $(this).siblings().css('display', 'block');
+      });
+      aLink.live('mouseout', function(event) {
+        aLink.siblings().css('display','none');
+      });
+    });
   </script>
 <% end %>
 <% if @data[:hot_survey].present? %>
@@ -45,6 +76,7 @@
       </div>
       <div class="bd">
         <ul>
+          <!-- <li><a href="javascript:void(0);"><img src="/assets/od-quillme/banner/banner_carnival.jpg" /></a></li> -->
           <li><img src="/assets/od-quillme/banner/banner_1.jpg" /></li>
           <li><img src="/assets/od-quillme/banner/banner_2.png" /></li>
           <li><img src="/assets/od-quillme/banner/banner_3.png" /></li>
@@ -57,7 +89,7 @@
   <div class="bulletin dashed-box r">
     <div class="dashed-box-inner">
       <div class="dashed-box-inner-top">
-        <h3 class="box-title">站内公告</h3>
+        <h3 class="box-title">问卷吧快报</h3>
         <a href="<%= public_notices_path %>" class="more">更多</a>
       </div>
       <% if @data[:public_notices].present? %>
@@ -79,47 +111,140 @@
     </div>
   </div>
 </div>
-
-<div class="gift-list-main dashed-box inner-page">
-  <div class="dashed-box-inner">
-    <div class="dashed-box-inner-top">
-      <h3 class="box-title">推荐礼品</h3>
-      <a href="<%= gifts_path %>" class="more">更多</a>
+<% if @data[:movies].length > 0 %>
+<div id="vote" class="inner-page mt20">
+  <div class="dashed-box">
+    <div class="dashed-box-inner">
+      <div class="dashed-box-inner-top">
+        <!-- <h3 class="box-title">影片小调查</h3> -->
+        <ul class="vote-class">
+          <li class="active"><a class="left" href="javascript:;">正在热播</a></li>
+          <li><a class="right" href="javascript:;">即将上映</a></li>
+        </ul>
+        <a href="http://wenjuanba.com/vote/suffrages" target="_blank" class="vote-more">更多</a>
+      </div>
+      <div class="vote-list dn">
+        <ul>
+          <% @data[:movies][3..5].each_with_index do |movie,idx|%>
+            <li <% if idx == 2 %>style="border:none;margin:0;"<% end%> >
+              <span class="movie-name"><a href='/vote/suffrages'><%=movie.title%></a></span>
+              <span class="movie-img"><img src="<%=movie.poster %>" alt="<%= movie.title%>" /></span>
+              <% if movie.info_show_at < 0%>
+                <span class="time">上映日期: 未知</span>
+              <% else %>
+                <span class="time">上映日期: <%= Time.at(movie.info_show_at).strftime('%F') %></span>
+              <% end %>
+              <span class="actor">主演:<%=movie.info_actors || '未知' %></span>
+              <span class="button-list">
+                <% if movie['voted'] %>
+                  <span>已参与</span>
+                <% else%>
+                <span>
+                  <a href="javascript:void(0);" data-t=0 data-id="<%= movie.id.to_s %>" class="btn want-to-see">想看</a>
+                  <b class="tip"><i></i>仅限影院观看意愿</b>
+                </span>
+                <span>
+                  <a href="javascript:void(0);" data-t=1 data-id="<%= movie.id.to_s %>" class="btn dont-want-to-see">不想看</a>
+                  <b class="tip"><i></i>仅限影院观看意愿</b> 
+                </span>               
+                <% end %>
+              </span>
+            </li>          
+          <% end %>  
+        </ul>
+      </div>
+      <div class="vote-list">
+        <ul>
+          <% @data[:movies][0..2].each_with_index do |movie,idx|%>
+            <li <% if idx == 2 %>style="border:none;margin:0;"<% end%> >
+              <span class="movie-name"><a href="/vote/suffrages"><%=movie.title%></a></span>
+              <span class="movie-img"><img src="<%=movie.poster %>" alt="<%= movie.title%>" /></span>
+              <% if movie.info_show_at < 0%>
+                <span class="time">上映日期: 未知</span>
+              <% else %>
+                <span class="time">上映日期: <%= Time.at(movie.info_show_at).strftime('%F') %></span>
+              <% end %>
+              <span class="actor">主演:<%=movie.info_actors || '未知' %></span>
+              <span class="button-list">
+                <% if movie['voted'] %>
+                  <span>已参与</span>
+                <% else%>
+                <span>
+                  <a href="javascript:void(0);" data-t=0 data-id="<%= movie.id.to_s %>" class="btn want-to-see">想看</a>
+                  <b class="tip"><i></i>仅限影院观看意愿</b>
+                </span>
+                <span>
+                  <a href="javascript:void(0);" data-t=2 data-id="<%= movie.id.to_s %>" class="btn have-read">看过</a>
+                  <b class="tip"><i></i>仅限影院观看意愿</b>
+                </span>  
+                <span>
+                  <a href="javascript:void(0);" data-t=1 data-id="<%= movie.id.to_s %>" class="btn dont-want-to-see">不想看</a>
+                  <b class="tip"><i></i>仅限影院观看意愿</b> 
+                </span>          
+                <% end %>              
+              </span>
+            </li>          
+          <% end %> 
+        </ul>
+      </div>
     </div>
-    <% if @data[:hotest_gifts].present? %>
-    <ul class="gift-list">
-      <% @data[:hotest_gifts].each do |gift|%>
-        <li>
-          <a href="<%= gift_path(gift['_id']) %>">
-            <span class="gift-img">
-              <img src="<%= show_image(gift.photo_src,'gifts') %> " alt="<%= gift.title %>" />
-            </span>
-            <span class="gift-name"><%= gift.title %></span>
-            <span class="gift-mask"></span>
-            <span class="gift-remark">
-              <span class="integral l"><b><%= gift.point%></b>积分</span>
-              <span class="gift-remark-right">
-                <span class="nop">人气：<b><%= gift.view_count%></b></span>
-                <span class="price">价值：<b><%= show_gift_price(gift.price)%></b> 元</span>
-              </span>     
-            </span>
-          </a>
-        </li>
-      <% end %>       
-    </ul>
-    <% end %>
   </div>
 </div>
-
-
-<!-- 热门兑换 -->
-
-<!-- 调研推荐&排行榜&新鲜事 -->
+<% end %>
 <div class="inner-page">
+  <% if @data[:express_surveys].present? %>
+  <div class="paid-survey">
+    <div class="content-title">
+      <h2>热点调研</h2>
+      <div class="page" click="0">
+        <a href="javascript:void(0);" class="prev"><i class="page-top"></i></a>
+        <a href="javascript:void(0);" class="next"><i class="page-bottom"></i></a>
+      </div>
+    </div>
+    <div class="survey-list express">
+      <ul>
+        <%= render :partial => 'sample/surveys/express_surveys',:locals => {:surveys => @data[:express_surveys]} %> 
+      </ul>
+    </div>
+  </div>
+  <div class="create-survey dashed-box">
+    <div class="count">
+      <span>
+        <strong>累计问卷</strong>
+        <% @data[:survey_counts].each do |data|%>
+          <i><%= data %></i>
+        <% end %>
+        <b>份</b>
+      </span>
+    </div>
+    <div class="count">
+      <span>
+        <strong>累计答题</strong>
+        <% @data[:answer_counts].each do |data|%>
+          <i><%= data %></i>
+        <% end %>
+        <b>次</b>
+      </span>
+    </div>
+    <div class="btn-line">
+      <% if current_user.present? %>
+        <a class="create-survey-btn" href="<%= Rails.application.config.diaoyan + '/questionaires/new?akr=' + current_user.get_auth_remote_key %>">免费创建一份问卷</a>
+      <% else %>
+        <a class="create-survey-btn" href="<%= Rails.application.config.diaoyan %>/questionaires/new">免费创建一份问卷</a>
+      <% end %>
+    </div>
+  </div>
+  <% end %>
+</div>
+
+<div style="clear:both;"></div>
+<!-- 调研推荐&排行榜&新鲜事 -->
+<div class="inner-page survey_list quill">
+
   <div class="research-list dashed-box l">
     <div class="dashed-box-inner">
       <div class="dashed-box-inner-top">
-        <h3 class="box-title">调研推荐</h3>
+        <h3 class="box-title">商业调研</h3>
         <a href="<%= surveys_path(:status => 2) %>" class="more">更多</a>
       </div>
       <ul>
@@ -169,8 +294,10 @@
         <ul class="forums-list">
           <% @data[:fresh_news].each_with_index do |news,index|%>
             <li <%= hide_border?(@data[:fresh_news],index) %>>
-              <span class="time"><%= ch_time(news.created_at) %></span>
-              <%= user_behavor(news) %>
+              <div>
+                <span class="time"><%= ch_time(news.created_at) %></span>
+                <%= user_behavor(news) %>
+              </div>
             </li>
           <% end %>
         </ul>
@@ -178,3 +305,26 @@
   </div> 
   <% end %>
 </div> 
+
+<!-- 热门兑换 -->
+<div class="gift-list-main dashed-box inner-page">
+  <div class="dashed-box-inner gift_slide">
+    <div class="dashed-box-inner-top">
+      <h3 class="box-title">热门兑换</h3>
+      <a href="javascript:void(0);" class="more next" page='2'>换一组</a>
+    </div>
+    <% if @data[:hotest_gifts].present? %>
+    <div class='more_list'>
+      <ul class="gift-list">
+         <%=  render :partial => "gifts_list",  :locals => {:gifts => @data[:hotest_gifts]  } %>      
+      </ul>
+    </div>
+    <% end %>
+  </div>
+</div>
+
+<% if Rails.env.production? %>
+<div style='display:none;'><script type="text/javascript"> var _bdhmProtocol = (("https:" == document.location.protocol) ? " https://" : " http://"); document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3Fb54732309180d2feab954364fdebf7f2' type='text/javascript'%3E%3C/script%3E")) </script>
+</div>
+<% end %>
+

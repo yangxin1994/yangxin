@@ -1,0 +1,151 @@
+<% content_for :head do %>
+  <%= stylesheet_link_tag "pages/carnival/campaigns-bundle", :media => "all" %>
+  <%= javascript_include_tag "pages/carnival/campaigns-bundle" %>
+  <script type="text/javascript">
+    $(function(){
+      //set full page
+      function setFullPage() {
+        $('.fullPage').fullpage({
+            verticalCentered: true,
+            slidesColor: ['#eff2c9', '#eff2c9', '#eff2c9', '#eff2c9'],
+            loopTop: false,
+            loopBottom: false,
+            autoScrolling:true
+        })
+      }
+
+      function resetOverflow(){
+        $('html, body').removeAttr('style');
+      }
+
+      setFullPage();
+      resetOverflow();
+
+    });
+
+  </script>
+<% end %>
+
+
+<div class='fullPage'>
+  <div class='section balloon'>
+    <div class='page bg4'>
+      <div class="page-inner">
+        <div class='ball-cont'>
+          <div class='ball-body'>
+            <div class='umbrella'></div>
+            <div class='basket'>
+            </div>
+          </div>
+          <div class='ball-line'>
+            <div class='line-wrap'>
+              <div class='line line-1'></div>
+              <div class='line line-2'></div>
+              <div class='line line-3'></div>
+              <div class='line line-4'></div>
+              <div class='bg-grass'></div>
+              <div class="tooltip rqq">
+                 <div id='task_three_ask' style='font-size: 60px; color: #ccc; line-height: 70px;'>?</div>
+                 <div id='task_three_text' style='display:none;'>点击问号解开热气球绳子,<br>4根全部解开立即获得<b>神秘奖品</b><br>和<b>小米大奖抽奖机会！</b></div>
+              </div>
+              <div class='stack stack1'><a href='javascript:void(0);'></a></div>
+              <div class='stack stack2'><a href='javascript:void(0);'></a></div>
+              <div class='stack stack3'><a href='javascript:void(0);'></a></div>
+              <div class='stack stack4'><a href='javascript:void(0);'></a></div>
+            </div>
+          </div>
+        </div>
+        <div class="ly-plate">
+          <div class="rotate-bg">
+            <div class='draw_remain'></div>
+          </div>
+            <div class="lottery-star">
+              <img src="/assets/activities/2014-6/ferris/rotate-static.png" id="lotteryBtn">
+            </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class='section stair'>
+    <div class='page bg3'>
+      <div class="page-inner">
+        <div id='machine-wrap'>
+          <div class='wrap-skin'>
+            <div class="tooltip tlj">
+              <div id='task_two_ask' style='font-size: 60px; color: #ccc; line-height: 70px;'>?</div>
+              <div id='task_two_text' style='display:none;'>点击跳楼机问号进行闯关,<br>本关分5个小任务,闯关成功<br>可参加<b>神秘抽奖哦！</b></div>
+            </div>
+            <div class='happy'></div>
+            <div class='st5'><a href='javascript:void(0);'></a></div>
+            <div class='st4'><a href='javascript:void(0);'></a></div>
+            <div class='st3'><a href='javascript:void(0);'></a></div>
+            <div class='st2'><a href='javascript:void(0);'></a></div>
+            <div class='st1'><a href='javascript:void(0);'></a></div>
+            <div class='sbottom'></div>            
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class='section wheel'>
+    <div class="page bg2">
+      <div class="page-inner">
+        <div id="ferris-wheel">
+          <div class="tooltip mtl">
+            <div id='task_one_ask' style='font-size: 60px; color: #ccc; line-height: 70px;'>?</div>
+            <div id='task_one_text' style='display:none;'>点问号（<b>注意中间问号</b>）闯关,<br> 本关分5个小任务,闯关成功即送<b>10元手机充值卡！</b></div>
+          </div>
+          <span class="ferris-wheel-box">
+          <a href="javascript:void(0);" class="one"></a>
+          <a href="javascript:void(0);" class="two"></a>
+          <a href="javascript:void(0);" class="three"></a>
+          <a href="javascript:void(0);" class="four"></a>
+          <a href="javascript:void(0);" class="five"></a>
+          <span class="ferris"></span>
+          <span class="holder"></span>
+          </span>
+        </div>        
+      </div>
+    </div>
+  </div>
+  <div class='section gate active'>
+    <div class="page bg1">
+      <div class="page-inner">
+        <div class="door-box">
+          <span class="left"></span>
+          <span class="right"></span>
+        </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="reward_list">
+  <h2>问卷吧嘉年华活动中奖用户名单</h2>
+  <h3>我们会按照您的中奖手机号联系您,并将奖品寄送到您的手中,请您耐心等待</h3>
+  <table>
+    <tbody>
+      <tr>
+        <td>中奖手机号</td>
+        <td>奖品名称</td>
+        <td>中奖日期</td>
+      </tr>
+      <%if @reward_list.length > 0 %>
+        <% @reward_list.each do |reward|%>
+          <tr>
+            <% reward.mobile[3..6] = '****'%>
+            <td><%= reward.mobile %></td>
+            <td><%= reward.carnival_prize.name %>(1个)</td>
+            <td><%= reward.created_at.strftime("%F")%></td>
+          </tr>        
+        <% end %>
+        <tr>
+            <td>187****6869</td>
+            <td>红米note(1部)</td>
+            <td>2014-07-18</td>          
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

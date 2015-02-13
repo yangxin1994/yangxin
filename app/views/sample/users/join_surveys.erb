@@ -34,7 +34,11 @@
                         <tr>
                             <td><%= int_time_to_date(survey.created_at.to_i) %></td>
                             <td>
-                                <a target="_blank" href="/a/<%= survey.id.to_s %>">
+                                <% if survey.is_a? AnswerTask %>
+                                    <a target="_blank" href="<%= survey.survey.get_encoded_url(current_user) %>">
+                                <% else %>
+                                    <a target="_blank" href="/a/<%= survey.id.to_s %>">
+                                <% end -%>
                                     <%= truncate(survey.survey.try(:title).to_s.strip, length: 30) %>
                                     <% if survey.status.to_i == 1 %>
                                         <span class="c-blue">(继续答题..)</span>

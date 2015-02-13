@@ -44,7 +44,8 @@ module OopsData
     config.encoding = "utf-8"
 
     # Configure sensitive parameters which will be filtered from the log file.
-    config.filter_parameters += [:password]
+		# config.filter_parameters += [:password]
+    config.filter_parameters += []
 
     # Enable the asset pipeline
     config.assets.enabled = true
@@ -56,7 +57,7 @@ module OopsData
 
     config.autoload_paths += Dir["#{config.root}/lib/**/"]
     config.autoload_paths += Dir["#{config.root}/app/models/*/"].find_all { |f| File.stat(f).directory? } 
-
+    config.autoload_paths += [Rails.root.join('vendor', 'oopsCrawl', 'lib', 'model')]
     config.permanent_signed_in_months = 24
     config.answer_id_time_out_in_hours = 240
     config.bind_answer_id_cookie_key = 'odb'

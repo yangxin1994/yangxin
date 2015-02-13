@@ -1,0 +1,31 @@
+<div class="page">
+	<div class="finished-page">
+		<div id="sf_main">
+      Thank you for your participation.
+
+			{{#if reward_point}}
+			<br />You have gained {{point}} points.
+			{{#if signin}}
+			<a href='/rewards'>Click</a> to view your points.
+			{{else}}
+			<a href='/account/sign_up'>Sign in</a> to view your points.
+			{{/if}}
+			{{/if}}
+
+			{{#if reward_lottery}}
+			<br />You can draw a lottery to win <a href="/lotteries/{{lottery_id}}">{{{lottery_title}}}</a>
+			{{#if signin}}
+			<a href='/lotteries/own'>Click</a> to see the lottery id.
+			{{else}}
+      Lottery id has been sent to your email. 
+			{{/if}}
+			{{/if}}
+			<a class="edit-finish" href="javascript:void(0);" id="close_btn">Close</a>	
+		</div>
+	</div>
+</div>
+{{#if show_restart}}
+<div class="footer">
+	<a href="javascript:void(0)" class="resume" id="restart_btn">Re-answer</a>
+</div>
+{{/if}}

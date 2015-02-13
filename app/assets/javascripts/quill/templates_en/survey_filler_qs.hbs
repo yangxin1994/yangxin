@@ -1,0 +1,19 @@
+<div>
+	<div id='sf_main' class='sf_main_padding'>
+		<div class='header'>{{#if header}}{{header}}{{/if}}</div>
+		{{#if title}}
+		<div class='s-title'>{{title}}</div>
+		{{/if}}
+		<div id='questions_con'></div>
+		<div class='footer'>{{#if footer}}{{footer}}{{/if}}</div>
+	</div>
+	{{#if remind}}
+	<div id='remind'>Notice: Please re-answer the questions seriously.</div>
+	{{/if}}
+	<div id='page_buttons'>
+		{{#if allow_pageup}}
+		<button id='prev_btn' class='light'>Previous</button>
+		{{/if}}
+		<button id='next_btn'>Next</button>
+	</div>
+</div>

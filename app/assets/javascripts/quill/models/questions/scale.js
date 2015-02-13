@@ -56,17 +56,17 @@ $(function(){
 			this.trigger('change:issue:show_style');
 		},
 		
-		_getInfo: function() {
+		_getInfo: function(lang) {
 			return null;
 		},
 
-		_checkAnswer: function(answer) {
+		_checkAnswer: function(answer, lang) {
 			for (var i = 0; i < this.issue.items.length; i++) {
 				var item = this.issue.items[i];
 				if(answer[item.id] == undefined)
-					return '请为所有项评分';
+					return lang=='en' ? 'Rank for all items' : '请为所有项评分';
 				if(answer[item.id] >= this.issue.labels.length)
-					return '评分有误，请重新评分';
+					return lang=='en' ? 'error' : '评分有误，请重新评分';
 			};
 			return null;
 		}

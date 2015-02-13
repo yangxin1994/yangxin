@@ -1,0 +1,5 @@
+tmp
+log
+thin.yml
+tmp/*
+log/*

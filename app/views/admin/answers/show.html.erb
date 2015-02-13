@@ -56,6 +56,9 @@
         <li class="divider"></li>
         <li><a href="<%= params[:id] %>/to_csv" class="querilayer">导当前条件下所有数据</a></li>
         <li><a href="<%= params[:id] %>/to_csv?status=32">导出审核完毕的数据</a></li>
+        <li><a href="<%= params[:id] %>/to_csv?status=4&suspected=true">导出疑似作弊的待审核数据</a></li>
+        <li><a href="<%= params[:id] %>/to_csv?status=4&suspected=false">导出非疑似作弊的待审核数据</a></li>
+        <li><a href="<%= params[:id] %>/to_csv?status=32&suspected=true">导出疑似作弊的通过审核数据</a></li>
       </ul>
     </div>
   </span>
@@ -81,6 +84,7 @@
       <tr>
         <th width="20%">答案创建者</th>
         <th >状态</th>
+        <th >代理信息</th>
         <th >创建时间</th>
         <th >操作</th>
       </tr>
@@ -93,8 +97,24 @@
     <tbody>
       <% @answers['data'].each do |answer| %>
       <tr>
-        <td><a href="/admin/samples/<%= answer["user_id"] %>"><%= answer["user_email_mobile"] %></a></td>
+        <% if answer["user_email_mobile"].present? %>
+          <td><a href="/admin/samples/<%= answer["user_id"] %>"><%= answer["user_email_mobile"] %></a></td>
+        <% elsif answer.carnival_user.present?  %>
+          <td><span><%= answer.carnival_user.mobile %></span></td>
+        <% else %>
+          <td></td>
+        <% end  %>
         <td><%= answer_type_tag answer["status"] %></td>
+        <% if answer.agent_task.present? %>
+          <td>
+            <span><%= answer.agent_task.try(:agent).try(:name) %></span>
+            <% if answer.mobile.present? %>
+              <span><%= "(#{answer.mobile})" %></span>
+            <% end %>
+          </td>
+        <% else %>
+          <td></td>
+        <% end %>
         <td><%= answer["created_at"].strftime('%F %R') %></td>
         <td>
           <a class="btn handle" href="<%= answer["_id"] %>/review" ><i class="icon-list-alt"></i>查看详细</a>

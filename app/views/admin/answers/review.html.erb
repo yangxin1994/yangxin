@@ -3,6 +3,7 @@
   <script>
     window.latitude = <%= @questions.latitude.to_f %>
     window.longitude = <%= @questions.longitude.to_f %>
+    window.answer_id = "<%= @questions._id.to_s %>"
   </script>
 <% end %>
 
@@ -24,6 +25,9 @@
 <% end %>
 
 <legend><%= @survey.title %></legend>
+  <%- if @questions.agent_task.present? %>
+    <p> 代理:<%= @questions.agent_task.agent.email  %></p>
+  <%- end %>
   <%- if @questions.interviewer_task.present? %>
     <p> 访问员:<%= @questions.interviewer_task.user.email  %></p>
   <%- end %>
@@ -32,8 +36,12 @@
 		答题时长: <%= ((@questions.finished_at - @questions.created_at.to_i) / 60.0 ).ceil if @questions.finished_at.present? %> 分钟
 		<span> <a href="/manyime/audio/<%= @questions.audio_index %>.3gp">录音下载</a></span>
 	</p>
+  <p> IP地址: <%= @questions.ip_address %> <%= QuillCommon::AddressUtility.find_province_city_town_by_code(@questions.region) %></p>  
   <p class="red"> <%= @questions.audit_message %> </p>
-  <div id="map" style="height:500px;"></div>
+
+  <%- if @questions.interviewer_task.present? %>
+    <div id="map" style="height:500px;"></div>
+  <%- end %>
 	<br />
 <%= render :partial => "admin/answers/detail" %>
 <% if @questions['status'].to_i == 4 %>

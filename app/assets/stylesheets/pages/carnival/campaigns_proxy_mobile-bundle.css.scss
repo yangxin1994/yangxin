@@ -1,0 +1,254 @@
+//=require jquery.fancybox
+//=require ui/widgets/od_progressbar
+@import "common";
+@import "compass/css3/border-radius";
+@import "compass/utilities/general/clearfix";
+@import "activities/2014-6/ferris/*.png";
+@import "compass/reset";
+.header{
+  height:20px;
+}
+
+
+
+.box{
+  width:320px;
+  margin: 0 auto;
+  @include border-radius(3px);
+  border:1px solid #dbdbdb;
+  text-align: center;
+  padding:40px 20px;
+  .title{
+    @include one-line(24px);
+    font-size: 24px;
+    font-weight:bold;
+    color:#666;
+  }
+  .describe{
+    color:#666;
+    font-size:16px;
+    margin: 30px 0;
+    line-height: 1.8em;
+    text-align: center;
+
+  }
+
+  .btn-container{
+    width:320px;
+    margin:0 auto;    
+    text-align: center;
+    cursor: pointer;
+    color: #fff;
+    display: block;
+    margin: 20px auto 40px auto;
+    @include one-line(54px);
+    font-size: 16px;
+    font-weight: bold;
+    background: #5691f0;
+    @include border-radius(3px);
+    .pre_survey{
+      a{
+        color: #fff;  
+        text-decoration: none;
+      }
+    }
+
+    
+    
+
+  }
+}
+
+
+// .process{
+//   position: relative;
+//   margin:0 auto;  
+//   border:1px solid red;
+//   @include one-line(50px);
+//   text-align: center;
+//   .percent{
+    
+//     background:yellow;
+//     height:inherit;
+//   }
+//   .text{
+//     position: absolute;
+//     top:0px;
+//     left:40%;
+//   }
+// }
+
+// .s_content{
+//   @include clearfix;
+//   margin:0 auto;
+//   >div{
+//     width:inherit;
+//     height:100px;
+//     a{
+//       display:inline-block;
+//       width:100%;
+//       @include one-line(100px);
+//       text-align: center;
+//       cursor: pointer;
+//       background:green;
+//       text-decoration: none;
+//       &.disabled{
+//         cursor:default;
+//         background: grey;
+//       }
+//     }
+//   }
+// }
+// .footer{
+//   text-align: center;
+// }
+
+
+.carnival-popup{
+  padding:30px;
+  min-width: 320px;
+  min-height:100px;
+  background: #f8f8f8;
+  float: left;
+  margin:20px;
+  text-align: center;
+  cursor: default;
+  @include border-radius(4px);
+  .so_share{
+    a{
+      display:inline-block;
+      width:45px;
+      height:45px;
+      &.sina{
+        @include ferris-sprite(sina);
+      }
+      &.qq{
+        @include ferris-sprite(qq);
+      }
+      &.tencent{
+        @include ferris-sprite(tencent);
+      }
+      &.douban{
+        @include ferris-sprite(douban);
+      }
+      &.renren{
+        @include ferris-sprite(renren);
+      }
+      &.qzone{
+        @include ferris-sprite(qzone);
+      }
+
+    }
+  }
+  .notic{
+    display:none;
+    position:absolute;
+    top:6px;
+    width:320px;
+    font-size: 14px;
+    background:#fe7b91;
+    color:#fff;
+    @include one-line(26px);
+    a{
+      color:#fff;
+    }
+  }
+  form{
+    padding-top:20px;
+    input.phone{
+      width: 135px;
+      height: 16px;
+      padding: 5px 5px;
+      font-size: 12px;      
+    }
+  }
+  img{
+    display: block;
+    margin:0 auto;
+    margin-top:15px;
+  }
+  h2{
+    color:#E75C72;
+    font-size: 20px;
+    font-weight: bold;
+    text-align: center;
+  }
+  p{
+    // color:#B3BDC6;
+    color: #666;
+    font-size: 14px;
+    text-align: center;
+    line-height: 1.5em;
+    margin-top:10px;
+    b{
+      color:#52ACEF;
+    }
+    &.share_d{
+      color:#fff;
+      background:#fec919;
+      // text-align: left;
+      font-weight: bold;
+    }
+  }
+  .btn{
+    min-width: 100px;
+    padding:0 15px;
+    height:40px;
+    font-size: 16px;
+    line-height: 40px;
+    text-align: center;
+    color:#fff;
+    display: inline-block;
+    margin:15px 10px;
+    @include border-radius(4px);
+    text-decoration: none;
+    cursor:pointer;
+    &.submit{
+      background: #72CBED;
+      &:hover{
+        background: #46C2E8;
+      }
+    }
+    &.cancel{
+      background: #A2CA81;
+      &:hover{
+        background: #8CBA60;
+      }
+    }
+  }
+  .clos{
+    cursor:pointer;
+    min-width: 100px;
+    padding:0 15px;
+    height:40px;
+    font-size: 16px;
+    line-height: 40px;
+    text-align: center;
+    color:#fff;
+    display: inline-block;
+    margin:15px 10px;
+    @include border-radius(4px);
+    text-decoration: none;
+    background: #72CBED;
+    &:hover{
+      background: #46C2E8;
+    }        
+  }
+  input[type='text'], input[type='password']{
+    border: 1px solid #ccc;
+    @include border-radius(3px);
+    padding: 2px;
+    line-height:1.5em;
+    
+    &:focus {
+      border-color: rgb(245, 192, 0);
+      outline: none;
+    }
+    
+    &.error {
+      border-color: rgb(255, 0, 0);
+      outline: none;
+      color: #f00;
+    }
+  }
+}

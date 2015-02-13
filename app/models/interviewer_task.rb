@@ -97,15 +97,27 @@ class InterviewerTask
   end
 
   def submit_answers(answers)
+    Rails.logger.info "111&&&&&&&&&&&&&&&&&&&&"
+    Rails.logger.info answers.inspect
     answers.each do |a|
       # convert the gps or 3g location to a region code
-      region = QuillCommon::AddressUtility.find_region_code_by_latlng(*a["location"])
+      Rails.logger.info "2&&&&&&&&&&&&&&&&&&&&"
+      region = -1
+      begin
+        Rails.logger.info "2.1&&&&&&&&&&&&&&&&&&&&"
+        # region = QuillCommon::AddressUtility.find_region_code_by_latlng(*a["location"])
+        Rails.logger.info "2.2&&&&&&&&&&&&&&&&&&&&"
+      rescue
+        region = -1
+      end
+      Rails.logger.info "3&&&&&&&&&&&&&&&&&&&&"
       if a["status"].to_i == 1
         status = Answer::REJECT
       else
         # status = self.survey.answer_need_review ? Answer::UNDER_REVIEW : Answer::FINISH
         status = Answer::UNDER_REVIEW
       end
+      Rails.logger.info "4&&&&&&&&&&&&&&&&&&&&"
       answer_to_insert = {:interviewer_task_id => self._id,
         :survey_id => self.survey_id,
         :channel => -2,
@@ -118,7 +130,12 @@ class InterviewerTask
         :status => status,
         :reject_type => a["reject_type"].to_i,
         :region => region}
-      Answer.create(answer_to_insert)
+      Rails.logger.info "4&&&&&&&&&&&&&&&&&&&&"
+      Rails.logger.info answer_to_insert.inspect
+      retval = Answer.create(answer_to_insert)
+      Rails.logger.info "&&&&&&&&&&&&&&&&&&&&"
+      Rails.logger.info retval.inspect
+      Rails.logger.info "&&&&&&&&&&&&&&&&&&&&"
     end
     self.refresh_quota
     return self
@@ -132,4 +149,11 @@ class InterviewerTask
     self.write_attribute(:interviewer, self.user.nickname)
     return self
   end
+
+	def info_for_interviewer
+		self.quota["amount"] = self.quota["rules"][0]["amount"]
+    self.write_attribute(:create_time, self.created_at.to_i)
+    self.write_attribute(:update_time, self.survey.last_update_time)
+		return self
+	end
 end

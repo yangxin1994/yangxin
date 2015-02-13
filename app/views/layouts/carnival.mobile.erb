@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>问卷吧嘉年华 - 答题获取手机充值卡，还可以抽红米note、小米盒子、小米电源等大奖哦！你也来参加吧！</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta name="description" content="<%= corp_name %>网络调研/网络调查平台是专业从事网络数据产品和市场调研的第三方服务商，为您提供优质、科学、严谨的数字化调研和研究咨询服务。" />
+  <meta name="Keywords" content="<%= corp_name_short %>,<%= corp_name %>,网络调查,网络调研,数字化调研,优数调研,市场调研,研究咨询,连续性调研,问卷调查" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimum-scale=1.0, maximum-scale=1.0">
+
+  <%= stylesheet_link_tag    "layouts/carnival_mobile-layout" %>
+  <%= javascript_include_tag "layouts/app-layout" %>
+
+  <%= csrf_meta_tags %>
+  <link rel="shortcut icon" href="/assets/od-quillme/favicon.ico">
+  <script src="/javascripts/jquery.cookie.js?body=1" type="text/javascript"></script>
+
+  <%= yield :head %>
+
+</head>
+<body>
+  <div class='header'>
+    
+  </div>
+    <%= yield %>
+  <div class="footer">
+    
+  </div>
+
+<% if Rails.env.production? %>
+<div style='display:none;'>
+  <!-- Baidu statistic -->
+  <script type="text/javascript">
+  var _bdhmProtocol = (("https:" == document.location.protocol) ? " https://" : " http://");
+  document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3Fbd6514854e0a82f4cf35b8a23b78ee51' type='text/javascript'%3E%3C/script%3E"));
+  </script>
+</div>
+<% end %>
+</body>
+</html>
+

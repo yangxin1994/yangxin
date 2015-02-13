@@ -10,9 +10,12 @@ db/*.lock
 db/journal
 .DS_Store
 config/mongoid.yml
+config/config.yml
 Gemfile.lock
 public/uploads/*
 public/uploads/avatar/*
 public/assets/*
 public/manyime/*
 lib/data.csv
+public/images/*
+vendor/oopsCrawl/config/mongoid.yml

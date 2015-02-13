@@ -17,7 +17,7 @@ $(function(){
 
 				getName: function (value) { return _type_names[value]; },
 
-				getLabel: function (value) { return _type_labels[value]; },
+				getLabel: function (value, lang) { return lang == 'en' ? _type_names[value] : _type_labels[value]; },
 
 				getValue: function (name) {
 					return _.findIndex(_type_names, function(type_name) {

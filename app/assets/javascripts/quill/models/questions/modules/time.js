@@ -85,12 +85,12 @@ $(function(){
 				}
 			},
 
-			_getInfo: function() {
-				return '请选择时间';
+			_getInfo: function(lang) {
+				return lang=='en' ? 'Choose time' : '请选择时间';
 			},
 
-			_checkAnswer: function(answer) {
-				return isNaN(answer) ? '请选择时间' : null;
+			_checkAnswer: function(answer, lang) {
+				return isNaN(answer) ? (lang=='en' ? 'Please choose time' : '请选择时间') : null;
 			}
 		};
 

@@ -63,11 +63,93 @@
           <%= survey['created_at'].strftime("%F") %>
         </td>
         <td>
-          <a class="btn" href="/admin/answers/<%= survey['_id']%>" target="_blank"><i class="icon-edit"></i>审核答案</a>
+          
+        <div class="btn-group">
+          <a class="btn handle" href="/admin/answers/<%= survey['_id']%>" target="_blank"><i class="icon-edit"></i>审核答案</a>
+          <button class="btn dropdown-toggle" data-toggle="dropdown">
+            <span class="caret"></span>
+          </button>
+          <ul class="dropdown-menu">
+            <li><a href="/admin/surveys/<%= survey._id %>" target="_blank"><i class="icon-list-alt"></i>查看问卷</a></li>
+            <li><a href="javascript:;" class="batch-reject" data-sid="<%= survey['_id']%>" data-stitle="<%= survey['title']%>"><i class="icon-remove"></i>批量拒绝</a></li>
+            <li><a href="javascript:;" class="batch-pass" data-sid="<%= survey['_id']%>" data-stitle="<%= survey['title']%>"><i class="icon-remove"></i>批量通过</a></li>
+          </ul>
+        </div>          
         </td>
       </tr>
       <% end %>
     </tbody>
   </table>
 
+  <div class="modal hide fade" id="batch_reject_modal">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+      <h3>批量拒绝答案 - <span id="survey_title"></span></h3>
+    </div>
+    <div class="modal-body" id="promote_body">
+      <p>
+        说明：系统将批量拒绝您上传csv问卷中包含的所用问卷，csv的文件格式第一列为答案id，第二列为拒绝理由。
+      </p>
+      <form action="answer/0/batch_reject" class="form-horizontal"
+            name="batch_reject"
+            enctype="multipart/form-data"
+            id = "breject_form"
+            method="post">
+        <input value="put" type='hidden' name="_method">
+        <div class="control-group">
+          <div class="controls">
+            <label class="control-label" for="answer_list">
+            </label>
+            <input type="file" id="answer_list" name="answer_list">
+            <p id="answer_list_vld"></p>
+          </div>
+        </div>
+        <div class="control-group">
+          <div class="controls">
+            <button type="submit" class="btn" id="breject_btn">上传并拒绝答案</button>
+          </div>
+        </div>      
+      </form>
+    </div>    
+    <div class="modal-footer">
+      <a class="btn" href="javascript:$('#promote_modal').modal('hide');">关闭</a>
+    </div>
+  </div> 
+
+  <div class="modal hide fade" id="batch_pass_modal">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+      <h3>批量通过答案 - <span id="survey_title"></span></h3>
+    </div>
+    <div class="modal-body" id="promote_body">
+      <p>
+        说明：系统将批量通过您上传csv问卷中包含的所用问卷，csv的文件格式第一列为答案id
+      </p>
+      <form action="answer/0/batch_pass" class="form-horizontal"
+            name="batch_pass"
+            enctype="multipart/form-data"
+            id = "bpass_form"
+            method="post">
+        <input value="put" type='hidden' name="_method">
+        <div class="control-group">
+          <div class="controls">
+            <label class="control-label" for="pass_answer_list">
+            </label>
+            <input type="file" id="pass_answer_list" name="pass_answer_list">
+            <p id="pass_answer_list_vld"></p>
+          </div>
+        </div>
+        <div class="control-group">
+          <div class="controls">
+            <button type="submit" class="btn" id="bpass_btn">上传并通过答案</button>
+          </div>
+        </div>      
+      </form>
+    </div>    
+    <div class="modal-footer">
+      <a class="btn" href="javascript:$('#promote_modal').modal('hide');">关闭</a>
+    </div>
+  </div> 
 </div>
+
+

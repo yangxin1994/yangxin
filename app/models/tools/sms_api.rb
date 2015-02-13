@@ -7,7 +7,8 @@ class SmsApi # 短信接口
   attr_reader :phone_number, :message
 
   include HTTParty
-  base_uri 'http://sdkhttp.eucp.b2m.cn'
+# base_uri 'http://sdkhttp.eucp.b2m.cn'
+  base_uri 'http://219.239.91.112'
   format  :xml
 
   def initialize(phone_number, message)
@@ -23,7 +24,7 @@ class SmsApi # 短信接口
   # PASSWORD = '921256'
   PASSWORD = 'od@2013'
   CODE = 4699
-  AUTOGRAPH = '［问卷吧］'
+  AUTOGRAPH = '【问卷吧】'
   ##### 注意: 不能使用短信接口发送个人信息(如"老地方见","你在哪"之类)                   #####
   ##### 否则短信平台会封掉接口，测试时只写两个字"内部测试"加其他必要的程序信息(如校验码)#####
   ##### 注意!注意!注意!注意!注意!注意!注意!注意!注意!注意!注意!注意!注意!注意注意!!注意!#####
@@ -106,12 +107,41 @@ class SmsApi # 短信接口
             :query => { :cdkey => SmsApi::CDKEY,
                         :password => SmsApi::PASSWORD,
                         :phone    => phone,
-                        :message  => message + AUTOGRAPH,
+                        :message  => AUTOGRAPH + message,
                         :sendtime => sendtime})
   end
 
 
   ################### different types of sms ########################
+
+  def self.pre_survey_sms(survey_id, mobile, reward_scheme_id)
+    survey = Survey.find(survey_id)
+    @survey_title = survey.title
+    @survey_link = "#{Rails.application.config.quillme_host}/s/#{reward_scheme_id}"
+    @survey_link = Rails.application.config.quillme_host + "/" + MongoidShortener.generate(@survey_link)
+    
+    @reward = ""
+    reward_scheme = RewardScheme.find_by_id(reward_scheme_id)
+    if reward_scheme && reward_scheme.rewards[0].present?
+      case reward_scheme.rewards[0]["type"]
+      when RewardScheme::MOBILE
+          @reward = "#{reward_scheme.rewards[0]["amount"]}元手机话费奖励"
+      when RewardScheme::ALIPAY
+          @reward = "#{reward_scheme.rewards[0]["amount"]}元支付宝奖励"
+      when RewardScheme::JIFENBAO
+          @reward = "#{reward_scheme.rewards[0]["amount"]}元集分宝奖励"
+      when RewardScheme::POINT
+          @reward = "#{reward_scheme.rewards[0]["amount"]}积分奖励"
+      when RewardScheme::LOTTERY
+          @reward = "一次抽奖机会"
+      end
+    end
+
+    text_template_file_name = "#{Rails.root}/app/views/sms_text/pre_survey_invitation_sms.text.erb"
+    text_template = ERB.new(File.new(text_template_file_name).read, nil, "%")
+    text = text_template.result(binding)
+    self.send_sms('pre_survey_invitation', mobile, text)
+  end
 
   def self.invitation_sms(survey_id, sample_id, callback, opt = {})
     sample = User.find_by_id(sample_id)
@@ -195,12 +225,43 @@ class SmsApi # 短信接口
     self.send_sms(type,mobile, text)
   end
 
-  def self.charge_confirm_sms(mobile, callback, opt)
-    @gift_name = opt[:gift_name].to_s
+  def self.charge_confirm_sms(type, mobile, callback, opt)
+    @gift_name = opt["gift_name"].to_s
     text_template_file_name = "#{Rails.root}/app/views/sms_text/charge_confirm_sms.text.erb"
     text_template = ERB.new(File.new(text_template_file_name).read, nil, "%")
     text = text_template.result(binding)
-    self.send_sms(mobile, text)
+    self.send_sms(type, mobile, text)
+  end
+
+  def self.carnival_re_invitation(type, mobile, callback, opt)
+    answer_id = opt["answer_id"]
+    @answer_link = "#{Rails.application.config.quillme_host}/a/#{answer_id}"
+    @answer_link = Rails.application.config.quillme_host + "/" + MongoidShortener.generate(@answer_link)
+
+    text_template_file_name = "#{Rails.root}/app/views/sms_text/carnival_re_invitation.text.erb"
+    text_template = ERB.new(File.new(text_template_file_name).read, nil, "%")
+    text = text_template.result(binding)
+    self.send_sms(type, mobile, text)
+  end
+
+  def self.carnival_batch_re_invite_reject(type, mobile, callback, opt)
+    @answer_link = "#{Rails.application.config.quillme_host}/carnival/campaigns?mob=#{mobile}"
+    @answer_link = Rails.application.config.quillme_host + "/" + MongoidShortener.generate(@answer_link)
+
+    text_template_file_name = "#{Rails.root}/app/views/sms_text/carnival_batch_re_invite_reject.text.erb"
+    text_template = ERB.new(File.new(text_template_file_name).read, nil, "%")
+    text = text_template.result(binding)
+    self.send_sms(type, mobile, text)
+  end
+
+  def self.carnival_batch_re_invite_blank(type, mobile, callback, opt)
+    @answer_link = "#{Rails.application.config.quillme_host}/carnival/campaigns?mob=#{mobile}"
+    @answer_link = Rails.application.config.quillme_host + "/" + MongoidShortener.generate(@answer_link)
+
+    text_template_file_name = "#{Rails.root}/app/views/sms_text/carnival_batch_re_invite_blank.text.erb"
+    text_template = ERB.new(File.new(text_template_file_name).read, nil, "%")
+    text = text_template.result(binding)
+    self.send_sms(type, mobile, text)
   end
 
   def self.send_massive_sms(mobile_list, sms_text)

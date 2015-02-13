@@ -1,0 +1,23 @@
+<div class="page">
+	{{#if remind}}
+		<div class="describe">
+			<span>Notice: Please re-answer the questions seriously.</span>
+		</div>
+	{{/if}}
+	<div id='questions_con'></div>
+</div>
+
+<div class="footer">
+	{{#if allow_pageup}}
+	<a href="javascript:void(0)" class="prev" id="prev_btn" title="Previous"></a>
+	{{/if}}
+	<i class="footer-divide"></i>
+	<a href="javascript:void(0)" class="next" id="next_btn">Previous</a>
+	{{#if show_restart}}
+	<a href="javascript:void(0)" class="resume" id="restart_btn">Re-answer</a>
+	{{else}}
+		{{#if allow_replay}}
+			<a href="javascript:void(0)" class="resume" id="replay">Re-answer</a>
+		{{/if}}
+	{{/if}}
+</div>

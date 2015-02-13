@@ -113,9 +113,7 @@ $(function(){
 			});
 		},
 
-		setAnswer: function(answer) {
-			if(!answer) return;
-
+		_setAnswer: function(answer) {
 			if(this.model.hasOther()) {
 				this.$('input:text').val(answer.text_input);
 				this.model_issue.other_item.input_value = answer.text_input;
@@ -153,7 +151,6 @@ $(function(){
 			if(this.model.hasOther())
 				answer.text_input = $.trim(this.$('input:text').val());
 
-			console.log(answer);
 			return answer;
 		}
 		

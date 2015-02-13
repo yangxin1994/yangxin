@@ -151,29 +151,54 @@ $(function(){
 			this.itemsHandler._deserialize_items(items);
 		},
 
-		_getInfo: function() {
-			switch(this.issue.option_type) {
-				case 2: return '每行选择 ' + this.issue.min_choice + ' 项';
-				case 3: return '每行最多选择 ' + this.issue.max_choice + ' 项';
-				case 4: return '每行至少选择 ' + this.issue.min_choice + ' 项';
-				case 5: return '每行选择 ' + this.issue.min_choice + ' 到 ' + this.issue.max_choice + ' 项';
-			}
-			return null;
+		_getInfo: function(lang) {
+      if(lang=='en') {
+        switch(this.issue.option_type) {
+          case 2: return 'Choose ' + this.issue.min_choice + ' options each row';
+          case 3: return 'Choose no more than ' + this.issue.max_choice + ' options each row';
+          case 4: return 'Choose at least ' + this.issue.min_choice + ' options each row';
+          case 5: return 'Choose ' + this.issue.min_choice + ' to ' + this.issue.max_choice + ' options each row';
+        }
+        return null;
+      } else {
+        switch(this.issue.option_type) {
+          case 2: return '每行选择 ' + this.issue.min_choice + ' 项';
+          case 3: return '每行最多选择 ' + this.issue.max_choice + ' 项';
+          case 4: return '每行至少选择 ' + this.issue.min_choice + ' 项';
+          case 5: return '每行选择 ' + this.issue.min_choice + ' 到 ' + this.issue.max_choice + ' 项';
+        }
+        return null;
+      }
 		},
 
-		_checkAnswer: function(answer) {
-			for (var i = 0; i < this.issue.rows.length; i++) {
-				var row = this.issue.rows[i];
-				if(answer[row.id] == undefined) return '请回答所有子问题';
-				switch(this.issue.option_type) {
-					case 0: case 2:
-						if(answer[row.id].length != this.issue.min_choice) return '每行请选择 ' + this.issue.min_choice + ' 项';
-					default:
-						if(answer[row.id].length < this.issue.min_choice) return '每行至少选择 ' + this.issue.min_choice + ' 项';
-						if(answer[row.id].length > this.issue.max_choice) return '每行最多选择 ' + this.issue.max_choice + ' 项';
-				}
-			};
-			return null;
+		_checkAnswer: function(answer, lang) {
+      if(lang=='en') {
+        for (var i = 0; i < this.issue.rows.length; i++) {
+          var row = this.issue.rows[i];
+          if(answer[row.id] == undefined) return 'Please answer all rows';
+          switch(this.issue.option_type) {
+            case 0: case 2:
+              if(answer[row.id].length != this.issue.min_choice) return 'Choose ' + this.issue.min_choice + ' options each row';
+            default:
+              if(answer[row.id].length < this.issue.min_choice) return 'Choose at least ' + this.issue.min_choice + ' options each row';
+              if(answer[row.id].length > this.issue.max_choice) return 'Choose no more than ' + this.issue.max_choice + ' options each row';
+          }
+        };
+        return null;
+      } else {
+        for (var i = 0; i < this.issue.rows.length; i++) {
+          var row = this.issue.rows[i];
+          if(answer[row.id] == undefined) return '请回答所有子问题';
+          switch(this.issue.option_type) {
+            case 0: case 2:
+              if(answer[row.id].length != this.issue.min_choice) return '每行请选择 ' + this.issue.min_choice + ' 项';
+            default:
+              if(answer[row.id].length < this.issue.min_choice) return '每行至少选择 ' + this.issue.min_choice + ' 项';
+              if(answer[row.id].length > this.issue.max_choice) return '每行最多选择 ' + this.issue.max_choice + ' 项';
+          }
+        };
+        return null;
+      }
 		}
 	});
 

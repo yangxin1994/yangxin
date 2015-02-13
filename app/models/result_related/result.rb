@@ -49,6 +49,7 @@ class Result
     # if the result does not exist return 0
     return 0 if result.nil?
     # the task is finished or there is error, return
+    
     return result.status if result && result.status == 1 || result.status == -1
 
     # the task has not been finished, check the progress
@@ -59,11 +60,15 @@ class Result
       result.save
       return ErrorEnum::TASK_NOT_EXIST
     end
+
+
     if Time.now.to_i - task.updated_at.to_i > 600
       result.status = -1
       result.save
       return ErrorEnum::TASK_TIMEOUT
     end
+
+
     progress = task.progress
 
     # calculate the status
@@ -367,11 +372,16 @@ class Result
     end
   
     answer_ary.each do |answer|
-      answer["sort_result"].each_with_index do |input_id, sort_index|
-        result.each_key do |k|
-          if k.split(',').include?(input_id)
-            result[k][sort_index] = result[k][sort_index] + 1 if sort_index < input_number
-            break
+      # puts "!!!!!!!!!!!!!!!!!!"
+      # puts answer.inspect
+      # puts "!!!!!!!!!!!!!!!!!!"
+      if !answer["sort_result"].blank?
+        answer["sort_result"].each_with_index do |input_id, sort_index|
+          result.each_key do |k|
+            if k.split(',').include?(input_id)
+              result[k][sort_index] = result[k][sort_index] + 1 if sort_index < input_number
+              break
+            end
           end
         end
       end

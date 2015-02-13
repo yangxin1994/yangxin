@@ -19,6 +19,10 @@ class Filler::FillerController < ApplicationController
 
   def ensure_survey(survey_id)
     @survey = Survey.find(survey_id)
+    if !@survey.nil? and @survey.id.to_s == '53e1da56eb0e5b56f50000fa'
+      @survey[:lang] = 'en'
+    end
+    @survey
   end
 
   def ensure_reward(reward_scheme_id, rewards)
@@ -81,7 +85,10 @@ class Filler::FillerController < ApplicationController
     render_404 if reward_scheme.nil?
     survey_id = reward_scheme.survey_id
     ensure_survey(survey_id)
-
+    if @survey.is_a? SurveyTask
+      redirect_to @survey.get_encoded_url(current_user)
+      return
+    end
     # 4. Check whether an answer for this survey is already exist.
     #    If the user is signed in, ask his answer from Quill.
     #    If the user is not signed in, check the cookie
@@ -91,10 +98,15 @@ class Filler::FillerController < ApplicationController
     else
       answer = Answer.find_by_id(cookies[cookie_key(survey_id, is_preview)])
     end
-    @percentage = 0
+    if answer.is_a? AnswerTask
+      redirect_to "/"
+      return
+    end
+    @percentage = -1
     if answer.present?
       if answer.user.present? && answer.user != current_user
         cookies.delete(cookie_key(survey_id, is_preview), :domain => :all)
+        answer = nil
       else
         answer.update_status
         redirect_to show_a_path(answer.id.to_s) and return if !answer.is_edit
@@ -111,6 +123,13 @@ class Filler::FillerController < ApplicationController
 
     # 6. Check whether survey is closed or not
     @survey_closed = !@is_preview && @survey.status != Survey::PUBLISHED
+    if params[:ati].present?
+      # checkout whether agent task is already closed
+      agent_task = AgentTask.find(params[:ati])
+      if agent_task.blank? || agent_task.status != AgentTask::OPEN
+        @survey_closed = true
+      end
+    end
     
     # 10. get request referer and channel
     @channel = params[:c].to_i

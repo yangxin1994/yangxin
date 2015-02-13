@@ -7,7 +7,9 @@
 @import "od-quillme/icons/*.png";
 
 
-
+body {
+	font-family: "ff-tisa-web-pro-1","ff-tisa-web-pro-2","Lucida Grande","Hiragino Sans GB","Hiragino Sans GB W3","\5FAE\8F6F\96C5\9ED1";
+}
 
 /* layout */
 
@@ -246,6 +248,11 @@ body{background: image-url('od-quillme/bg.png');}
 .inner-page{
 	width:960px;
 	margin:0 auto;
+}
+
+.survey_list{
+	margin-top:20px;
+	height:865px;
 }
 
 
@@ -541,7 +548,7 @@ body{background: image-url('od-quillme/bg.png');}
 			margin-bottom:5px;
 			border-bottom:1px #f9b9b9 dashed;
 			.box-title{
-				width:60px;
+				// width:60px;
 				height:18px;
 				font-size:14px;
 				font-weight: bold;
@@ -559,7 +566,7 @@ body{background: image-url('od-quillme/bg.png');}
 }
 
 /*调研列表*/
-.research-list{
+.research-list,.survey-list{
 	width:610px;
 	float: left;
 	ul{
@@ -570,6 +577,7 @@ body{background: image-url('od-quillme/bg.png');}
 			border-bottom:1px #dbdbdb dashed;
 			@include clearfix;
 			.reward.unfinished{background: #fbbf62;}
+			.reward.red{background: $red1;}
 			.reward.finished{background: #ddd;}
 			.reward{
 				float: left;
@@ -584,7 +592,7 @@ body{background: image-url('od-quillme/bg.png');}
 					b{
 						font-size: 20px;
 						@include one-line(46px);
-						font-weight: bold;
+
 					}
 				}
 				&.integral{
@@ -592,19 +600,21 @@ body{background: image-url('od-quillme/bg.png');}
 						display: block;
 						font-size: 18px;
 						margin-top:3px;
-						font-weight: bold;
 						letter-spacing: 1px;
+						line-height: 1.2em;
 					}
 					em{
 						text-align: center;
 						font-size: 12px;
+						
 					}
 				}
 				&.lottery{
 					b{
 						font-size: 14px;
 						display: block;
-						padding:0 3px;
+						padding:3px;
+						line-height: 1.4em;
 					}
 				}
 			}
@@ -848,275 +858,6 @@ body{background: image-url('od-quillme/bg.png');}
   background:url('/assets/image/sample/next_s.png') no-repeat; 	
 } 
 
-/*
-.share_cont{
-  width:488px;
-  height:220px;
-  padding-left:22px;
-	@include border-radius(4px);
-  h1{
-    color:#333;
-    margin:15px 0px;  
-    font-size: 16px;
-  }
-  .share_tit{
-    width:460px;
-	@include one-line(24px);
-    background:#fff7eb;
-    text-align:center;
-    span{
-      color:#ed1818;  
-    }    
-  }
-  .weibo a{
-    margin-right:10px;
-  }
-  .method{
-    color:#999;
-    font-size: 14px;
-    margin:20px 0px 12px 0px;
-  }
-  input{
-    width:360px;
-    height:24px;
-    padding:3px 4px 2px 4px;
-    float:left;  
-  }
-  button{
-    width:66px;
-    height:32px;
-	@include one-line(31px);
-    background:#f14646;
-    border:0px;
-    margin-left:10px;
-    font-size: 14px;
-    color:#fff;
-    cursor:pointer;        
-    @include border-radius(4px);
-    &:hover, &.hover{
-    	background:$red1;
-    }
-    &:active, &.active{
-		background:#d93631;
-    }	              
-  }
-  .share-notice{
-  	display:none;
-  	margin-top:10px;
-  	i{
-  		float: left;
-		display: inline-block;
-		width: 20px;
-		height: 20px;
-		background: url(/assets/od-quillme/success.png) no-repeat;
-  	}
-  	span{
-  		height:20px;
-  		line-height:20px;
-  		color:#666;
-  	}
-  }    
-}
-
-
-#share_survey{
-	width:820px;
-	height:auto;
-	.share_l{
-		float:left;
-		margin:20px 0px 20px 20px;
-		width:340px;
-		h2{
-			color:#666;
-			font-size:14px;
-			font-weight:bold;
-			a{	
-				margin-left:10px;
-				color:#65ADF1;
-				font-size: 14px;
-			}
-		}
-
-		div.form{
-			position:relative;
-			color:#B3B3B3;
-			margin-top:20px;
-			.err_notice{
-				border: 1px solid #f47474;
-				text-align: center;
-				font-size: 14px;
-				left: 73px;
-				display:none;
-				color:#ec1717;
-				height:30px;
-  			  	background:#fff7eb;
-  			  	line-height:30px;
-				position:absolute;
-				width: 228px;
-				@include border-radius(4px);
-				i{
-					margin-right: 4px;
-					top: 4px;
-					position: relative;
-					display:inline-block;
-					width:20px;
-					height:20px;
-					background: image-url('/assets/od-quillme/faild.png') no-repeat;
-				}
-				span{
-					height:20px;
-					line-height:20px;
-					a{
-						color: #65ADF1;
-					}
-				}
-			}
-			input#remember{
-				float:left;
-				padding:0px;
-				width: 14px;
-				height: 14px;
-				border: 1px solid #B3B3B3;
-				margin-right: 5px;
-				display: inline;
-				border: 0px;
-			}						
-			input{
-				width:208px;
-				line-height: 18px;
-				height:18px;
-				padding: 5px 10px;
-				color: #999;				
-			}
-			label.for_in{
-				display:inline-block;
-				text-align:right;
-				width:60px;
-				@include one-line(30px);
-				font-size: 14px;	
-				margin-right:10px;			
-			}
-			.pass{
-				margin:20px 0px 10px 0px;
-			}
-			.ano{
-				padding:0px 58px 0px 72px;
-				input,label{
-					float:left;
-				}
-				a{
-					color:#B3B3B3;
-					float:right;
-				}
-			}
-			button{
-				margin:13px 0px 0px 70px;
-				width:230px;
-				@include one-line(30px);
-				color:#fff;
-				background:$red;
-				text-align:center;
-				border:0px;
-		  	font-size:14px;          
-		  	@include border-radius(4px);
-		  	cursor: pointer;
-		  	letter-spacing: 5px;
-		  	&:hover{
-		  		background: $red1;
-		  	}	        
-		  	&:active{
-		  		background: $red2;
-		  	}    				
-			}
-  		button.disabled{
-  			cursor:default;
-				background:#E6E6E6;
-				color:#B3B3B3; 
-				&:hover{
-					background:#e6e6e6;
-					color:#b3b3b3;
-				} 				
-  		}			
-		}
-	}
-	.share_m{
-		width:8px;
-		height:235px;
-		float:left;
-		background:url('/assets/od-quillme/share_line.png')
-	}
-	.share_bor{
-		margin-bottom:20px;
-		float:left;
-  		width:380px;
-  		height:auto;
-  		padding-left:30px;
-		@include border-radius(4px);
-  		h2{
-  		  color:#666;
-  		  font-size:14px;
-  		  font-weight:bold;
-  		  margin:20px 0px 12px 0px;  
-  		}
-  		.share_tit{
-  		  height:24px;
-  		  background:#fff7eb;
-  		  line-height:24px;
-  		  text-align:center;
-  		  span{
-  		    color:#ed1818;  
-  		  }    
-  		}
-  		.weibo a{
-  		  margin-right:10px;
-  		}
-  		.method{
-  		  color:#999;
-  		  margin:21px 0px;
-  		  font-size: 14px;
-  		}
-  		input{
-  		  width:260px;
-  		  padding:5px;
-  		  float:left;  
-  		}
-  		button{
-  		  width:66px;
-  		  height:30px;
-  		  font-size: 14px;
-  		  background:$red;
-  		  border:0px;
-  		  margin-left:10px;
-  		  color:#fff;
-  		  cursor:pointer;         
-  		  @include border-radius(4px);	
-  		  &:hover{
-  		  	background: $red1;
-  		  }
-  		  &:active{
-  		  	background: $red2;
-  		  }
-  		}
-  		.share-notice{
-  			margin-top: 10px;
-  			display:none;
-  			i{
-  				float: left;
-				display: inline-block;
-				width: 20px;
-				height: 20px;
-				background: url(/assets/od-quillme/success.png) no-repeat;	
-  			}
-  			span{
-  				height: 20px;
-				line-height: 20px;
-				color: #666;
-  			}
-  		}    
-	}
-}
-
-*/
 
 
 .pagination {
@@ -1228,3 +969,59 @@ textarea.error {
 	}
 }
 
+/*商业调研 2014-4-3 */
+	.create-survey{
+		cursor: default;
+		width:295px;
+		margin-top:20px;
+		float:right;
+		.count{
+			padding:13px 0;
+			span{
+				padding:0 20px;
+				font-size: 14px;
+				color:$red1;
+				strong{
+					margin-right:10px;
+				}
+				b{
+					color:#666;
+					margin-left:10px;
+				}
+			}
+			i{
+				width:20px;
+				@include one-line(27px);
+				@include inline-block;
+				text-align: center;
+				color:#fff;
+				font-size: 24px;
+				font-weight: bold;
+				background: #b4b5be;
+				border:1px #a7abbb solid;
+				@include border-radius(3px);
+				text-shadow: #999 0 1px 0;
+			}
+		}
+		.btn-line{
+			border-top:1px #dbdbdb dashed;
+			width:265px;
+			margin:0 auto;
+			padding:22px 0 16px 0;
+			margin-top:11px;
+			.create-survey-btn{
+				width:200px;
+				margin:0 auto;
+				@include one-line(40px);
+				text-align: center;
+				color:#FFF;
+				background: $blue;
+				display: block;
+				font-size: 16px;
+				@include border-radius(4px);
+				&:hover{
+					background: $blue2;
+				}
+			}
+		}
+	}

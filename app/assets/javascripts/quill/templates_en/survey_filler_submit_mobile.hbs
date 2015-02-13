@@ -1,0 +1,27 @@
+<div class="page">
+	<div class="describe">
+		{{#if remind}}
+		<div id='remind'>Notice: Please re-answer the questions seriously.</div>
+		{{/if}}
+		<span>
+			You have finished the survey. Submit the answers now?
+			{{#if allow_pageup}}You can not modify the answers after submitting.{{/if}}
+		</span>
+	</div>
+</div>
+<div class="footer">
+	{{#if allow_pageup}}	
+	<a href="javascript:void(0)" class="prev" id="check_btn" title="Return to check answers"></a>
+	{{/if}}	
+	<i class="footer-divide"></i>
+	<a href="javascript:void(0)" class="next" id="submit_btn">Submit</a>
+	{{#if show_restart}}
+	<a href="javascript:void(0)" class="resume" id="restart_btn">Re-answer</a>
+	{{else}}
+		{{#if allow_replay}}
+			<a href="javascript:void(0)" class="resume" id="replay">Re-answer</a>
+		{{/if}}
+	{{/if}}
+</div>
+
+

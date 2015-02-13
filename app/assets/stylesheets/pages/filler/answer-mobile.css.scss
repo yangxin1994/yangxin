@@ -445,6 +445,20 @@ select{
 			cursor: default;
 		}		
 	}
+	.newanswer-btn,.signout-btn{
+		border:0px;
+		float: right;
+		padding:0 15px;
+		@include one-line(28px);
+		background: #FCCA19;
+		font-weight: bold;
+		font-size: 16px;
+		@include border-radius(4px);
+		text-align: center;
+		margin-top:12px;
+		margin-right:10px;
+		text-decoration: none;		
+	}
 	.resume{
 		float: right;
 		color: #999;

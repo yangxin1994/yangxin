@@ -1,0 +1,56 @@
+<!-- content for head -->
+<% content_for :head do %>
+  <!--<%= javascript_include_tag "pages/admin/carnival/index-bundle" %>-->
+<% end %>
+
+<% content_for :sidebar do %>
+  <ul class="nav nav-list flowy-admin-sidenav">
+    <li>
+      <a href="/admin/carnivals/pre_surveys">
+        <i class="icon-chevron-right"></i>
+        预调研配额
+      </a>
+    </li>
+    <li class="active">
+      <a href="/admin/carnivals/surveys">
+        <i class="icon-chevron-right"></i>
+        调研回收
+      </a>
+    </li>
+    <li>
+      <a href="/admin/carnivals/orders">
+        <i class="icon-chevron-right"></i>
+        订单
+      </a>
+    </li>    
+  </ul>
+<% end %>
+
+<div>
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>问卷名称</th>
+        <th>总数</th>
+        <th>性别（男/女）</th>
+        <th>年龄（0/19/25/31/36/41/50）</th>
+        <th>收入（0/2000/3000/6000/8000/10000）</th>
+        <th>学历（初中/高中/大专/本科/硕士）</th>
+        <th>地区</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @quotas.each do |quota| %>
+      <tr>
+        <td><%= Survey.find(quota.survey_id).title %></td>
+        <td><%= quota.quota["amount"] %></td>
+        <td><%= quota.quota["gender"].join('/') %></td>
+        <td><%= quota.quota["age"].join('/') %></td>
+        <td><%= quota.quota["income"].join('/') %></td>
+        <td><%= quota.quota["education"].join('/') %></td>
+        <td><a href="/admin/carnivals/region_quota?survey_id=<%=quota.survey_id%>">查看</a></td>
+      </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

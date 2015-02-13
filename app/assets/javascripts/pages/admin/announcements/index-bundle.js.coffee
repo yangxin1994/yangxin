@@ -26,6 +26,6 @@ $ ->
         if ret.success
           icon.attr('class', "icon-star#{if ret.value then "" else "-empty" }")
         else
-          alert_msg.show('error', "处理失败,请稍后重试 (╯‵□′)╯︵┻━┻ ")        
+          alert_msg.show('error', "处理失败,请稍后重试")        
       error: ->
-          alert_msg.show('error', "处理失败,请稍后重试 (╯‵□′)╯︵┻━┻ ")
+          alert_msg.show('error', "处理失败,请稍后重试")

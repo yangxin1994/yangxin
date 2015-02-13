@@ -4,13 +4,13 @@ require 'data_type'
 require 'securerandom'
 require 'tool'
 require 'quill_common'
+require 'digest'
 Dir[File.dirname(__FILE__) + '/lib/survey_components/*.rb'].each {|file| require file }
 class Answer
 
   include Mongoid::Document
   include Mongoid::Timestamps
   include FindTool
-
 
   # status
   NOT_EXIST = 0
@@ -34,8 +34,10 @@ class Answer
 
   field :audio_index, :type => Integer, default: 0
   field :picture_index, :type => Integer, default: 0
-
+  # for manyime branch
   # status: 1 for editting, 2 for reject, 4 for under review, 8 for finish, 16 for redo, 32 for under agents' review
+  # for master branch
+  # status: 1 for editting, 2 for reject, 4 for under review, 8 for for under agents' review, 16 for redo, 32 finish
   field :status, :type => Integer, default: 1
   field :answer_content, :type => Hash, default: {}
   field :random_quality_control_answer_content, :type => Hash, default: {}
@@ -75,11 +77,16 @@ class Answer
   field :agent_feedback_name
   field :agent_feedback_email
   field :agent_feedback_mobile
+  field :agent_user_id, :type => String
+  field :task_id, :type => String
+  field :mobile, :type => String
   field :sample_attributes_updated, :type => Boolean, default: false
+  field :suspected, :type => Boolean
 
 
   belongs_to :agent_task
   belongs_to :user, class_name: "User", inverse_of: :answers
+  belongs_to :carnival_user
   belongs_to :survey
   belongs_to :interviewer_task
   belongs_to :lottery
@@ -133,15 +140,20 @@ class Answer
     answers = answers.find_by_status(options[:status]) if options[:status]
     answers = answers.find_by_status(options["status"]) if options["status"]
     if options[:keyword].present?
-      if options[:keyword] =~ /^.+@.+$/
-        options[:email] = options[:keyword]
-      elsif /^\d{11}$/
-        options[:mobile] = options[:keyword]
+      if answers[0].carnival_user.present?
+        c = CarnivalUser.where(mobile: options[:keyword]).first
+        answers = answers.where(carnival_user_id: c.try(:_id))
       else
-        return answers.where(:_id => options[:keyword])
+        if options[:keyword] =~ /^.+@.+$/
+          options[:email] = options[:keyword]
+        elsif /^\d{11}$/
+          options[:mobile] = options[:keyword]
+        else
+          return answers.where(:_id => options[:keyword])
+        end
+        user = User.search_sample(options[:email], options[:mobile], true).first
+        answers = answers.where(:user_id => user.try(:_id))
       end
-      user = User.search_sample(options[:email], options[:mobile], true).first
-      answers = answers.where(:user_id => user.try(:_id))
     end
     answers  
   end  
@@ -152,6 +164,11 @@ class Answer
   def self.find_by_survey_id_sample_id_is_preview(survey_id, sample_id, is_preview)
     return nil if sample_id.blank?
     return Answer.where(user_id: sample_id, survey_id: survey_id, :is_preview => is_preview).first
+  end
+
+  def self.find_by_survey_id_carnival_user_id_is_preview(survey_id, carnival_user_id, is_preview)
+    return nil if carnival_user_id.blank?
+    return Answer.where(carnival_user_id: carnival_user_id, survey_id: survey_id, :is_preview => is_preview).first
   end
 
   def self.find_by_status(status)
@@ -166,13 +183,20 @@ class Answer
     set_reject
     update_attributes(reject_type: reject_type)
     update_attributes(finished_at: finished_at) if self.finished_at.blank?
+    # send agent notification
+    self.send_agent_notification
   end
 
-  def self.create_answer(survey_id, reward_scheme_id, introducer_id, agent_task_id, answer_obj)
-    answer = Answer.create(answer_obj)
+  def self.create_answer(survey_id, reward_scheme_id, introducer_id, agent_task_id, agent_user_id, task_id, answer_obj)
+    answer = self.create(answer_obj)
     Survey.normal.find(survey_id).answers << answer
     # AgentTask.find_by_id(agent_task_id).try(:new_answer, answer)
-    AgentTask.find(agent_task_id).new_answer(answer) if agent_task_id.present?
+    if agent_task_id.present?
+      AgentTask.find(agent_task_id).new_answer(answer)
+      answer.agent_user_id = agent_user_id
+      answer.task_id = task_id
+      answer.save
+    end
     RewardScheme.find(reward_scheme_id).new_answer(answer)
     answer.set_introducer_info(introducer_id)
       .init_answer_content
@@ -278,6 +302,120 @@ class Answer
     return status == REJECT && reject_type == REJECT_BY_SCREEN
   end
 
+  # def load_question(question_id, next_page)
+  #   pages_with_qc_questions = (survey.pages.map { |p| p["questions"] }).map do |page_question_ids|
+  #     cur_page_questions = []
+  #     page_question_ids.each do |q_id|
+  #       cur_page_questions << q_id
+  #       qc_ids = self.random_quality_control_locations[q_id] || []
+  #       cur_page_questions += qc_ids
+  #     end
+  #     cur_page_questions
+  #   end
+  #   # consider the following scenario:
+  #   # a normal question is removed, there are quality control questions after this normal question
+  #   # such quality control questions are added to the last page
+  #   remain_qc_ids = []
+  #   self.random_quality_control_answer_content.each do |k, v|
+  #     remain_qc_ids << k if !pages_with_qc_questions.flatten.include?(k)
+  #   end
+  #   pages_with_qc_questions << remain_qc_ids if !remain_qc_ids.blank?
+
+  #   if self.survey.is_pageup_allowed
+  #     # begin to find the question given
+  #     pages_with_qc_questions.each_with_index do |page_questions, page_index|
+  #       next if question_id.to_s != "-1" && !page_questions.include?(question_id)
+  #       question_index = question_id.to_s == "-1" ? -1 : page_questions.index(question_id)
+  #       if next_page
+  #         if question_index + 1 == page_questions.length
+  #           # should load next page questions
+  #           return load_question_by_ids([]) if page_index + 1 == pages_with_qc_questions.length
+  #           questions_ids = pages_with_qc_questions[page_index + 1]
+  #           while questions_ids.blank?
+  #             # if the next page has no questions, try to load questions in the page after the next
+  #             page_index = page_index + 1
+  #             return load_question_by_ids([]) if page_index + 1 == pages_with_qc_questions.length
+  #             questions_ids = pages_with_qc_questions[page_index + 1]
+  #           end
+  #           return load_question_by_ids(questions_ids, next_page)
+  #         else
+  #           # should load remaining questions in the current page
+  #           return load_question_by_ids(page_questions[question_index + 1..-1], next_page)
+  #         end
+  #       else
+  #         if question_index <= 0
+  #           # should load previous page questions
+  #           return load_question_by_ids([]) if page_index == 0
+  #           questions_ids = pages_with_qc_questions[page_index - 1]
+  #           while questions_ids.blank?
+  #             # if the previous page has no questions, try to laod questions in the page before the previous
+  #             page_index = page_index - 1
+  #             return load_question_by_ids([]) if page_index == 0
+  #             questions_ids = pages_with_qc_questions[page_index - 1]
+  #           end
+  #           return load_question_by_ids(questions_ids, next_page)
+  #         else
+  #           # should load remaining questions in the current page
+  #           return load_question_by_ids(page_questions[0..question_index - 1], next_page)
+  #         end
+  #       end
+  #     end
+  #     # the question cannot be found, load questions from the one with nil answer
+  #     loaded_question_ids = []
+  #     cur_page = false
+  #     pages_with_qc_questions.each_with_index do |page_questions, page_index|
+  #       page_questions.each do |q_id|
+  #         # go to the next one if this questions has been answered
+  #         next if ( !self.answer_content[q_id].nil? || !self.random_quality_control_answer_content[q_id].nil? ) && !cur_page
+  #         cur_page = true
+  #         loaded_question_ids << q_id
+  #       end
+  #       return load_question_by_ids(loaded_question_ids, next_page) if cur_page
+  #     end
+  #     return load_question_by_ids([])
+  #   else
+  #     loaded_question_ids = []
+  #     # try to load normal questions
+  #     # summarize the questions that are results of logic control rules
+  #     logic_control_question_id = []
+  #     self.survey.logic_control.each do |rule|
+  #       if rule["rule_type"] == 0
+  #         all_questions_id = self.survey.all_questions_id
+  #         max_condition_index = -1
+  #         rule["conditions"].each do |c|
+  #           cur_index = all_questions_id.index(c["question_id"])
+  #           max_condition_index = cur_index if !cur_index.nil? && cur_index > max_condition_index
+  #         end
+  #         result_q_ids = all_questions_id[max_condition_index+1..-1] if max_condition_index != -1
+  #       end
+  #       result_q_ids = rule["result"] if ["1", "2"].include?(rule["rule_type"].to_s)
+  #       result_q_ids = rule["result"].map { |e| e["question_id"] } if ["3", "4"].include?(rule["rule_type"].to_s)
+  #       result_q_ids = rule["result"]["question_id_2"].to_a if ["5", "6"].include?(rule["rule_type"].to_s)
+  #       condition_q_ids = rule["conditions"].map {|condition| condition["question_id"]}
+  #       logic_control_question_id << { "condition" => condition_q_ids, "result" => result_q_ids || [] }
+  #     end
+  #     cur_page = false
+  #     pages_with_qc_questions.each do |page_questions|
+  #       page_questions.each do |q_id|
+  #         # check if this question is the result of some logic control rule
+  #         if cur_page
+  #           logic_control_question_id.each do |ele|
+  #             if !(ele["condition"] & loaded_question_ids).empty? && ele["result"].include?(q_id)
+  #               return load_question_by_ids(loaded_question_ids)
+  #             end
+  #           end
+  #         end
+  #         next if ( !self.answer_content[q_id].nil? || !self.random_quality_control_answer_content[q_id].nil? )
+  #         cur_page = true
+  #         loaded_question_ids << q_id
+  #       end
+  #       return load_question_by_ids(loaded_question_ids) if cur_page
+  #     end
+  #     return load_question_by_ids([])
+  #   end
+  # end
+
+  # allow logic control for survey.is_pageup_allowed == true
   def load_question(question_id, next_page)
     pages_with_qc_questions = (survey.pages.map { |p| p["questions"] }).map do |page_question_ids|
       cur_page_questions = []
@@ -297,97 +435,163 @@ class Answer
     end
     pages_with_qc_questions << remain_qc_ids if !remain_qc_ids.blank?
 
-    if self.survey.is_pageup_allowed
-      # begin to find the question given
-      pages_with_qc_questions.each_with_index do |page_questions, page_index|
-        next if question_id.to_s != "-1" && !page_questions.include?(question_id)
-        question_index = question_id.to_s == "-1" ? -1 : page_questions.index(question_id)
-        if next_page
-          if question_index + 1 == page_questions.length
-            # should load next page questions
-            return load_question_by_ids([]) if page_index + 1 == pages_with_qc_questions.length
-            questions_ids = pages_with_qc_questions[page_index + 1]
-            while questions_ids.blank?
-              # if the next page has no questions, try to load questions in the page after the next
-              page_index = page_index + 1
-              return load_question_by_ids([]) if page_index + 1 == pages_with_qc_questions.length
-              questions_ids = pages_with_qc_questions[page_index + 1]
-            end
-            return load_question_by_ids(questions_ids, next_page)
-          else
-            # should load remaining questions in the current page
-            return load_question_by_ids(page_questions[question_index + 1..-1], next_page)
-          end
-        else
-          if question_index <= 0
-            # should load previous page questions
-            return load_question_by_ids([]) if page_index == 0
-            questions_ids = pages_with_qc_questions[page_index - 1]
-            while questions_ids.blank?
-              # if the previous page has no questions, try to laod questions in the page before the previous
-              page_index = page_index - 1
-              return load_question_by_ids([]) if page_index == 0
-              questions_ids = pages_with_qc_questions[page_index - 1]
-            end
-            return load_question_by_ids(questions_ids, next_page)
-          else
-            # should load remaining questions in the current page
-            return load_question_by_ids(page_questions[0..question_index - 1], next_page)
-          end
+    # summarize the questions that are results of logic control rules
+    logic_control_question_id = []
+    self.survey.logic_control.each do |rule|
+      if rule["rule_type"] == 0
+        all_questions_id = self.survey.all_questions_id
+        max_condition_index = -1
+        rule["conditions"].each do |c|
+          cur_index = all_questions_id.index(c["question_id"])
+          max_condition_index = cur_index if !cur_index.nil? && cur_index > max_condition_index
         end
+        result_q_ids = all_questions_id[max_condition_index+1..-1] if max_condition_index != -1
       end
-      # the question cannot be found, load questions from the one with nil answer
-      loaded_question_ids = []
-      cur_page = false
-      pages_with_qc_questions.each_with_index do |page_questions, page_index|
-        page_questions.each do |q_id|
-          # go to the next one if this questions has been answered
-          next if ( !self.answer_content[q_id].nil? || !self.random_quality_control_answer_content[q_id].nil? ) && !cur_page
-          cur_page = true
-          loaded_question_ids << q_id
-        end
-        return load_question_by_ids(loaded_question_ids, next_page) if cur_page
-      end
-      return load_question_by_ids([])
-    else
-      loaded_question_ids = []
-      # try to load normal questions
-      # summarize the questions that are results of logic control rules
-      logic_control_question_id = []
-      self.survey.logic_control.each do |rule|
-        if rule["rule_type"] == 0
-          all_questions_id = self.survey.all_questions_id
-          max_condition_index = -1
-          rule["conditions"].each do |c|
-            cur_index = all_questions_id.index(c["question_id"])
-            max_condition_index = cur_index if !cur_index.nil? && cur_index > max_condition_index
-          end
-          result_q_ids = all_questions_id[max_condition_index+1..-1] if max_condition_index != -1
-        end
-        result_q_ids = rule["result"] if ["1", "2"].include?(rule["rule_type"].to_s)
-        result_q_ids = rule["result"].map { |e| e["question_id"] } if ["3", "4"].include?(rule["rule_type"].to_s)
-        result_q_ids = rule["result"]["question_id_2"].to_a if ["5", "6"].include?(rule["rule_type"].to_s)
-        condition_q_ids = rule["conditions"].map {|condition| condition["question_id"]}
-        logic_control_question_id << { "condition" => condition_q_ids, "result" => result_q_ids || [] }
-      end
-      cur_page = false
+      result_q_ids = rule["result"] if ["1", "2"].include?(rule["rule_type"].to_s)
+      result_q_ids = rule["result"].map { |e| e["question_id"] } if ["3", "4"].include?(rule["rule_type"].to_s)
+      result_q_ids = rule["result"]["question_id_2"].to_a if ["5", "6"].include?(rule["rule_type"].to_s)
+      condition_q_ids = rule["conditions"].map {|condition| condition["question_id"]}
+      logic_control_question_id << { "condition" => condition_q_ids, "result" => result_q_ids || [] }
+    end
+
+    # if loading pre page, destroy the answers of pre page
+    if self.survey.is_pageup_allowed && !next_page
+      # find questions ids until question_id
+      page_qids = []
       pages_with_qc_questions.each do |page_questions|
+        qids = []
+        found = false
         page_questions.each do |q_id|
-          # check if this question is the result of some logic control rule
-          if cur_page
-            logic_control_question_id.each do |ele|
-              if !(ele["condition"] & loaded_question_ids).empty? && ele["result"].include?(q_id)
-                return load_question_by_ids(loaded_question_ids)
+          qids << q_id
+          if q_id == question_id
+            found = true
+            break
+          end
+        end
+        if !qids.empty?
+          page_qids << qids
+        end
+        break if found
+      end
+      # remove answers
+      real_remove = false
+      puts page_qids.inspect
+      while !real_remove && page_qids.length > 0
+        qids = page_qids.pop
+        puts qids.inspect
+        while qids.length > 0
+          q_id = qids.pop
+          if self.random_quality_control_answer_content.has_key?(q_id)
+            self.random_quality_control_answer_content[q_id] = nil
+            next
+          end
+          # if answer is empty, it was hidden and do nothing here
+          # if answer is not blank, handle logics
+          if !self.answer_content[q_id].blank?
+            # 1. if q_id is in condition and real_remove
+            in_condition_and_stop = false
+            if real_remove
+              logic_control_question_id.each do |logic_control|
+                if logic_control['condition'].include?(q_id)
+                  in_condition_and_stop = true
+                  break
+                end
               end
             end
+            break if in_condition_and_stop
+            # 2. if q_id is not in condition or real_remove is false
+            self.answer_content[q_id] = nil
+            real_remove = true
           end
-          next if ( !self.answer_content[q_id].nil? || !self.random_quality_control_answer_content[q_id].nil? )
-          cur_page = true
-          loaded_question_ids << q_id
         end
-        return load_question_by_ids(loaded_question_ids) if cur_page
       end
-      return load_question_by_ids([])
+      _update_logic_control_result()
+      self.save
+    end
+
+    loaded_question_ids = []
+    # try to load normal questions
+    cur_page = false
+    pages_with_qc_questions.each do |page_questions|
+      page_questions.each do |q_id|
+        # check if this question is the result of some logic control rule
+        if cur_page
+          logic_control_question_id.each do |ele|
+            if !(ele["condition"] & loaded_question_ids).empty? && ele["result"].include?(q_id)
+              return load_question_by_ids(loaded_question_ids)
+            end
+          end
+        end
+        next if ( !self.answer_content[q_id].nil? || !self.random_quality_control_answer_content[q_id].nil? )
+        cur_page = true
+        loaded_question_ids << q_id
+      end
+      return load_question_by_ids(loaded_question_ids) if cur_page
+    end
+    return load_question_by_ids([])
+  end
+  def _update_logic_control_result()
+    #init logics
+    survey.show_logic_control.each do |rule|
+      if rule["rule_type"] == Survey::SHOW_QUESTION
+        rule["result"].each do |q_id|
+          self.answer_content[q_id] = {} if self.answer_content[q_id].nil?
+        end
+      elsif rule["rule_type"] == Survey::HIDE_QUESTION
+        rule["result"].each do |q_id|
+          self.answer_content[q_id] = nil if self.answer_content[q_id].blank?
+        end
+      end
+    end
+    self.logic_control_result = {}
+    survey.show_logic_control.each do |rule|
+      if rule["rule_type"] == Survey::SHOW_ITEM
+        rule["result"].each do |ele|
+          add_logic_control_result(ele["question_id"], ele["items"], ele["sub_questions"])
+        end
+      elsif rule["rule_type"] == Survey::SHOW_CORRESPONDING_ITEM
+        items_to_be_added = rule["result"]["items"].map { |input_ids| input_ids[1] }
+        add_logic_control_result(rule["result"]["question_id_2"], items_to_be_added, [])
+      end
+    end
+
+    survey.show_logic_control.each do |logic_control_rule|
+      # if the answers submitted have nothing to do with the conditions of this rule, move to the next rule
+      satisfy_rule = true
+      logic_control_rule["conditions"].each do |condition|
+        if answer_content[condition["question_id"]].nil? or !Tool.check_choice_question_answer(condition["question_id"],
+          answer_content[condition["question_id"]]["selection"],
+          condition["answer"],
+          condition["fuzzy"])
+          satisfy_rule = false
+          break
+        end
+      end
+      next if !satisfy_rule
+      case logic_control_rule["rule_type"].to_i
+      when Survey::SHOW_QUESTION
+        # if the rule is satisfied, show the question (set the answer of the question as "nil")
+        logic_control_rule["result"].each { |q_id| self.answer_content[q_id] = nil if self.answer_content[q_id].blank? }
+        self.save
+      when Survey::HIDE_QUESTION
+        # if the rule is satisfied, hide the question (set the answer of the question as {})
+        logic_control_rule["result"].each { |q_id| self.answer_content[q_id] ||= {} }
+        self.save
+      when Survey::SHOW_ITEM
+        # if the rule is satisfied, show the items (remove from the logic_control_result)
+        logic_control_rule["result"].each { |ele| remove_logic_control_result(ele["question_id"], ele["items"], ele["sub_questions"]) }
+      when Survey::HIDE_ITEM
+        # if the rule is satisfied, hide the items (add to the logic_control_result)
+        logic_control_rule["result"].each { |ele| add_logic_control_result(ele["question_id"], ele["items"], ele["sub_questions"]) }
+      when Survey::SHOW_CORRESPONDING_ITEM
+        # if the rule is satisfied, show the items (remove from the logic_control_result)
+        items_to_be_removed = log_control_rule["result"]["items"].map { |input_ids| input_ids[1] } || []
+        remove_logic_control_result(logic_control_rule["result"]["question_id_2"], items_to_be_removed, [])
+      when Survey::HIDE_CORRESPONDING_ITEM
+        # if the rule is satisfied, hide the items (add to the logic_control_result)
+        items_to_be_added = log_control_rule["result"]["items"].map { |input_ids| input_ids[1] } || []
+        add_logic_control_result(logic_control_rule["result"]["question_id_2"], items_to_be_added, [])
+      end
     end
   end
 
@@ -406,7 +610,7 @@ class Answer
   end
 
   def add_logic_control_result(question_id, items, sub_questions)
-    return if self.survey.is_pageup_allowed
+    # return if self.survey.is_pageup_allowed
     if self.logic_control_result[question_id].nil?
       self.logic_control_result[question_id] = {"items" => items, "sub_questions" => sub_questions}
     else
@@ -419,7 +623,7 @@ class Answer
   end
 
   def remove_logic_control_result(question_id, items, sub_questions)
-    return if self.survey.is_pageup_allowed
+    # return if self.survey.is_pageup_allowed
     return if self.logic_control_result[question_id].nil?
     cur_items = self.logic_control_result[question_id]["items"].to_a
     cur_sub_questions = self.logic_control_result[question_id]["sub_questions"].to_a
@@ -498,6 +702,10 @@ class Answer
       v["selection"] ||= [] if v.class == Hash && v.has_key?("selection")
       self.answer_content[k] = v if self.answer_content.has_key?(k)
       self.random_quality_control_answer_content[k] = v if self.random_quality_control_answer_content.has_key?(k)
+      if self.answer_content[k].nil?
+        q = Question.find(k)
+        self.answer_content[k] = {} if q.is_required == false
+      end
     end
     self.save
     return true
@@ -525,15 +733,16 @@ class Answer
       condition_qid_ary = logic_control_rule["conditions"].map {|ele| ele["question_id"]}
       next if (new_answer.keys & condition_qid_ary).empty?
       # for each condition, check whether it is violated
+      pass_condition = true
       logic_control_rule["conditions"].each do |condition|
         # if the volunteer has not answered this question, stop the checking of this rule
         break if answer_content[condition["question_id"]].nil?
-        pass_condition = Tool.check_choice_question_answer(condition["question_id"],
+        pass_condition &&= Tool.check_choice_question_answer(condition["question_id"],
                                 answer_content[condition["question_id"]]["selection"],
                                 condition["answer"],
                                 condition["fuzzy"])
-        set_reject_with_type(REJECT_BY_SCREEN) and return false if pass_condition
       end
+      set_reject_with_type(REJECT_BY_SCREEN) and return false if pass_condition
     end
     true
   end
@@ -581,19 +790,20 @@ class Answer
   end
 
   def update_logic_control_result(new_answer)
-    return if survey.is_pageup_allowed
+    # return if survey.is_pageup_allowed
     survey.show_logic_control.each do |logic_control_rule|
       # if the answers submitted have nothing to do with the conditions of this rule, move to the next rule
       condition_qid_ary = logic_control_rule["conditions"].map {|condition| condition["question_id"]}
       next if (new_answer.keys & condition_qid_ary).empty?
       satisfy_rule = true
       logic_control_rule["conditions"].each do |condition|
-        satisfy_rule = false if answer_content[condition["question_id"]].nil?
-        pass_condition = Tool.check_choice_question_answer(condition["question_id"],
-                                answer_content[condition["question_id"]]["selection"],
-                                condition["answer"],
-                                condition["fuzzy"])
-        satisfy_rule = false if !pass_condition
+        if answer_content[condition["question_id"]].nil? or !Tool.check_choice_question_answer(condition["question_id"],
+          answer_content[condition["question_id"]]["selection"],
+          condition["answer"],
+          condition["fuzzy"])
+          satisfy_rule = false
+          break
+        end
       end
       next if !satisfy_rule
       # the conditions of this logic control rule is satisfied
@@ -657,12 +867,17 @@ class Answer
     return ErrorEnum::ANSWER_NOT_COMPLETE if self.random_quality_control_answer_content.has_value?(nil)
     old_status = self.status
     # if the survey has no prize and cannot be spreadable (or spread reward point is 0), set the answer as finished
-    if self.is_preview || !self.need_review
+    if self.agent_task.present?
+      self.set_under_review
+      # send agent notification
+      self.send_agent_notification
+    elsif self.is_preview || !self.need_review
       self.set_finish
-    elsif !self.agent_task.nil?
-      self.set_under_agent_review
+      Carnival.pre_survey_finished(self.id) if self.survey_id.to_s == Carnival::PRE_SURVEY
+      Carnival.background_survey_finished(self.id) if self.survey_id.to_s == Carnival::BACKGROUND_SURVEY
     else
       self.set_under_review
+      Carnival.survey_finished(self.id) if Carnival::SURVEY.include?(self.survey_id.to_s)
     end
     self.update_quota(old_status) if !self.is_preview
     self.finished_at = Time.now.to_i
@@ -716,20 +931,27 @@ class Answer
   end
 
   def review(review_result, answer_auditor, message)
-    return false if self.status != UNDER_REVIEW
+    # return false if self.status != UNDER_REVIEW
     old_status = self.status
     if review_result
+      return false if self.status == FINISH
       self.set_finish
       self.update_sample_attributes
       message_title = "问卷[#{self.survey.title}]通过审核!"
       message_content = "您参与的[#{self.survey.title}]已通过审核,感谢参与."
+      if self.agent_task.present?
+        # send agent notification
+        self.send_agent_notification
+      end
     else
+      return false if self.status == REJECT || self.status == REDO
       set_reject_with_type(REJECT_BY_REVIEW)
       message_title = "对不起,您参与的问卷未通过审核!"
       message_content = "您参与的问卷[#{self.survey.title}]没有通过管理员审核"
       message_content += ", 拒绝原因: #{message}" if message.present?
       PunishLog.create_punish_log(user.id) if user.present?
     end
+    Carnival.survey_reviewed(self.id) if Carnival::SURVEY.include?(self.survey_id.to_s)
     answer_auditor.create_message(message_title, message_content, [user._id.to_s]) if user.present?
     update_attributes(audit_message: message_content, auditor: answer_auditor, audit_at: Time.now.to_i)
     interviewer_task.try(:refresh_quota)
@@ -1209,7 +1431,7 @@ class Answer
           show_answer['items'] << tmp_item
         end
         if question.issue['other_item'] && question.issue['other_item']['has_other_item'].to_s=='true'
-          item = question.issue['other_item']['has_other_item']
+          item = question.issue['other_item']
           tmp_item = {'title'=>item['content']['text']}
           tmp_item_answer = val.select{|k,v| k.to_s==item['id'].to_s}.values.first
           tmp_item.merge!({'content' => tmp_item_answer})
@@ -1234,15 +1456,16 @@ class Answer
         answer["question_content"] << show_answer and next if val.blank?
 
         show_answer['items'] = []
-        val['sort_result'].each do |id_s|
-          item = question.issue['items'].select{|elem| elem['id'].to_s == id_s}[0]
-          if item
-            show_answer['items'] << {'title'=>item['content']['text']}
-            next
-          end
-          if question.issue['other_item'] && question.issue['other_item']['has_other_item'].to_s=='true'
-            item = question.issue['other_item']['has_other_item']
-            show_answer['items'] << {'title'=>item['content']['text']} if item['id'].to_s == id_s
+        if !val['sort_result'].blank?
+          val['sort_result'].each do |id_s|
+            item = question.issue['items'].select{|elem| elem['id'].to_s == id_s}[0]
+            if item
+              show_answer['items'] << {'title'=>item['content']['text']}
+              next
+            end
+            if question.issue['other_item'] && question.issue['other_item']['has_other_item'].to_s=='true'
+              show_answer['items'] << {'title'=>val["text_input"]} if question.issue["other_item"]["id"].to_s == id_s
+            end
           end
         end
 
@@ -1350,8 +1573,8 @@ class Answer
     # return if no user or attributes already updated
     return false if self.user.blank? || self.sample_attributes_updated
     self.answer_content.each do |q_id, answer|
-      q = BasicQuestion.find(q_id)
-      next if answer.blank? || q.sample_attribute.blank?
+      q = BasicQuestion.find_by_id(q_id)
+      next if answer.blank? || q.blank? || q.sample_attribute.blank?
       attr_value = nil
       case q.sample_attribute.type
       when DataType::STRING
@@ -1439,4 +1662,30 @@ class Answer
       a.save
     end
   end
+
+  def send_agent_notification
+    agent_api_url = self.agent_task.try(:agent).try(:api_url)
+    agent_api_address = self.agent_task.try(:agent).try(:api_address)
+    return if agent_api_url.blank?
+    key = self.agent_task.try(:agent).try(:key)
+    params = {
+      status: self.status,
+      reject_type: self.reject_type.to_i,
+      user_id: self.agent_user_id,
+      task_id: self.task_id
+    }
+    digest = Digest::MD5.hexdigest("#{self.status},#{self.reject_type.to_i},#{self.agent_user_id},#{self.task_id.to_s},#{key}")
+    params[:digest] = digest
+
+    url = URI.parse(agent_api_url)
+    begin
+      Net::HTTP.start(url.host, url.port) do |http|
+        r = Net::HTTP::Post.new(agent_api_address)
+        r.set_form_data(params)
+        retval = http.request(r)
+      end
+    rescue
+    end
+  end
+
 end

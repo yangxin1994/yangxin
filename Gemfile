@@ -8,11 +8,16 @@ gem 'rails', '~> 3.2.6'
 gem "binding_of_caller", "~> 0.7.2", :group => :development
 gem 'tilt','~> 1.3.2'
 gem 'httparty', '~> 0.10.2'
-gem 'sidekiq', '~> 2.8.0'
+gem 'sidekiq', '~> 2.17.8'
 gem "kiqstand", '~> 1.0.0'
 gem 'whenever', '~> 0.8.2', :require => false
 gem 'sinatra', require: false
 gem 'slim', '~> 1.3.6'
+gem 'haml', '~> 4.0.3'
+
+gem 'thin'
+gem "faye-rails", "1.0.0"
+gem "settingslogic", "~> 2.0.9"
 
 gem 'ezcrypto', '~> 0.7.2'
 gem 'rack-protection', '~> 1.3.2'
@@ -37,6 +42,8 @@ gem 'yab62', require: 'yab62'
 
 gem 'mini_magick', '~> 3.5.0'
 gem 'carrierwave', '~> 0.8.0'
+gem 'carrierwave-video'
+gem 'carrierwave-video-thumbnailer'
 gem 'rack-raw-upload', '1.1.0'
 
 gem 'carrierwave-mongoid', :require => 'carrierwave/mongoid'
@@ -84,7 +91,6 @@ group :test do
 end
 
 group :development do
-  gem 'thin'
   gem 'pry-rails', "~> 0.2.2"
   gem "better_errors", "~> 0.8.0"
   #gem "rack-mini-profiler", "~> 0.1.30"

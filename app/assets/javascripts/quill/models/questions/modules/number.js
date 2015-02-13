@@ -60,35 +60,66 @@ $(function(){
 				model.trigger('change:number:unit_location', handler);
 			},
 
-			_getInfo: function() {
-				var type = (issue.precision == 0) ? '整数' : '小数';
-				var retval = null;
-				if(issue.min_value == model.MIN_INT) {
-					if(issue.max_value == model.MAX_INT) retval = '请输入' + type;
-					else retval = '请输入小于或等于 ' + issue.max_value + ' 的' + type;
-				} else {
-					if(issue.max_value == model.MAX_INT) retval = '请输入大于或等于 ' + issue.min_value + ' 的' + type;
-					else retval = '请输入 ' + issue.min_value + ' 到 ' + issue.max_value + ' 之间的' + type;
-				}
-				if(issue.precision > 0) {
-					retval = retval + '，精确到小数点后' + issue.precision + '位';
-				}
-				return retval;
+			_getInfo: function(lang) {
+        if(lang=='en') {
+          var type = (issue.precision == 0) ? 'Integer' : 'Float';
+          var retval = null;
+          if(issue.min_value == model.MIN_INT) {
+            if(issue.max_value == model.MAX_INT) retval = type;
+            else retval = type + ' <= ' + issue.max_value;
+          } else {
+            if(issue.max_value == model.MAX_INT) retval = type + ' >= ' + issue.min_value; 
+            else retval = type + ' ' + issue.min_value + ' - ' + issue.max_value;
+          }
+          if(issue.precision > 0) {
+            retval = retval + '. Precision is ' + issue.precision;
+          }
+          return retval;
+        } else {
+          var type = (issue.precision == 0) ? '整数' : '小数';
+          var retval = null;
+          if(issue.min_value == model.MIN_INT) {
+            if(issue.max_value == model.MAX_INT) retval = '请输入' + type;
+            else retval = '请输入小于或等于 ' + issue.max_value + ' 的' + type;
+          } else {
+            if(issue.max_value == model.MAX_INT) retval = '请输入大于或等于 ' + issue.min_value + ' 的' + type;
+            else retval = '请输入 ' + issue.min_value + ' 到 ' + issue.max_value + ' 之间的' + type;
+          }
+          if(issue.precision > 0) {
+            retval = retval + '，精确到小数点后' + issue.precision + '位';
+          }
+          return retval;
+        }
 			},
 
-			_checkAnswer: function(answer) {
-				if(isNaN(answer)) return '请输入数值';
-				if(answer < issue.min_value) return '输入不能小于 ' + issue.min_value;
-				if(answer > issue.max_value) return '输入不能大于 ' + issue.max_value;
-				if(issue.precision == 0) {
-					if((answer + '').indexOf('.') >= 0)
-						return '请输入整数';
-				} else if(issue.precision > 0) {
-					var splits = ((answer + '').split('.'));
-					if(splits.length == 2 && splits[1].length > issue.precision) 
-						return '请精确到小数点后' + issue.precision + '位数字';
-				}
-				return null;
+			_checkAnswer: function(answer, lang) {
+        if(lang=='en') {
+          if(isNaN(answer)) return 'Input a number';
+          if(answer < issue.min_value) return 'should not be less than ' + issue.min_value;
+          if(answer > issue.max_value) return 'should not be larger than ' + issue.max_value;
+          if(issue.precision == 0) {
+            if((answer + '').indexOf('.') >= 0)
+              return 'Please input integer';
+          } else if(issue.precision > 0) {
+            var splits = ((answer + '').split('.'));
+            if(splits.length == 2 && splits[1].length > issue.precision) 
+              return 'Precision should be ' + issue.precision;
+          }
+          return null;
+        } else {
+          if(isNaN(answer)) return '请输入数值';
+          if(answer < issue.min_value) return '输入不能小于 ' + issue.min_value;
+          if(answer > issue.max_value) return '输入不能大于 ' + issue.max_value;
+          if(issue.precision == 0) {
+            if((answer + '').indexOf('.') >= 0)
+              return '请输入整数';
+          } else if(issue.precision > 0) {
+            var splits = ((answer + '').split('.'));
+            if(splits.length == 2 && splits[1].length > issue.precision) 
+              return '请精确到小数点后' + issue.precision + '位数字';
+          }
+          return null;
+        }
 			}
 			
 		};

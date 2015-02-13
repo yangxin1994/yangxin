@@ -1,0 +1,23 @@
+<div id='sf_main'>
+	<div class='welcome no_reward'>
+		<div class='inner'>
+			<h1>{{title}}</h1>
+			<div class='msg green'>
+				<em></em>
+				<span>
+					<b>Finished! {{#if publish_result}}<a href='/surveys/{{survey_id}}/result'>View the report</a>{{/if}}</b>
+					<br />Thank you for your participation.
+					{{#if spreadable}}
+					<a id='start_spread' href='javascript:void(0);'>Invite friends</a> to get <em>{{spread_point}}</em> more points.
+					{{/if}}
+					{{#if show_subscribe}}
+					<br />(<a id='subscribe_btn' href='/surveys#subscribe' target='_blank'>Subscribe</a> survey notification)
+					{{/if}}
+				</span>
+			</div>
+			<div class='form'>
+				<button id='close_btn'>Close</button>
+			</div>
+		</div>
+	</div>
+</div>

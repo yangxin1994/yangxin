@@ -73,7 +73,7 @@ $(function(){
 
 			this.$el.addClass('q-' + quill.helpers.QuestionType.getName(this.model.get('question_type')).toLowerCase());
 
-			var info = this.model.getInfo();
+			var info = this.model.getInfo(this.options.lang);
 			if(!info)
 				this.$('.q-info').hide();
 			else
@@ -81,7 +81,15 @@ $(function(){
 
 			this.model.get('is_required') ? this.$('.q-required').show() : this.$('.q-required').hide();
 
-			this.model.get('note') ? this.$('.q-note').show() : this.$('.q-note').hide();
+      var note = this.model.get('note');
+      if(note) {
+        this.$('.q-note').show();
+        if(note.indexOf('<img') == 0) {
+          this.$('.q-note').html(note);
+        }
+      } else {
+        this.$('.q-note').hide();
+      }
 		},
 
 		/* Refresh index display
@@ -94,11 +102,15 @@ $(function(){
 		/* Set and get the answer of the question
 		 * =========================== */
 		setAnswer: function(answer) {
-			throw 'Override setAnswer method!';
+      if(_.isNull(answer) || _.isUndefined(answer) || (_.isObject(answer) && _.isEmpty(answer))) return;
+      this._setAnswer(answer);
 		},
+    _setAnswer: function(answer) {
+      throw 'Override _setAnswer method!';
+    },
 		getAnswer: function() {
 			var answer = this._getAnswer();
-			var error = this.model.checkAnswer(answer);
+			var error = this.model.checkAnswer(answer, this.options.lang);
 			this.$el.removeClass('error');
 			this.$('.q-error').text('');
 			if(error) {

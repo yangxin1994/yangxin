@@ -11,10 +11,13 @@ class Quill::ResultsController < Quill::QuillController
   end
 
   # PAGE: show result
+
+  
   def show
     @hide_left_sidebar = true
 
     @survey_questions = get_survey_questions
+
     @filters = @survey.filters || []
 
     @filter_index = params[:fi].to_i
@@ -24,8 +27,11 @@ class Quill::ResultsController < Quill::QuillController
     @include = params[:i].to_b
 
     @job_id = @survey.analysis(@filter_index-1, @include)
+
     @reports = @survey.list_report_mockups
+
   end
+
 
   # AJAX
   def excel
@@ -59,13 +65,18 @@ class Quill::ResultsController < Quill::QuillController
       Dir.mkdir("public/uploads/csv")
     end
     csv_origin = params["import_file"]
-    filename = Time.now.strftime("%y-%m-%s-%d")+'_'+(csv_origin.original_filename)
+    filename = Time.now.strftime("%s")+'_'+(csv_origin.original_filename)
     File.open("public/uploads/csv/#{filename}", "wb") do |f|
       f.write(csv_origin.read)
     end
     csv = File.read("public/uploads/csv/#{filename}").utf8!
-
     result = @survey.answer_import(csv)
+    if result[:error]
+      csv_file = CSV.open("public/uploads/csv/error_#{filename}", "wb") do |csv|
+        result[:error].each {|a| csv << a}
+      end
+      result[:error] = "uploads/csv/error_#{filename}"
+    end
     render_json_auto result and return
   end
 end

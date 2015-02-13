@@ -86,4 +86,9 @@ OopsData::Application.configure do
   config.ofcard_service_uri = "http://api2.ofpay.com/"
   config.ofcard_key_str = "OFCARD"
   config.ret_url = "http://221.221.17.98:4000/orders/confirm"
+  config.diaoyan = 'http://127.0.0.1:3000'
+
+  # esai uri
+  config.esai_service_uri = "http://www.esaipai.com/IF/EIFPHONE/"
+
 end

@@ -15,6 +15,11 @@ class Order
   FROZEN = 32
   REJECT = 64
 
+  # esai status
+  ESAI_HANDLE = 3
+  ESAI_SUCCESS = 4
+  ESAI_FAIL = 5
+
   # type
   VIRTUAL = 1
   REAL = 2
@@ -52,7 +57,9 @@ class Order
   field :finished_at, :type => Integer
   field :canceled_at, :type => Integer
   field :rejected_at, :type => Integer
-  field :ofcard_order_id, :type => String, :default => ""
+  field :esai_order_id, :type => String, :default => ""
+  # 3 for handling, 4 for success, 5 for fail
+  field :esai_status, :type => Integer
   field :point, :type => Integer, :default => 0
 
   belongs_to :prize
@@ -60,12 +67,13 @@ class Order
   belongs_to :gift
   belongs_to :answer
   belongs_to :sample, :class_name => "User", :inverse_of => :orders
+  belongs_to :movie_activity
 
   index({ code: 1 }, { background: true } )
   index({ status: 1 }, { background: true } )
   index({ source: 1 }, { background: true } )
   index({ amount: 1 }, { background: true } )
-  index({ type: 1, status: 1 ,ofcard_order_id: 1}, { background: true } )
+  index({ type: 1, status: 1, esai_order_id: 1}, { background: true } )
 
   #attr_accessible :mobile, :alipay_account, :qq, :sample_name, :address, :postcode
 
@@ -221,13 +229,64 @@ class Order
 
   def auto_handle
     return false if self.status != WAIT
-    return false if ![MOBILE_CHARGE, QQ_COIN].include?(self.type)
-    case self.type
-    when MOBILE_CHARGE
-      # ChargeClient.new.mobile_charge(self.mobile, self.amount, self._id.to_s)
-    when QQ_COIN
-      # ChargeClient.new.qq_charge(self.qq, self.amount, self._id.to_s)
+    return false if self.type != MOBILE_CHARGE
+    # retval = EsaiApi.new.charge_phone(self.mobile, self.amount, "None")
+    self.status = HANDLE
+    self.esai_status = ESAI_HANDLE
+    self.handled_at = Time.now
+    self.save
+    ChargeWorker.perform_async(self.id.to_s, self.mobile, self.amount)
+  end
+
+  def auto_handle_one_by_one
+    return false if self.status != WAIT
+    return false if self.type != MOBILE_CHARGE
+    self.status = HANDLE
+    self.esai_status = ESAI_HANDLE
+    self.handled_at = Time.now
+    self.save
+
+    retval = EsaiApi.new.charge_phone(self.mobile, self.amount, "None")
+    if retval.nil?
+      self.esai_status = Order::ESAI_FAIL
+    else
+      self.esai_status = Order::ESAI_HANDLE
+      self.esai_order_id = retval
     end
+    self.save
+  end
+
+  def self.recharge_fail_mobile
+    Order.where(esai_status: ESAI_FAIL, status: HANDLE, type: MOBILE_CHARGE).each do |order|
+      order.update_attributes(status: WAIT)
+      order.auto_handle_one_by_one
+    end
+  end
+
+  def check_result
+    return nil if self.esai_order_id.blank?
+    retval = EsaiApi.new.check_result(self.esai_order_id, "None")
+    case retval
+    when 0, 1, 2
+      self.update_attributes({status: HANDLE, esai_status: ESAI_HANDLE})
+    when 4
+      self.update_attributes({status: SUCCESS, esai_status: ESAI_SUCCESS})
+      self.send_mobile_charge_success_message
+    when 5
+      self.update_attributes({status: HANDLE, esai_status: ESAI_FAIL})
+    end
+    return self.esai_status
+  end
+
+  def self.refresh_esai_orders
+    orders = Order.where(status: HANDLE, esai_status: ESAI_HANDLE)
+    orders.each do |e|
+      e.check_result
+    end
+  end
+
+  def send_mobile_charge_success_message
+    SmsWorker.perform_async("charge_notification", self.mobile, "", gift_name: "#{self.amount}元话费")
   end
 
   def manu_handle
@@ -255,36 +314,43 @@ class Order
     options[:status] = options[:status].to_i
     options[:source] = options[:source].to_i
     options[:type] = options[:type].to_i
+    options.delete(:type) if options[:type] == 0
     if options[:email].present?
-      orders = User.find_by_email(options[:email]).try(:orders).desc(:created_at) || []
+      orders = User.find_by_email(options[:email]).try(:orders)
+      orders = orders.nil? ? [] : orders.desc(:created_at)
     elsif options[:mobile].present?
-      orders = User.find_by_mobile(options[:mobile]).try(:orders).desc(:created_at) || []
+      orders = User.find_by_mobile(options[:mobile]).try(:orders)
+      orders = orders.nil? ? [] : orders.desc(:created_at)
     elsif options[:code].present?
       orders = Order.where(:code => /#{options[:code]}/).desc(:created_at)
     else
       orders = Order.all.desc(:created_at)
     end
-    if options[:status].present? && options[:status] != 0
-      status_ary = Tool.convert_int_to_base_arr(options[:status])
-      orders = orders.where(:status.in => status_ary)
-    end
-    if options[:source].present? && options[:source] != 0
-      source_ary = Tool.convert_int_to_base_arr(options[:source])
-      orders = orders.where(:source.in => source_ary)
-    end
-    if options[:type].present? && options[:type] != 0
-      type_ary = Tool.convert_int_to_base_arr(options[:type])
-      orders = orders.where(:type.in => type_ary)
-    end 
-    if options[:date_max].present?
-      orders = orders.where(:created_at.lt => Time.parse(options[:date_max]))
-    elsif options[:date_min].present?
-      orders = orders.where(:created_at.gt => Time.parse(options[:date_min]))
-    else
-      if options[:date].present?
-        _qdate = Time.now - options[:date].to_i.days
-        orders = orders.where(:created_at.gt => _qdate)
+    if !orders.blank?
+      if options[:status].present? && options[:status] != 0
+        status_ary = Tool.convert_int_to_base_arr(options[:status])
+        orders = orders.where(:status.in => status_ary)
       end
+      if options[:source].present? && options[:source] != 0
+        source_ary = Tool.convert_int_to_base_arr(options[:source])
+        orders = orders.where(:source.in => source_ary)
+      end
+      if options[:type].present? && options[:type] != 0
+        type_ary = Tool.convert_int_to_base_arr(options[:type])
+        orders = orders.where(:type.in => type_ary)
+      end 
+      if options[:date_max].present?
+        orders = orders.where(:created_at.lt => Time.parse(options[:date_max]))
+      elsif options[:date_min].present?
+        orders = orders.where(:created_at.gt => Time.parse(options[:date_min]))
+      else
+        if options[:date].present?
+          _qdate = Time.now - options[:date].to_i.days
+          orders = orders.where(:created_at.gt => _qdate)
+        end
+      end
+    else
+      orders = []
     end
     return orders      
   end
@@ -364,19 +430,19 @@ class Order
       end
       case order.type
       when 1
-        "#{sample.email},#{item.title}-#{order.amount},支付宝账号:#{order.alipay_account}"
+        "#{sample.email || sample.mobile},#{item.title}-#{order.amount},支付宝账号:#{order.alipay_account}"
       when 2
-        "#{sample.email},#{item.title}-#{order.amount},地址:#{order.address_str} 邮编:#{order.postcode} 收件人:#{order.receiver} 电话:#{order.mobile}"
+        "#{sample.email || sample.mobile},#{item.title}-#{order.amount},地址:#{order.address_str} 邮编:#{order.postcode} 收件人:#{order.receiver} 电话:#{order.mobile}"
       when 4
-        "#{sample.email},#{item.title}-#{order.amount},电话:#{order.mobile || order.sample.mobile}"
+        "#{sample.email || sample.mobile},#{item.title}-#{order.amount},电话:#{order.mobile || order.sample.mobile}"
       when 8
-        "#{sample.email},#{item.title}-#{order.amount},支付宝账号:#{order.alipay_account}"
+        "#{sample.email || sample.mobile},#{item.title}-#{order.amount},支付宝账号:#{order.alipay_account}"
       when 16
-        "#{sample.email},#{item.title}-#{order.amount},集分宝账号:#{order.alipay_account}"
+        "#{sample.email || sample.mobile},#{item.title}-#{order.amount},集分宝账号:#{order.alipay_account}"
       when 32
-        "#{sample.email},#{item.title}-#{order.amount},QQ:#{order.qq}"
+        "#{sample.email || sample.mobile},#{item.title}-#{order.amount},QQ:#{order.qq}"
       when 64
-        "#{sample.email},#{item.title}-#{order.amount},电话:#{order.mobile || order.sample.mobile}"
+        "#{sample.email || sample.mobile},#{item.title}-#{order.amount},电话:#{order.mobile || order.sample.mobile}"
       end
     end.join("\n")
   end

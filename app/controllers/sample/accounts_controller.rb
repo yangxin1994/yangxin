@@ -125,9 +125,9 @@ class Sample::AccountsController < Sample::SampleController
   #用户注册  手机验证码激活
   def mobile_activate
     activate_info = {
-      mobile: params[:mobile],
-      password: params[:password],
-      verification_code: params[:verification_code]}
+      "mobile" => params[:mobile],
+      "password" => params[:password],
+      "verification_code" => params[:verification_code]}
 
     retval = User.activate("mobile", activate_info, request.remote_ip, params[:_client_type])
 

@@ -41,7 +41,7 @@ class Modelinker
     linker = linker.split('.')
     last_linker = @data
     for l, i in linker
-      last_linker["#{l}"] ||= {}      
+      last_linker["#{l}"] ||= {} 
       if i == linker.length - 1
         last_linker["#{l}"] = mid
       else
@@ -93,12 +93,7 @@ class Modelinker
       @callback_queue["#{_mid}"] = options.callback
       @set_obj(options.linker, _mid)
       """
-      <#{options.type} 
-        id="#{options.id}" 
-        class="#{@klass} #{options.klass}"
-        data-mid="#{_mid}"
-        #{value_tag}
-        data-linker="#{options.linker}"#{_html_attr}>#{options.html}#{_select_options_tag}#{end_tag}
+      <#{options.type} id="#{options.id}" class="#{@klass} #{options.klass}" data-mid="#{_mid}"#{value_tag}data-linker="#{options.linker}"#{_html_attr}>#{options.html}#{_select_options_tag}#{end_tag}
       """
     else
       ""
@@ -132,5 +127,14 @@ class Modelinker
       @queue["#{last_linker}"]
     else
       @get_obj(last_linker)
+
+  remove: (linker)->
+    return false unless linker
+    _linker = ""
+    for i in linker.split('.')
+      _linker += "['#{i}']"
+    
+    del_string = "delete this.data#{_linker}"
+    eval(del_string)
 
 window.Modelinker = Modelinker

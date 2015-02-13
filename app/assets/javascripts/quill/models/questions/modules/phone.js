@@ -28,19 +28,19 @@ $(function(){
 				model.trigger('change:phone:phone_type', handler);
 			},
 
-			_getInfo: function() {
+			_getInfo: function(lang) {
 				switch(issue.phone_type) {
-					case 1: return '请输入座机号';
-					case 2: return '请输入手机号';
-					default: return '请输入电话号码';
+					case 1: return lang=='en' ? 'Telephone number' : '请输入座机号';
+					case 2: return lang=='en' ? 'Mobile phone number' : '请输入手机号';
+					default: return lang=='en' ? 'Telephone or mobile number' : '请输入电话号码';
 				}
 			},
 
-			_checkAnswer: function(answer) {
+			_checkAnswer: function(answer, lang) {
 				switch(issue.phone_type) {
-					case 1: return $.regex.isPhone(answer) ? null : '请输入正确的座机号';
-					case 2: return $.regex.isMobile(answer) ? null : '请输入正确的手机号码';
-					case 3: return ($.regex.isPhone(answer) || $.regex.isMobile(answer)) ? null : '请输入正确的电话号码';
+					case 1: return $.regex.isPhone(answer) ? null : (lang=='en' ? 'Please input a correct telephone number.' : '请输入正确的座机号');
+					case 2: return $.regex.isMobile(answer) ? null : (lang=='en' ? 'Please input a correct mobile phone number.' : '请输入正确的手机号码');
+					case 3: return ($.regex.isPhone(answer) || $.regex.isMobile(answer)) ? null : (lang=='en' ? 'Please input a correct phone number.' : '请输入正确的电话号码');
 				}
 				return null;
 			}

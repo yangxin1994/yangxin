@@ -4,8 +4,8 @@
   <%= stylesheet_link_tag    "layouts/sample-layout" %>
   <%= javascript_include_tag "layouts/sample-layout" %>
   <script type="text/javascript">
-  jQuery(function($) {
-
+    jQuery(function($) {
+	  FAYE_SERVER_URL = "<%= Setting.faye_server %>";
   });
   </script>
 

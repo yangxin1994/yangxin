@@ -27,10 +27,14 @@ every 1.days, :at => '4:30 pm' do
 	runner "SmsInvitationWorker.perform_async"
 end
 
-every 1.days do
-	command "cd ~/db_bak/; mongodump -d oops_data_production -o './' -u oopsdata -password=o2psllyscdata; tar -zcf oops_data_production_$(date +%d-%m-%y).tar.gz oops_data_production; rm -rf oops_data_production"
-end
-
 every 1.weeks do
 	runner "SampleAttribute.make_statistics"
+end
+
+every 1.days, :at => '1:00 am' do
+	runner 'Order.refresh_esai_orders'
+end
+
+every 1.days, :at => '0:00 am' do
+	runner 'Order.recharge_fail_mobile'
 end
