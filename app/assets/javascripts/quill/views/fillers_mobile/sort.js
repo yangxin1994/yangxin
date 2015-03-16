@@ -34,10 +34,9 @@ $(function(){
 						placeholder: item.content.text
 					}).placeholder().appendTo($('.sort-item', $p));
 				} else {
-					str    = $.richtext.textToHtml(item.content);
-					output = str.chunk(6).join('<br/>')
-					console.log(output)
-					$('.sort-item', $p).html(output);
+					str = $.richtext.textToHtml(item.content);
+					str = str.replace('&lt;br/&gt;','<br/>');//添加换行符号
+					$('.sort-item', $p).html(str);
 				};
 			}, this);
 

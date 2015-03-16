@@ -70,7 +70,10 @@ $(function(){
 				}).appendTo($('.sort-item-detail', dom));
 				if(item.input_value != '') ipt.val(item.input_value);
 			} else {
-				$('.sort-item-detail', dom).html($.richtext.textToHtml(item.content));
+					str = $.richtext.textToHtml(item.content);
+					str = str.replace('&lt;br/&gt;','');//去除换行符号
+					console.log(str)				
+				$('.sort-item-detail', dom).html(str);
 			}
 			this.renderMediaPreviews($('.sort-item-detail', dom), item.content);
 			dom.data('item-index', index);
