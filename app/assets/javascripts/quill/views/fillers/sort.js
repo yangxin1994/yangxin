@@ -71,7 +71,7 @@ $(function(){
 				if(item.input_value != '') ipt.val(item.input_value);
 			} else {
 					str = $.richtext.textToHtml(item.content);
-					str = str.replace('&lt;br/&gt;','');//去除换行符号
+					str = str.replace(/&lt;br\/&gt;/g,'');//去除换行符号
 					console.log(str)				
 				$('.sort-item-detail', dom).html(str);
 			}
