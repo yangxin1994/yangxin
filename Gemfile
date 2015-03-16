@@ -73,7 +73,7 @@ group :assets do
   # gem for bootstrap.
   gem "bootstrap-sass-rails", "~> 2.3.0.0"
   #gem 'font-awesome-sass', '~> 4.3.0'
-  gem 'font-awesome-sass-rails'
+  # gem 'font-awesome-sass-rails'
   # gem 'anjlab-bootstrap-rails', :require => 'bootstrap-rails',
   #                             :github => 'anjlab/bootstrap-rails',
   #                             :branch => '3.0.0'
