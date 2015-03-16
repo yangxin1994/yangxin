@@ -34,7 +34,10 @@ $(function(){
 						placeholder: item.content.text
 					}).placeholder().appendTo($('.sort-item', $p));
 				} else {
-					$('.sort-item', $p).html($.richtext.textToHtml(item.content));
+					str    = $.richtext.textToHtml(item.content);
+					//str    = str.strip_tags('<span>');
+					output = [str.slice(0, 37), '<br/>', str.slice(37)].join(''); // 从汉字第六个字后开始换行
+					$('.sort-item', $p).html(output);
 				};
 			}, this);
 
