@@ -35,7 +35,7 @@ $(function(){
 					}).placeholder().appendTo($('.sort-item', $p));
 				} else {
 					str = $.richtext.textToHtml(item.content);
-					str = str.replace('&lt;br/&gt;','<br/>');//添加换行符号
+					str = str.replace(/&lt;br\/&gt;/g,'<br/>');//添加换行符号
 					$('.sort-item', $p).html(str);
 				};
 			}, this);
