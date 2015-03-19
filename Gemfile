@@ -52,7 +52,7 @@ gem 'carrierwave-mongoid', :require => 'carrierwave/mongoid'
 
 gem 'roadie', '~> 2.3.4'# html email
 gem 'premailer-rails', '~> 1.4.0'
-gem 'nokogiri', '~> 1.5.6'
+gem 'nokogiri', '~> 1.6.6.2'
 
 
 group :assets do
