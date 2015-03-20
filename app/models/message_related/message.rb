@@ -23,5 +23,6 @@ class Message
   scope :unread, ->(t){where(:updated_at.gt => t)}
   scope :readed, ->(t){where(:updated_at.lt => t)}
 
+  index({ created_at:1},{background: true})
   index({ updated_at: 1 }, { background: true } )
 end
