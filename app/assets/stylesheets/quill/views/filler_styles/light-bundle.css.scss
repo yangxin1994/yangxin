@@ -9,7 +9,8 @@ $dark-blue:#14405b;
 $msg-bg: #d2e5b6;
 $pink:#ff6175;
 #sf {
-	background:image-url('filler/light/bg.png');
+  /*background:image-url('filler/light/bg.png');*/
+	background:image-url('filler/light/house-bg-2.png') center;
 	a { color: $pink; }
 }
 #sf_banner {
