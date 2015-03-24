@@ -15,6 +15,10 @@ $(function(){
 			},
 
 			_checkAnswer: function(answer, lang) {
+        if(!this.get('is_required')) {
+          if(!answer)
+            return null;
+        }
 				return $.regex.isEmail(answer) ? null : (lang=='en' ? 'Email is invalid' : '请输入有效邮箱');
 			}
 		};

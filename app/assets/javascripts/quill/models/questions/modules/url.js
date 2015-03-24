@@ -15,6 +15,10 @@ $(function(){
 			},
 
 			_checkAnswer: function(answer, lang) {
+        if(!this.get('is_required')) {
+          if(!answer)
+            return null;
+        }
 				return $.regex.isUrl(answer) ? null : (lang=='en' ? 'Web url is invalid' : '请输入有效的链接地址');
 			}
 		};

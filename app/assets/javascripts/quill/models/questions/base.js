@@ -124,8 +124,8 @@ $(function(){
 		checkAnswer: function(answer, lang) {
 			if(answer == null)
 				return lang=='en' ? 'Answer should not be empty' : '答案不能为空';
-			else if(!this.get('is_required')) 
-				return null;
+			// else if(!this.get('is_required')) 
+			// 	return null;
 			else
 				return this._checkAnswer(answer, lang);
 		},

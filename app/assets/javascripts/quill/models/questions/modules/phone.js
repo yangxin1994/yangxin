@@ -37,6 +37,10 @@ $(function(){
 			},
 
 			_checkAnswer: function(answer, lang) {
+        if(!this.get('is_required')) {
+          if(!answer)
+            return null;
+        }
 				switch(issue.phone_type) {
 					case 1: return $.regex.isPhone(answer) ? null : (lang=='en' ? 'Please input a correct telephone number.' : '请输入正确的座机号');
 					case 2: return $.regex.isMobile(answer) ? null : (lang=='en' ? 'Please input a correct mobile phone number.' : '请输入正确的手机号码');

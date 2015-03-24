@@ -81,6 +81,12 @@ $(function(){
 		},
 
 		_checkAnswer: function(answer, lang) {
+      if(!this.get('is_required')) {
+        if(!answer)
+          return null;
+        if((!answer.sort_result || answer.sort_result.length == 0) && !answer.text_input)
+          return null;
+      }
       if(lang=='en') {
         if(answer.sort_result == undefined) return 'Please sort the itmes';
         for(var i=0; i<answer.sort_result.length; i++)

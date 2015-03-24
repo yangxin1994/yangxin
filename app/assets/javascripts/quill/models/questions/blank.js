@@ -86,6 +86,8 @@ $(function(){
 		},
 
 		_checkAnswer: function(answer, lang) {
+      // if(!this.get('is_required')) 
+      //   return null;
 			if(answer.length != this.issue.items.length) return {index: 0, text: lang=='en' ? 'Please finish all sub questions' : '请完成所有子题目' };
 			for (var i = 0; i < this.issue.items.length; i++) {
 				var item = this.issue.items[i];

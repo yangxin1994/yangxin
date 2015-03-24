@@ -55,6 +55,12 @@ $(function(){
 			},
 
 			_checkAnswer: function(answer, lang) {
+        if(!this.get('is_required')) {
+          if(!answer)
+            return null;
+          if(answer.address == undefined || answer.address < 0)
+            return null;
+        }
 				if(answer.address == undefined || answer.address < 0) return lang == 'en' ? 'Please select address' : '请选择地址';
 				if(handler.getFormat() == 3 && !answer.detail) return lang == 'en' ? 'Please input address' : '请输入详细地址';
 				if(issue.has_postcode && !$.regex.isPostcode(answer.postcode)) return lang == 'en' ? 'Please input correct postcode' : '请输入正确邮编';

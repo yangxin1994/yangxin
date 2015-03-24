@@ -93,6 +93,10 @@ $(function(){
 			},
 
 			_checkAnswer: function(answer, lang) {
+        if(!this.get('is_required')) {
+          if(isNaN(answer))
+            return null;
+        }
         if(lang=='en') {
           if(isNaN(answer)) return 'Input a number';
           if(answer < issue.min_value) return 'should not be less than ' + issue.min_value;

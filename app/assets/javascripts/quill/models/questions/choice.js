@@ -122,6 +122,12 @@ $(function(){
 		},
 
 		_checkAnswer: function(answer, lang) {
+      if(!this.get('is_required')) {
+        if(!answer)
+          return null;
+        if((!answer.selection || answer.selection.length == 0) && !answer.text_input)
+          return null;
+      } 
       if(lang=='en') {
         if(!answer.selection) return  'Answer should not be empty';
         switch(this.issue.option_type) {

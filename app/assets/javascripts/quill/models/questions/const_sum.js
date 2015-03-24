@@ -45,6 +45,12 @@ $(function(){
 		},
 
 		_checkAnswer: function(answer, lang) {
+      if(!this.get('is_required')) {
+        if(!answer)
+          return null;
+        if(_.keys(answer).length == 0)
+          return null;
+      }
 			var sum = 0;
 			for (var i = 0; i < this.issue.items.length; i++) {
 				var id = this.issue.items[i].id;

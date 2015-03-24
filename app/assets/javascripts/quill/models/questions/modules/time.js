@@ -90,6 +90,10 @@ $(function(){
 			},
 
 			_checkAnswer: function(answer, lang) {
+        if(!this.get('is_required')) {
+          if(!answer || isNaN(answer))
+            return null;
+        }
 				return isNaN(answer) ? (lang=='en' ? 'Please choose time' : '请选择时间') : null;
 			}
 		};

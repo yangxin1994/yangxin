@@ -84,6 +84,10 @@ $(function(){
 			},
 
 			_checkAnswer: function(answer, lang) {
+        if(!this.get('is_required')) {
+          if(!answer || answer.length == 0)
+            return null;
+        }
         if(lang=='en') {
           if(answer.length == 0) return 'Please input text';
           if(issue.min_length >= 0 && answer.length < issue.min_length) return 'Input at least ' + issue.min_length + ' words';

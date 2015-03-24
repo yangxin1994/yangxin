@@ -172,6 +172,12 @@ $(function(){
 		},
 
 		_checkAnswer: function(answer, lang) {
+      if(!this.get('is_required')) {
+        if(!answer)
+          return null;
+        if(_.keys(answer).length == 0)
+          return null;
+      }
       if(lang=='en') {
         for (var i = 0; i < this.issue.rows.length; i++) {
           var row = this.issue.rows[i];
