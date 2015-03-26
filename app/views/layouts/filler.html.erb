@@ -15,12 +15,21 @@
 	</script>
 
 	<% if ["52a59fc6eb0e5bb2c5000007", "54365c14eb0e5bba58000204", "544a0602eb0e5b829e000016", 
-    "544a0ab5eb0e5bfab700019d", "544b6d8eeb0e5bef46000006",'547fb68beb0e5b4cc4000016', "55069ab7eb0e5bba6300001e"].include?(@survey['_id'].to_s) %>
+    "544a0ab5eb0e5bfab700019d", "544b6d8eeb0e5bef46000006",'547fb68beb0e5b4cc4000016', "55069ab7eb0e5bba6300001e",
+    "55120905eb0e5b2984000003", "551208dbeb0e5be514000004"].include?(@survey['_id'].to_s) %>
 	<!-- hack gonganbu to hide logo -->
 		<style type="text/css">
 			#logo { display: none; }
 		</style>
 	<% end %>
+
+  <% if ["", ""].include?(@survey['_id'].to_s) %>
+  <!-- hack background -->
+    <style type="text/css">
+      #sf_banner .sf_banner_top { background: #21A1DC; border-bottom: none;}
+      #logo { display: none; }
+    </style>
+  <% end %>
 
 	<%= yield :head %>
 
