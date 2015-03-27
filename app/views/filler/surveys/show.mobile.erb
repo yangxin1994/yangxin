@@ -85,9 +85,8 @@
 			</p>
 			<% unless params[:ati].present? %>
 				<% unless @is_preview %> <!-- 为住建委项目特殊添加-->
-				<% unless (params[:id] == '5485611beb0e5b8af10002e1' or params[:id] == '55120905eb0e5b2984000003' 
-          or params[:id] == '551208dbeb0e5be514000004' or params[:id] == '55069ab7eb0e5bba6300001e' 
-          or params[:id] == '54365c14eb0e5bba58000204') %> <!-- 2014年北京市公安局群众安全感和满意度调查问卷 -->
+				<% unless ['5485611beb0e5b8af10002e1', '55120905eb0e5b2984000003', '551208dbeb0e5be514000004',
+          '55069ab7eb0e5bba6300001e', '54365c14eb0e5bba58000204'].include?(params[:id]) %> <!-- 2014年北京市公安局群众安全感和满意度调查问卷 -->
 					<p class="tip">
 						<span class='fl'>耗时<span id="left_time"></span></span>
 						<span class="fr">奖励<span id="reward_info"></span></span>
