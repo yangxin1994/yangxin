@@ -564,7 +564,8 @@ $(function() {
                 this.hbs({
                     quality: (value.answer_reject_type == 2),
                     review_failed: (value[1] == 2),
-                    filter: (value.answer_reject_type == 1 || value.answer_reject_type == 8),
+                    filter: (value.answer_reject_type == 8),
+                    reach_max: (value.answer_reject_type == 1),
                     timeout: (value.answer_reject_type == 16),
                     review_failed: (value.answer_reject_type == 4),
                     reject_reason: value.answer_audit_message,

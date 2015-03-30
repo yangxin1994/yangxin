@@ -542,7 +542,8 @@ $(function() {
                 // reject 1（配额已满），2（未通过自动质控），4（未通过人工质控），8（甄别题）或者16（超时）
                 this.hbs({
                     title: this.model.get('title'),
-                    filter: (value.answer_reject_type == 1 || value.answer_reject_type == 8),
+                    filter: (value.answer_reject_type == 8),
+                    reach_max: (value.answer_reject_type == 1),
                     quality: (value.answer_reject_type == 2),
                     review_failed: (value.answer_reject_type == 4),
                     timeout: (value.answer_reject_type == 16),
