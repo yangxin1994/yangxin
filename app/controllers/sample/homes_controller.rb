@@ -23,7 +23,7 @@ class Sample::HomesController < Sample::SampleController
       paginated_surveys.map { |e| e.excute_sample_data(current_user) } 
     end
 
-    movies = Movie.rand(cookies[:vote_user_id])
+    #movies = Movie.rand(cookies[:vote_user_id])
 
     @data = {
       hot_survey:hot_survey,
@@ -35,8 +35,7 @@ class Sample::HomesController < Sample::SampleController
       banners:banners,
       survey_counts:survey_counts,
       answer_counts:answer_counts,
-      express_surveys:express_surveys,
-      movies:movies
+      express_surveys:express_surveys
     }
   end
 

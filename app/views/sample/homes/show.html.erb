@@ -111,12 +111,11 @@
     </div>
   </div>
 </div>
-<% if @data[:movies].length > 0 %>
-<div id="vote" class="inner-page mt20">
+<%# if @data[:movies].length > 0 %>
+<!-- <div id="vote" class="inner-page mt20">
   <div class="dashed-box">
     <div class="dashed-box-inner">
       <div class="dashed-box-inner-top">
-        <!-- <h3 class="box-title">影片小调查</h3> -->
         <ul class="vote-class">
           <li class="active"><a class="left" href="javascript:;">正在热播</a></li>
           <li><a class="right" href="javascript:;">即将上映</a></li>
@@ -125,72 +124,72 @@
       </div>
       <div class="vote-list dn">
         <ul>
-          <% @data[:movies][3..5].each_with_index do |movie,idx|%>
-            <li <% if idx == 2 %>style="border:none;margin:0;"<% end%> >
-              <span class="movie-name"><a href='/vote/suffrages'><%=movie.title%></a></span>
-              <span class="movie-img"><img src="<%=movie.poster %>" alt="<%= movie.title%>" /></span>
-              <% if movie.info_show_at < 0%>
+          <%# @data[:movies][3..5].each_with_index do |movie,idx|%>
+            <li <%# if idx == 2 %>style="border:none;margin:0;"<%# end%> >
+              <span class="movie-name"><a href='/vote/suffrages'><%#=movie.title%></a></span>
+              <span class="movie-img"><img src="<%#=movie.poster %>" alt="<%#= movie.title%>" /></span>
+              <%# if movie.info_show_at < 0%>
                 <span class="time">上映日期: 未知</span>
-              <% else %>
-                <span class="time">上映日期: <%= Time.at(movie.info_show_at).strftime('%F') %></span>
-              <% end %>
-              <span class="actor">主演:<%=movie.info_actors || '未知' %></span>
+              <%# else %>
+                <span class="time">上映日期: <%#= Time.at(movie.info_show_at).strftime('%F') %></span>
+              <%# end %>
+              <span class="actor">主演:<%#=movie.info_actors || '未知' %></span>
               <span class="button-list">
-                <% if movie['voted'] %>
+                <%# if movie['voted'] %>
                   <span>已参与</span>
-                <% else%>
+                <%# else%>
                 <span>
-                  <a href="javascript:void(0);" data-t=0 data-id="<%= movie.id.to_s %>" class="btn want-to-see">想看</a>
+                  <a href="javascript:void(0);" data-t=0 data-id="<%#= movie.id.to_s %>" class="btn want-to-see">想看</a>
                   <b class="tip"><i></i>仅限影院观看意愿</b>
                 </span>
                 <span>
-                  <a href="javascript:void(0);" data-t=1 data-id="<%= movie.id.to_s %>" class="btn dont-want-to-see">不想看</a>
+                  <a href="javascript:void(0);" data-t=1 data-id="<%#= movie.id.to_s %>" class="btn dont-want-to-see">不想看</a>
                   <b class="tip"><i></i>仅限影院观看意愿</b> 
                 </span>               
-                <% end %>
+                <%# end %>
               </span>
             </li>          
-          <% end %>  
+          <%# end %>  
         </ul>
       </div>
       <div class="vote-list">
         <ul>
-          <% @data[:movies][0..2].each_with_index do |movie,idx|%>
-            <li <% if idx == 2 %>style="border:none;margin:0;"<% end%> >
-              <span class="movie-name"><a href="/vote/suffrages"><%=movie.title%></a></span>
-              <span class="movie-img"><img src="<%=movie.poster %>" alt="<%= movie.title%>" /></span>
-              <% if movie.info_show_at < 0%>
+          <%# @data[:movies][0..2].each_with_index do |movie,idx|%>
+            <li <%# if idx == 2 %>style="border:none;margin:0;"<%# end%> >
+              <span class="movie-name"><a href="/vote/suffrages"><%#=movie.title%></a></span>
+              <span class="movie-img"><img src="<%#=movie.poster %>" alt="<%#= movie.title%>" /></span>
+              <%# if movie.info_show_at < 0%>
                 <span class="time">上映日期: 未知</span>
-              <% else %>
-                <span class="time">上映日期: <%= Time.at(movie.info_show_at).strftime('%F') %></span>
-              <% end %>
-              <span class="actor">主演:<%=movie.info_actors || '未知' %></span>
+              <%# else %>
+                <span class="time">上映日期: <%#= Time.at(movie.info_show_at).strftime('%F') %></span>
+              <%# end %>
+              <span class="actor">主演:<%#=movie.info_actors || '未知' %></span>
               <span class="button-list">
-                <% if movie['voted'] %>
+                <%# if movie['voted'] %>
                   <span>已参与</span>
-                <% else%>
+                <%# else%>
                 <span>
-                  <a href="javascript:void(0);" data-t=0 data-id="<%= movie.id.to_s %>" class="btn want-to-see">想看</a>
+                  <a href="javascript:void(0);" data-t=0 data-id="<%#= movie.id.to_s %>" class="btn want-to-see">想看</a>
                   <b class="tip"><i></i>仅限影院观看意愿</b>
                 </span>
                 <span>
-                  <a href="javascript:void(0);" data-t=2 data-id="<%= movie.id.to_s %>" class="btn have-read">看过</a>
+                  <a href="javascript:void(0);" data-t=2 data-id="<%#= movie.id.to_s %>" class="btn have-read">看过</a>
                   <b class="tip"><i></i>仅限影院观看意愿</b>
                 </span>  
                 <span>
-                  <a href="javascript:void(0);" data-t=1 data-id="<%= movie.id.to_s %>" class="btn dont-want-to-see">不想看</a>
+                  <a href="javascript:void(0);" data-t=1 data-id="<%#= movie.id.to_s %>" class="btn dont-want-to-see">不想看</a>
                   <b class="tip"><i></i>仅限影院观看意愿</b> 
                 </span>          
-                <% end %>              
+                <%# end %>              
               </span>
             </li>          
-          <% end %> 
+          <%# end %> 
         </ul>
       </div>
     </div>
   </div>
-</div>
-<% end %>
+</div> -->
+<%# end %>
 <div class="inner-page">
   <% if @data[:express_surveys].present? %>
   <div class="paid-survey">
