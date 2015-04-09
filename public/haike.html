@@ -1,0 +1,90 @@
+
+<!doctype html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0" />
+<title>海客客户端广告--手机APP--海外网</title>
+<meta http-equiv="content-type" content="text/html;charset=utf-8">
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<meta name="copyright" content="海外网版权所有" />
+<meta name="filetype" content="1">
+<meta name="publishedtype" content="1">
+<meta name="pagetype" content="2">
+<meta name="catalogs" content="L_457202">
+<meta http-equiv="X-UA-Compatible" content="IE=EmulateIE7" />
+<style>
+	body,div,span,img{ padding:0px; margin:0px;}
+	body{ width:100%; height:100%; overflow:hidden;}
+	div.bg{ width:100%; height:100%; overflow:hidden; background:url(http://mobile.haiwainet.cn/NMediaFile/2014/1120/LOCAL201411201536375589776959196.png) repeat-x; position:relative;}
+	h1{ font:18px/48px "Microsoft YaHei"; color:#000; text-align:center;}
+	div.bg img{ width:100%; height:100%;}
+	div.btn{ width:100%; text-align:center; position:absolute;  left:0px;}
+	div.btn p{ width:100%; height:auto; overflow:hidden; text-align:center;}
+	div.btn p.wz{ font:26px; height:28px; overflow:hidden; font:16px/28px Arial, Helvetica, sans-serif; color:#6b6b6b;}
+	div.btn span{ width:192px; height:57px; overflow:hidden; display:inline-block; padding:0px 5px;}
+	.gonews{ position:absolute; right:5px; bottom:30px; color:#000; font:16px/32px "Microsoft YaHei";}
+</style>
+
+
+
+</head>
+
+<body>
+
+<div class="bg" id="bg"></div>
+
+<div class="btn" id="btn">
+<h1>下载海客，广知天下，戳我！戳我！</h1>
+<p class="logo">
+	<img src="http://mobile.haiwainet.cn/NMediaFile/2014/1120/LOCAL201411201540445870448131297.png" height="110">
+</p>
+<p class="wz">海客新闻客户端</p>
+<span><a id="ios" href="https://itunes.apple.com/cn/app/hai-ke-xin-wen-ren-min-ri/id797398945?l=en&mt=8"><img src="http://mobile.haiwainet.cn/NMediaFile/2014/1120/LOCAL201411200916572129655815181.png" width="80%"/></a></span>
+<span><a id="android" href="http://mobile.haiwainet.cn/haiwainet.apk"><img src="http://mobile.haiwainet.cn/NMediaFile/2014/1120/LOCAL201411200916571425561236762.png" width="80%"/></a></span>
+<p>扫描二维码，关注海外网微信</p>
+<div>
+	<img src="./hwlogo.jpg" style='margin:0 auto;'>
+</div>
+</div>
+
+<script>
+    function is_weixin(){
+        var ua = window.navigator.userAgent.toLowerCase();
+        var androiddl=document.getElementById("android");
+        var iosdl=document.getElementById("ios");
+		if(ua.match(/MicroMessenger/i)=="micromessenger")
+        {
+            androiddl.href="http://mp.weixin.qq.com/mp/redirect?url=http://mobile.haiwainet.cn/haiwainet.apk";
+            iosdl.href="http://mp.weixin.qq.com/mp/redirect?url=https://itunes.apple.com/cn/app/hai-ke-xin-wen-ren-min-ri/id797398945?l=en&mt=8";}
+			
+        else {
+            androiddl.href="http://mobile.haiwainet.cn/haiwainet.apk";
+            iosdl.href="https://itunes.apple.com/cn/app/hai-ke-xin-wen-ren-min-ri/id797398945?l=en&mt=8";
+        }}
+
+    window.onload=is_weixin();
+</script>
+
+
+<script>
+	var oBg=document.getElementById('bg');
+	var oBtn=document.getElementById('btn');
+	setTop();
+	window.onorientationchange=function(){
+		setTop();
+		
+	};
+	function setTop(){
+		oBg.style.height=window.innerHeight+'px';
+		oBg.style.width=window.innerWidth+'px';
+		if(window.innerHeight>window.innerWidth){
+			oBtn.style['top']='1%';
+		}else{
+			oBtn.style['top']='0';
+		}
+		
+	}
+</script>
+</body>
+</html>
