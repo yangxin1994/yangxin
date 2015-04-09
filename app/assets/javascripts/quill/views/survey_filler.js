@@ -302,10 +302,15 @@ $(function() {
                 // answer_status: 4（待审核），8（等待代理审核），32（完成）
                 if (this.options.reward.reward_scheme_type == 0) {
                     // hack for survey carnival
-                    if (!this.options.is_preview && this.model.get('style_setting').redirect_link == 'carnival') {
-                        var d = new Date();
-                        location.href = "/carnival/campaigns?t=" + d.getTime();
-                        return;
+                    redirect_link = this.model.get('style_setting').redirect_link;
+                    if (!this.options.is_preview && redirect_link == 'carnival') {
+                      var d = new Date();
+                      location.href = "/carnival/campaigns?t=" + d.getTime();
+                      return;
+                    }
+                    if (redirect_link.indexOf('new ') == 0) {
+                      location.href = redirect_link.substr(4, redirect_link.length - 4);
+                      return;
                     }
                     // end hack
                     // free, show message
