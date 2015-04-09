@@ -308,7 +308,7 @@ $(function() {
                       location.href = "/carnival/campaigns?t=" + d.getTime();
                       return;
                     }
-                    if (redirect_link.indexOf('new ') == 0) {
+                    if (!this.options.is_preview && redirect_link.indexOf('new ') == 0) {
                       location.href = redirect_link.substr(4, redirect_link.length - 4);
                       return;
                     }
