@@ -2,8 +2,8 @@
 require 'error_enum'
 class Vrcode::CodesController < Vrcode::VrcodeController
   def index
-    redirect_to login_account_url unless current_user.present?
-    @code = current_user.get_verify_code
+    # redirect_to login_account_url unless current_user.present?
+    # @code = current_user.get_verify_code
   end
 
   def create
