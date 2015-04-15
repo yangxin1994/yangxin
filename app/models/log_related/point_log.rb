@@ -11,6 +11,7 @@ class PointLog < Log
   REVOKE = 64
   IMPORT = 128
   NETRANKING_IMPORT = 256 
+  VERIFY_CODE = 512 # 新浪微博爬虫验证码奖励
 
   field :type, :type => Integer, :default => 8
   field :amount, :type => Integer #花费积分数
@@ -41,6 +42,11 @@ class PointLog < Log
 
   def self.create_sina_reward_point_log(amount,sample_id)
     self.create(:amount => amount, :reason => ADMIN_OPERATE, :remark => '《积分快来》奖励积分', :user_id => sample_id)
+  end
+
+  def self.create_weibo_verify_code_log(amount,sample_id)
+    # 暂定每输正确一个验证码奖励一积分
+    self.create(:amount => amount, :reason => VERIFY_CODE, :remark => '新浪微博爬虫验证码奖励积分', :user_id => sample_id)
   end
 
   #创建礼品兑换产生的积分变化记录

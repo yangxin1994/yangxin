@@ -6,7 +6,7 @@ class Log
   include Mongoid::Timestamps
   include FindTool
   include ViewHelper
-  # log type, 1 for answering surveys, 2 for lottery, 4 for gift redeem, 8 for point change, 16 for register, 32 for spread, 64 for punish                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
+  # log type, 1 for answering surveys, 2 for lottery, 4 for gift redeem, 8 for point change, 16 for register, 32 for spread, 64 for punish  128 for weibo verify code                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
 
   field :type, :type => Integer
 

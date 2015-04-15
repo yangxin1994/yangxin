@@ -658,6 +658,12 @@ OopsData::Application.routes.draw do
     end
   end
 
+  #新浪微博爬虫验证码用
+  namespace :vrcode do 
+    resources :codes 
+  end
+
+
   namespace :travel do 
     resources :users do
       collection do 
