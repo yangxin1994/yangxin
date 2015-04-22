@@ -21,7 +21,7 @@
 
 
 
-<div id="recever" style="display:none;">
+<!-- <div id="recever" style="display:none;">
   <div class="exc_notices">
     <h1>补全收货人地址</h1>
     <div class="sub_infor">
@@ -38,11 +38,29 @@
       </div>
       <textarea name="street_info" placeholder="街道地址（不需要填写省/市/区）"></textarea>
       <div class="tj_sub">
-        <% if user_signed_in %>
+        <%# if user_signed_in %>
         <div class="synchro">
           <input type="checkbox" name="info_sys"/><span>同步到个人资料</span>
         </div>
-        <% end %>
+        <%# end %>
+        <input class="sub_btn" type="button" value="提交" />
+        <div style="clear:both;"></div>
+      </div>
+    </div>
+  </div>
+</div> -->
+
+<!-- 住建委项目去除地址信息,只保留手机号码和姓名-->
+<div id="recever" style="display:none;">
+  <div class="exc_notices">
+    <h1>填写个人信息</h1>
+    <div class="sub_infor">
+      <div class="basic_document">
+        <input class="name" name="receiver" type="text" placeholder="姓名" />
+        <input class="phone_num" name="mobile" type="text" placeholder="电话" />
+        <div style="clear:both;"></div>
+      </div>
+      <div class="tj_sub">
         <input class="sub_btn" type="button" value="提交" />
         <div style="clear:both;"></div>
       </div>
@@ -50,9 +68,8 @@
   </div>
 </div>
 
-
-
-<div id="recever_confirm" style="display:none;">
+<!-- 住建委项目去除地址信息,只保留手机号码和姓名-->
+<!-- <div id="recever_confirm" style="display:none;">
   <div class="exc_notices">
     <h1>确认收货地址</h1>
     <div class="sub_infor">
@@ -75,8 +92,25 @@
       </div>
     </div>
   </div>
+</div> -->
+<!-- 住建委项目去除地址信息,只保留手机号码和姓名-->
+<div id="recever_confirm" style="display:none;">
+  <div class="exc_notices">
+    <h1>确认个人信息</h1>
+    <div class="sub_infor">
+      <div class="basic_document">
+        收货人：<span name="receiver" class="recerver_info"></span>
+        <span>手机：<span name="mobile" class="recerver_info"></span></span>
+        <span name="info_sys" class="recerver_info" style="display:none;"></span>
+      </div>
+      <div class="tj_sub">
+        <input class="sub_btn con_sub_btn" type="button" value="继续提交" />
+        <a href="javascript:void(0);" class="repair_address">我要修改</a>
+        <div style="clear:both;"></div>
+      </div>
+    </div>
+  </div>
 </div>
-
 
 
 <div id="order_ok" style="display:none;">

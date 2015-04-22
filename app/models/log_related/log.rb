@@ -60,27 +60,29 @@ class Log
   def update_reallog
     times = Log.get_new_logs(5,nil)[1..4].map(&:created_at).map{|create_time| ViewHelper::View.ch_time(create_time)}
     self['username'] = self.user.try(:nickname)
-    if [2,8,6].include?(self.type.to_i) && ![PointLog::IMPORT,PointLog::ADMIN_OPERATE,PointLog::REVOKE].include?(self.reason.to_i)
-      hash = {}
-      new_log =  '<li><div><span class="time">刚刚</span>'
-      new_log += ViewHelper::View.user_behavor(self)
-      new_log += '</div></li>'
-      hash[:log] = new_log
-      hash[:other_times] = times
-      begin
-        FayeClient.send("/realogs/new", hash)
-      rescue
-        pid = %x(lsof -i:9393 | awk 'END{print $2}').gsub(/\n/,'').to_i
-
-        if pid > 0
-          puts "******************#{pid}***************"
-          %x(kill -9 `lsof -i:9393 | awk 'END{print $2}'`)
-        end
-
-        if File.exist?('./faye_server/tmp/pids/thin.9393.pid')
-          system("rm -rf ./faye_server/tmp/pids/* && ./faye start")
-        else
-          system("./faye start")
+    if self.has_attribute?('reason')
+      if [2,8,6].include?(self.type.to_i) && ![PointLog::IMPORT,PointLog::ADMIN_OPERATE,PointLog::REVOKE].include?(self.reason.to_i)
+        hash = {}
+        new_log =  '<li><div><span class="time">刚刚</span>'
+        new_log += ViewHelper::View.user_behavor(self)
+        new_log += '</div></li>'
+        hash[:log] = new_log
+        hash[:other_times] = times
+        begin
+          FayeClient.send("/realogs/new", hash)
+        rescue
+          pid = %x(lsof -i:9393 | awk 'END{print $2}').gsub(/\n/,'').to_i
+  
+          if pid > 0
+            puts "******************#{pid}***************"
+            %x(kill -9 `lsof -i:9393 | awk 'END{print $2}'`)
+          end
+  
+          if File.exist?('./faye_server/tmp/pids/thin.9393.pid')
+            system("rm -rf ./faye_server/tmp/pids/* && ./faye start")
+          else
+            system("./faye start")
+          end
         end
       end
     end
