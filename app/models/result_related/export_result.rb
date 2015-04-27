@@ -112,7 +112,7 @@ class ExportResult < Result
 
     puts "answer_contents_length:#{spss_data_json["answer_contents"].length}"
 
-
+    puts spss_data_json.gsub(/<[^>]*>/, '')
     retval = ConnectDotNet.send_data('/ToSpss.aspx') do
       {'spss_data' => spss_data_json.gsub(/<[^>]*>/, ''), 'job_id' => task_id.to_s}
     end
