@@ -104,7 +104,7 @@ class ExportResult < Result
 
 
     # #========================
-
+    puts "aa"
     spss_data_json = {"spss_header" => survey.spss_header,
                       "answer_contents" => survey.formated_answers(answers, result_key, task_id.to_s),
                       "header_name" => survey.csv_header,
