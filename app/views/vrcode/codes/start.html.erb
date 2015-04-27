@@ -13,7 +13,28 @@
   <link rel="shortcut icon" href="/assets/od-quillme/favicon.ico">
 </head>
 <body>
-
-asdfafadfadfas
+  <div class="header">
+    <p>已获得<b>积分</b></p>
+    <div class="pd">
+      <p class="pd">
+        正在判断<b>1</b>个
+      </p>
+      <p class="zq">
+        输入正确<b>1</b>个
+      </p>
+      <p class="cw">
+        输入错误<b>1</b>个
+      </p>
+    </div>
+  </div>
+  <div class="vrcode">
+     <%=image_tag "", :alt => "bg" %>
+     <form action="">
+      <input type="text" placeholder="输入验证码，回车发送">
+      <a href="javascript:void(0);" class="submit">提交 (Enter)</a>
+      <span>已提交<b>1</b>个</span>
+     </form>
+     
+  </div>
 </body>
 </html>
