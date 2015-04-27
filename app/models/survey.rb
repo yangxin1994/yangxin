@@ -605,7 +605,7 @@ class Survey
        "spss_label" => "答题时长"},
       {"spss_name" => 'created_at',
         "spss_type" => 'String',
-        "spas_label" => "答题时间"
+        "spss_label" => "答题时间"
       } 
     ]
 
@@ -687,7 +687,7 @@ class Survey
       else
         user_id = ""
       end
-      line_answer = [user_id, answer._id, answer.agent_task.present?.to_s, answer.user.try(:email), answer.user.try(:mobile), answer.ip_address, QuillCommon::AddressUtility.find_province_city_town_by_code(answer.region), "#{answer_time} 分","#{answer.created_at.strftime('%Y %m %d %H %I')}"]
+      line_answer = [user_id, answer._id, answer.agent_task.present?.to_s, answer.user.try(:email), answer.user.try(:mobile), answer.ip_address, QuillCommon::AddressUtility.find_province_city_town_by_code(answer.region), "#{answer_time} 分","#{answer.created_at.strftime('%Y-%m-%d %H:%I')}"]
       begin
         all_questions_id(false).each_with_index do |question, index|
           qindex = index
@@ -749,7 +749,7 @@ class Survey
             status = "被管理员拒绝"
           end
         end
-        line_answer = [answer.agent_user_id || "", status, answer.remote_ip, QuillCommon::AddressUtility.find_province_city_town_by_code(answer.region), "#{answer_time} 分","#{answer.created_at.strftime('%Y %m %d %H %I')}"]
+        line_answer = [answer.agent_user_id || "", status, answer.remote_ip, QuillCommon::AddressUtility.find_province_city_town_by_code(answer.region), "#{answer_time} 分","#{answer.created_at.strftime('%Y-%m-%d %H:%I')}"]
         begin
           all_questions_id(false).each_with_index do |question, index|
             qindex = index
@@ -788,7 +788,7 @@ class Survey
           agent_info = answer.agent_task.agent.name
           agent_info += "(#{answer.mobile})" if answer.mobile.present?
         end
-        line_answer = [answer.carnival_user.try(:id) || answer.user.try(:id) || "", answer._id, agent_info.to_s, answer.user.try(:email), answer.user.try(:mobile), answer.remote_ip, QuillCommon::AddressUtility.find_province_city_town_by_code(answer.region), "#{answer_time} 分","#{answer.created_at.strftime('%Y %m %d %H %I')}"]
+        line_answer = [answer.carnival_user.try(:id) || answer.user.try(:id) || "", answer._id, agent_info.to_s, answer.user.try(:email), answer.user.try(:mobile), answer.remote_ip, QuillCommon::AddressUtility.find_province_city_town_by_code(answer.region), "#{answer_time} 分","#{answer.created_at.strftime('%Y-%m-%d %H:%I')}"]
         begin
           all_questions_id(false).each_with_index do |question, index|
             qindex = index
