@@ -1,7 +1,7 @@
 #source 'http://rubygems.org'
 source 'http://ruby.taobao.org'
 
-# ruby "1.9.3"
+ruby "1.9.3"
 
 gem 'rails', '~> 3.2.6'
 
