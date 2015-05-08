@@ -40,7 +40,7 @@ gem 'gon', "~> 4.1.1"
 gem 'yab62', require: 'yab62'
 # uploader
 gem 'easy_captcha'
-gem 'rmagick'
+# gem 'rmagick'
 gem 'mini_magick', '~> 3.5.0'
 gem 'carrierwave', '~> 0.8.0'
 gem 'carrierwave-video'
