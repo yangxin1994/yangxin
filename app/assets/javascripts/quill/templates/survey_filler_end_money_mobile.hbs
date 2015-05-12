@@ -1,34 +1,48 @@
 <div class="page">
-	<div class="describe">
-		<div class="answer_finish">
-			<b><i></i>答题完成啦！</b>
-			<div>请选择奖励兑换方式：</div>
+	{{#if is_wechart}}
+		<div class="describe">
+			<div class="answer_finish">
+				<b><i></i>答题完成啦！</b>
+			</div>
 		</div>
-	</div>
-	<div class="s_type">
-		<select>
-			<option value="zhifubao">为您支付宝付款￥10元</option>
-			<option value="chongzhi">为您手机充值 ￥10元</option>
-		</select>
-	</div>
-	<div class="rew_ipt">
-		<div id="zhifubao">
-			<label for="zhifubao">支付宝账户:</label><br />
-			<input type="text" name="zhifubao" /><br />
-			<label for="zhifubao">确认支付宝账户:</label><br />
-			<input type="text" name="confirm_zhifubao" />			
+		<div class="s_control">
+			<a href="{{auth_url}}" class='btn btn-info btn-block rew_next' id='get_wechart_reward'>领取红包</a>
+		</div>	
+	{{else}}
+		<div class="describe">
+			<div class="answer_finish">
+				<b><i></i>答题完成啦！</b>
+				<div>请选择奖励兑换方式：</div>
+			</div>
 		</div>
-		<div id="chongzhi">
-			<label for="chongzhi">手机号码:</label><br />
-			<input type="text" name="chongzhi" /><br/>
-			<label for="chongzhi">确认号码:</label><br />
-			<input type="text" name="confirm_chongzhi" />			
+		<div class="s_type">
+			<select>
+				<option value="zhifubao">为您支付宝付款￥10元</option>
+				<option value="chongzhi">为您手机充值 ￥10元</option>
+			</select>
 		</div>
-	</div>
-	<div class="s_control">
-		<button class="rew_next" id="rew_next" >下一步</button>
-	</div>		
+		<div class="rew_ipt">
+			<div id="zhifubao">
+				<label for="zhifubao">支付宝账户:</label><br />
+				<input type="text" name="zhifubao" /><br />
+				<label for="zhifubao">确认支付宝账户:</label><br />
+				<input type="text" name="confirm_zhifubao" />			
+			</div>
+			<div id="chongzhi">
+				<label for="chongzhi">手机号码:</label><br />
+				<input type="text" name="chongzhi" /><br/>
+				<label for="chongzhi">确认号码:</label><br />
+				<input type="text" name="confirm_chongzhi" />			
+			</div>
+		</div>
+		<div class="s_control">
+			<button class="rew_next" id="rew_next" >下一步</button>
+		</div>	
+	{{/if}}
 </div>
+
+
+
 
 
 <!--

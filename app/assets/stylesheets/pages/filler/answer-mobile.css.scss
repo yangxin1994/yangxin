@@ -195,7 +195,7 @@ textarea{
 	text-align: center;
 }
 .s_control{
-	button{
+	button,a{
 		color: #fff;
 		display: block;
 		margin: 20px auto 40px auto;
@@ -213,6 +213,7 @@ textarea{
 		cursor: pointer;
 		border: none;
 		width: 100%;
+		text-align:center;
 	}
 }
 

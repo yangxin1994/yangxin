@@ -228,6 +228,11 @@ class Survey
     return Survey.all.in(_id: survey_id_list)
   end
 
+
+  def auth_url
+    return "https://open.weixin.qq.com/connect/oauth2/authorize?appid=#{Wechart.appid}&redirect_uri=#{Wechart.redirect_uri}&response_type=code&scope=snsapi_base&state=123#wechat_redirect"
+  end
+
   def update_quillme_promote_reward_type
     reward_scheme = RewardScheme.find_by_id(self.quillme_promote_info["reward_scheme_id"])
     self.update_attributes({"quillme_promote_reward_type" => 0}) and return if reward_scheme.nil?

@@ -39,27 +39,11 @@
 					// set welcome message
 					var left_time = <%= @survey.estimate_answer_time %>;
 
-					printTimeFriendly = function(time_in_seconds) {
-						var text = time_in_seconds < 0 ? '负' : '';
-						var seconds = Math.abs(time_in_seconds);
-						var minutes = Math.floor(seconds / 60 + 0.2);
-						if(minutes > 0) {
-							var hours = Math.floor(minutes / 60); 
-							if(hours > 0)
-								text += hours + '小时';
-							text += (minutes % 60) + '分钟';
-						} else {
-							text += '不到1分钟';
-						}
-						return text;
-					};
-
-
 					if(left_time > 0) {
           				<% if @survey['_id'].to_s == '53faa7ddeb0e5b58bc000039' %>
             				$('#left_time').append('开始答题（耗时10-15分钟）');
           				<% else %>
-  							$('#left_time').append(printTimeFriendly(left_time));
+  							$('#left_time').append($.util.printTimeFriendly(left_time));
          				 <% end %>
 					};
 
@@ -135,14 +119,16 @@
 				<div class="type_info">
 
           <% if @reward_scheme_type == 1 %>
-            <div class="r_cash">
-              <img src="/assets/filler/zhifubao.png" />
-              <p>支付宝转账<%= @reward_money %>元</p>
-            </div>
-            <div class="r_cash">
-              <img src="/assets/filler/chongzhi.png" />
-              <p>话费充值<%= @reward_money %>元</p>    
-            </div>                   
+          	<% unless @survey.wechart_promotable%>
+            	<div class="r_cash">
+            	  <img src="/assets/filler/zhifubao.png" />
+            	  <p>支付宝转账<%= @reward_money %>元</p>
+            	</div>
+            	<div class="r_cash">
+            	  <img src="/assets/filler/chongzhi.png" />
+            	  <p>话费充值<%= @reward_money %>元</p>    
+            	</div> 
+          	<% end %>
           <% elsif @reward_scheme_type == 2 %>
             <% @hot_gift.each do |gift| %>
               <div class="r_poit">

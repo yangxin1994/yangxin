@@ -374,8 +374,13 @@ $(function() {
                         this._close()
                     }, this));
                 } else if (this.options.reward.reward_scheme_type == 1) {
+
                     if (value.order_id == null) {
-                        this.hbs({}, 'survey_filler_end_money_mobile').appendTo($('#f_body'));
+                        this.hbs({
+                            is_wechart:this.model.get('wechart_promotable'),
+                            auth_url:this.options.auth_url
+                        }, 'survey_filler_end_money_mobile').appendTo($('#f_body'));
+
                         $('.s_type select').children('option[value="zhifubao"]').text('为您支付宝付款￥' + this.options.reward.reward_money + '元')
                         $('.s_type select').children('option[value="chongzhi"]').text('为您手机充值￥' + this.options.reward.reward_money + '元')
 

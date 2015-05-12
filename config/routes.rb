@@ -610,7 +610,11 @@ OopsData::Application.routes.draw do
   # Survey filler
   scope :module => "filler" do
     match "s/:id" => "surveys#show", :as => :show_s, :via => :get
-    resources :surveys, :only => [:show] 
+    resources :surveys, :only => [:show] do 
+      collection do 
+        get 'wechart_auth' 
+      end
+    end
 
     match "p/:id" => "previews#show", :as => :show_p, :via => :get
     resources :previews, :only => [:show]
