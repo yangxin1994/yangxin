@@ -16,38 +16,75 @@
 
 		<script type="text/javascript">
 			jQuery(function($) {
-				window.rsi = '<%=params[:id]  %>';
-				// referer
-				window.referer = "<%= raw escape_javascript(@referer_host) %>";
-				window.channel = <%= @channel %>;
-
-				// set welcome message
-				var left_time = <%= @survey.estimate_answer_time %>;
-				if(left_time > 0) {
-          <% if @survey['_id'].to_s == '53faa7ddeb0e5b58bc000039' %>
-            $('#left_time').append('开始答题（耗时10-15分钟）');
-          <% else %>
-  					$('#left_time').append($.util.printTimeFriendly(left_time));
-          <% end %>
-				};
-
-				var reward_type = <%= @reward_scheme_type %>;
-				if(reward_type > 0) {
-					switch(parseInt(reward_type)) {
-						case 1: 
-							$('#reward_info').append('￥' + "<%=  @reward_money %>");
-							$('.rtype').append('支持以下领取方式:');
-							break;
-						case 2:
-							$('#reward_info').append("<%= @reward_point %>" + '积分'); 
-							$('.rtype').append('热门兑换:');
-							break;
-						case 3:
-							$('#reward_info').append('抽奖机会');
-							$('.rtype').append('参与调研有机会获得:');
-					}
+				var wechart   = <%= @survey.wechart_promotable %>;
+				//微信答题
+				if(wechart){
+					var ua = navigator.userAgent.toLowerCase();	
+					if(ua.match(/MicroMessenger/i)!="micromessenger") {
+						normal_flow();
+						//$('#sf_main').empty().append('<div style="font-size:18pt;text-align:center;">请使用微信浏览器进行答题</div>');
+					}else{
+						normal_flow();
+					}					
 				}else{
-					$('#reward_info').parent().html('免费调研');
+					normal_flow();
+				}
+
+				function normal_flow(){
+					window.rsi = '<%=params[:id]  %>';
+					// referer
+					window.referer = "<%= raw escape_javascript(@referer_host) %>";
+					window.channel = <%= @channel %>;
+					
+					// set welcome message
+					var left_time = <%= @survey.estimate_answer_time %>;
+
+					printTimeFriendly = function(time_in_seconds) {
+						var text = time_in_seconds < 0 ? '负' : '';
+						var seconds = Math.abs(time_in_seconds);
+						var minutes = Math.floor(seconds / 60 + 0.2);
+						if(minutes > 0) {
+							var hours = Math.floor(minutes / 60); 
+							if(hours > 0)
+								text += hours + '小时';
+							text += (minutes % 60) + '分钟';
+						} else {
+							text += '不到1分钟';
+						}
+						return text;
+					};
+
+
+					if(left_time > 0) {
+          				<% if @survey['_id'].to_s == '53faa7ddeb0e5b58bc000039' %>
+            				$('#left_time').append('开始答题（耗时10-15分钟）');
+          				<% else %>
+  							$('#left_time').append(printTimeFriendly(left_time));
+         				 <% end %>
+					};
+
+					var reward_type = <%= @reward_scheme_type %>;
+					if(reward_type > 0) {
+						switch(parseInt(reward_type)) {
+							case 1:
+								$('#reward_info').append('￥' + "<%=  @reward_money %>");
+								if(wechart){
+									$('.type_info').hide();
+								}else{
+									$('.rtype').append('支持以下领取方式:');	
+								}
+								break;
+							case 2:
+								$('#reward_info').append("<%= @reward_point %>" + '积分'); 
+								$('.rtype').append('热门兑换:');
+								break;
+							case 3:
+								$('#reward_info').append('抽奖机会');
+								$('.rtype').append('参与调研有机会获得:');
+						}
+					}else{
+						$('#reward_info').parent().html('免费调研');
+					}
 				}
 			});	
 		</script>
@@ -85,12 +122,12 @@
 			</p>
 			<% unless params[:ati].present? %>
 				<% unless @is_preview %> <!-- 为住建委项目特殊添加-->
-				<% unless params[:id] == '5485611beb0e5b8af10002e1' or ['55120905eb0e5b2984000003', '551208dbeb0e5be514000004', '55069ab7eb0e5bba6300001e', '54365c14eb0e5bba58000204'].include?(@survey['_id'].to_s) or @survey['title'].include?('北京市城镇基本住房保障条例') %> <!-- 2014年北京市公安局群众安全感和满意度调查问卷 -->
-					<p class="tip">
-						<span class='fl'>耗时<span id="left_time"></span></span>
-						<span class="fr">奖励<span id="reward_info"></span></span>
-					</p>
-				<% end %>
+					<% unless params[:id] == '5485611beb0e5b8af10002e1' or ['55120905eb0e5b2984000003', '551208dbeb0e5be514000004', '55069ab7eb0e5bba6300001e', '54365c14eb0e5bba58000204'].include?(@survey['_id'].to_s) or @survey['title'].include?('北京市城镇基本住房保障条例') %> <!-- 2014年北京市公安局群众安全感和满意度调查问卷 -->
+						<p class="tip">
+							<span class='fl'>耗时<span id="left_time"></span></span>
+							<span class="fr">奖励<span id="reward_info"></span></span>
+						</p>
+					<% end %>
 				<% end %>
 			<% end %>
 			<div class="reward_show">

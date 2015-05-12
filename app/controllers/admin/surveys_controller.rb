@@ -139,6 +139,7 @@ class Admin::SurveysController < Admin::AdminController
 
   def promote
     if survey = Survey.where(:_id => params[:id]).first
+      @s       = survey
       @promote = survey.serialize_in_promote_setting
       gon.push({:id => params[:id]})
       gon.push({:pmt_attrs => survey.sample_attributes_for_promote})

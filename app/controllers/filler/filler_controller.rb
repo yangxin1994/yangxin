@@ -31,7 +31,7 @@ class Filler::FillerController < ApplicationController
     return if rewards.blank?
     r = rewards[0]
     case r['type']
-    when RewardScheme::MOBILE, RewardScheme::ALIPAY, RewardScheme::JIFENBAO
+    when RewardScheme::MOBILE, RewardScheme::ALIPAY, RewardScheme::JIFENBAO, RewardScheme::HONGBAO
       if r['amount'] > 0
         @reward_scheme_type = 1
         @reward_money = r["type"] == RewardScheme::JIFENBAO ? r['amount'].to_f / 100 : r['amount']
