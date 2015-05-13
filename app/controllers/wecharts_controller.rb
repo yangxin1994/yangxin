@@ -21,6 +21,7 @@ class WechartsController < ApplicationController
 		Rails.logger.info '============================'
 		Rails.logger.info params.inspect
 		Rails.logger.info '============================'
+		render :text => 'false'
 	end
 
 	def verify
