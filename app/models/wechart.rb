@@ -21,11 +21,11 @@ class Wechart
   end 
 
   def self.get_open_id(code)
-  	Rails.logger.info '------------------'
-  	Rails.logger.info code
-  	Rails.logger.info '------------------'
-    uri = URI("https://api.weixin.qq.com/sns/oauth2/access_token?appid=#{self.appid}&secret=#{self.secret}&code=#{code}&grant_type=authorization_code")
-    res = Net::HTTP.get(uri)
+	uri = URI.parse("https://api.weixin.qq.com/sns/oauth2/access_token?appid=#{self.appid}&secret=#{self.secret}&code=#{code}&grant_type=authorization_code")
+	http = Net::HTTP.new(uri.host, uri.port)
+	http.use_ssl = true
+	http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+	res = http.get(uri.request_uri)
     Rails.logger.info '========================================='
     Rails.logger.info res.inspect
     Rails.logger.info '========================================='	
