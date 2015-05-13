@@ -23,7 +23,6 @@ class Wechart
   def self.get_open_id(code)
     uri = URI("https://api.weixin.qq.com/sns/oauth2/access_token?appid=#{self.appid}&secret=#{self.secret}&code=#{code}&grant_type=authorization_code")
     res = Net::HTTP.get(uri)
-    res = JSON.parse(res)
     Rails.logger.info '========================================='
     Rails.logger.info res.inspect
     Rails.logger.info '========================================='	
