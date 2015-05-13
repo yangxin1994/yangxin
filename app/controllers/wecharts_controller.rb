@@ -13,7 +13,10 @@ class WechartsController < ApplicationController
     		# do other things 
     	end
     	result = verify
-    	render :text => params[:echostr] if result
+    	Rails.logger.info '-----------------'
+    	Rails.logger.info result
+    	Rails.logger.info '-----------------'
+    	render :text => params[:echostr] and return if result
     	render :text => 'false'
     end
 
