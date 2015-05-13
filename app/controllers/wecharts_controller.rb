@@ -18,9 +18,10 @@ class WechartsController < ApplicationController
     end
 
 	def wechart_auth
-		Rails.logger.info '============================'
-		Rails.logger.info params.inspect
-		Rails.logger.info '============================'
+		openid = Wechart.get_open_id(params[:code])
+		Rails.logger.info  '======================='
+		Rails.logger.info openid
+		Rails.logger.info  '======================='
 		render :text => 'false'
 	end
 
