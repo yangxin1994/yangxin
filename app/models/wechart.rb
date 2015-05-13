@@ -26,7 +26,10 @@ class Wechart
 	http.use_ssl = true
 	http.verify_mode = OpenSSL::SSL::VERIFY_NONE
 	res = http.get(uri.request_uri)
-    res = JSON.parse(res)
+    res = JSON.parse(res.body)
+    Rails.logger.info '--------------------------'
+    Rails.logger.info res
+    Rails.logger.info '--------------------------'
     return res['openid']
   end 
 end
