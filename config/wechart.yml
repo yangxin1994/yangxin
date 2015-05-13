@@ -13,9 +13,9 @@ staging:
   appid: wx1a0d521c3de9bc4e
   secret: 2669158850e56b82c7607bcc1aea6375
   token: wenjuanba2015wecharts
-  redirect_uri: http://staging.wenjuanba.com/wecharts/wechart_auth 
+  redirect_uri: http://staging.wenjuanba.com/wecharts/wechart_auth
 development:
   appid: wx1a0d521c3de9bc4e
   secret: 2669158850e56b82c7607bcc1aea6375
   token: wenjuanba2015wecharts
-  redirect_uri: http://localhost:8000/wecharts/wechart_auth
+  redirect_uri: http://staging.wenjuanba.com/wecharts/wechart_auth
