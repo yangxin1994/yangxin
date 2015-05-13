@@ -13,14 +13,14 @@ class WechartsController < ApplicationController
     		# do other things 
     	end
     	result = verify
-    	Rails.logger.info '-----------------'
-    	Rails.logger.info result
-    	Rails.logger.info '-----------------'
     	render :text => params[:echostr] and return if result
     	render :text => 'false'
     end
 
 	def wechart_auth
+		Rails.logger.info '============================'
+		Rails.logger.info params.inspect
+		Rails.logger.info '============================'
 	end
 
 	def verify
