@@ -207,7 +207,7 @@ class Order
   end
 
   def self.create_hongbao_order(answer_id,openid)
-    wechart_user  = WechartUser.find_by_open_id(openid)
+    wechart_user  = WechartUser.find_by_openid(openid)
     answer        = Answer.find(answer_id)
     survey        = answer.survey
     return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
