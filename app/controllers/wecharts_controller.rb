@@ -44,7 +44,10 @@ class WechartsController < ApplicationController
 		# end
 		
 		wuser  = WechartUser.where(openid:openid).first
-		WechartWorker.perform_async('get_user_info',{open_id:openid}) unless wuser.present?
+		unless wuser.present?
+			WechartWorker.perform_async('get_user_info',{open_id:openid}) 
+		end
+		
 
 		render :text => 'false'
 	end
