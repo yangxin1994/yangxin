@@ -1,6 +1,7 @@
 class WechartUser
   include Mongoid::Document
-  include Mongoid::Timestamps  
+  include Mongoid::Timestamps 
+  include FindTool 
   MALE    = 1
   FEMALE  = 2
   UNKNOWN = 0
