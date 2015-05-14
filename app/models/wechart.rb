@@ -35,7 +35,10 @@ class Wechart
   #定时任务 每1个小时执行一次
   def self.refresh_access_token
     uri = URI("https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=#{self.appid}&secret=#{self.secret}")
-    res = Net::HTTP.get(uri)
+    res = Net::HTTP.new(uri.host, uri.port)
+    res.use_ssl = true
+    res.verify_mode = OpenSSL::SSL::VERIFY_NONE
+    res = http.get(uri.request_uri)
     res = JSON.parse(res)
     tok = res['access_token']
     $redis.set('access_token',tok)
