@@ -18,12 +18,37 @@ class WechartsController < ApplicationController
     end
 
 	def wechart_auth
+		Rails.logger.info '---------------------------------'
+		Rails.logger.info params.inspect
+		Rails.logger.info '---------------------------------'
 		openid = Wechart.get_open_id(params[:code])
 		order  = Order.where(open_id:openid,answer_id:params[:state])
+		answer = Answer.find(params[:state])
 		# redirect_to a special page and show that has already get the hongbao
-		order  = Order.create_hongbao_order(params[:state],openid) unless order.present?
+		# unless order.present?
+		# 	order  = Order.create_hongbao_order(params[:state],openid)
+		# 	total_amount = answer.reward_scheme.wechart_reward_amount
+		# 	amount_arr   = total_amount.scan(/\d+/)
+		# 	if amount_arr.length == 1
+		# 		#设置了每份问卷奖励多少
+		# 		total_amount = amount_arr.first.to_i
+		# 		min_value    = total_amount
+		# 		max_value    = total_amount
+		# 	elsif amount_arr.length == 2
+		# 		#设置了每份问卷奖励的金额范围,具体金额由微信随机分配
+		# 		min_value    = amount_arr.first.to_i
+		# 		max_value    = amount_arr.last.to_i
+		# 		total_amount = rand(min_value..max_value) 
+		# 	end
+		# 	res = Wechart.send_red_pack(order_code,openid,request.remote_ip,total_amount,min_value,max_value)
+		# 	if res
+		# 		#order.update_attributes(amount:total_amount)
+		# 	end
+		# end
+		
 		wuser  = WechartUser.where(openid:openid).first
 		WechartWorker.perform_async('get_user_info',{open_id:openid}) unless wuser.present?
+
 		render :text => 'false'
 	end
 

@@ -211,7 +211,16 @@ class Order
     answer        = Answer.find(answer_id)
     survey        = answer.survey
     return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
-    order         = Order.create(:source => ANSWER_SURVEY,:amount => amount,:type => HONGBAO)
+    order_code    = nil
+    loop do 
+      order_code  = rand(1000000000..9999999999)
+      order_code  = Wechart.mch_id.to_s + Date.today.strftime('%Y%m%d').to_s +  order_code.to_s
+      exist       = Order.find_by_code(order_code)
+      break unless exist.present?
+    end
+    
+
+    order         = Order.create(:source => ANSWER_SURVEY,:type => HONGBAO,:code => order_code)
     order.survey  = survey
     order.answer  = answer
     order.open_id = openid

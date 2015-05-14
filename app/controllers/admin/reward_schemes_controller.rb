@@ -58,7 +58,7 @@ class Admin::RewardSchemesController < Admin::AdminController
       when :hongbao
         reward_scheme_setting[:rewards] << {
           :type => 32,
-          :amount => value.to_i
+          :amount => value
         } if value.present?        
       when :prizes
         prizes = []

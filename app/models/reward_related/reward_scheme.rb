@@ -74,6 +74,16 @@ class RewardScheme
     self.answers << answer
     answer.save
   end
+
+
+  def wechart_reward_amount
+    hash = self.rewards.select{|hash| hash['type'] == 32}
+    if hash.length > 0
+      return hash.first['amount']
+    else
+      return nil
+    end
+  end
   
 
 

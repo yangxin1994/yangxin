@@ -30,7 +30,7 @@ class Wechart
     end
     return token
   end
-  
+
 
   #定时任务 每1个小时执行一次
   def self.refresh_access_token
@@ -68,25 +68,28 @@ class Wechart
     return res
   end
 
-
-  def self.send_red_pack(order_id,openid)
+  def self.send_red_pack(order_code,openid,ip,total_amount,min_value,max_value)
     uri = "https://api.mch.weixin.qq.com/mmpaymkttransfers/sendredpack"
+    #min_value 最小金额
+    #max_value 最大金额
+    #total_num 红包发放总人数
+    #total_amount 付款金额
     wechat_hash = {
     	nonce_str:(0...32).map { ('a'..'z').to_a[rand(26)] }.join,
     	sign:generate_sign,
-    	mch_billno:order_id,
+    	mch_billno:order_code,
     	mch_id:Wechart.mch_id,
     	wxappid:Wechart.appid,
     	nick_name:Wechart.nick_name,
     	send_name:Wechart.send_name,
     	re_openid:openid,
-    	total_amount:1,
-    	min_value:1,
-    	max_value:1,
+    	total_amount:total_amount,
+    	min_value:min_value,
+    	max_value:max_value,
     	total_num:1,
     	wishing:'感谢您参与问卷吧调研,祝您生活愉快!',
-    	client_ip:'127.0.0.1',
-    	act_name:'问卷标题',
+    	client_ip:ip,
+    	act_name:'问卷吧红包大派送',
     	remark:'分享到朋友圈,让更多人领红包'
     }
 

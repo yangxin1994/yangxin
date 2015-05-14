@@ -75,6 +75,8 @@ class Admin::SurveysController < Admin::AdminController
           @editing_rs["prizes"] = reward["prizes"]
         when 16
           @editing_rs["jifenbao"] = reward["amount"]
+        when 32
+          @editing_rs["hongbao"] = reward["amount"]
         else
 
         end
