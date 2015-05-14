@@ -65,10 +65,7 @@ class Wechart
     http.verify_mode = OpenSSL::SSL::VERIFY_NONE
     res = http.get(uri.request_uri)
     res = JSON.parse(res.body)
-    puts '==================================='
-    puts res.inspect
-    puts '==================================='
-    return res
+    WechartUser.create_new(res)
   end
 
   def self.send_red_pack(order_code,openid,ip,total_amount,min_value,max_value)

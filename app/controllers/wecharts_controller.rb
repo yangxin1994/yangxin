@@ -18,9 +18,6 @@ class WechartsController < ApplicationController
     end
 
 	def wechart_auth
-		Rails.logger.info '---------------------------------'
-		Rails.logger.info params.inspect
-		Rails.logger.info '---------------------------------'
 		openid = Wechart.get_open_id(params[:code])
 		order  = Order.where(open_id:openid,answer_id:params[:state])
 		answer = Answer.find(params[:state])

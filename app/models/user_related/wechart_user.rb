@@ -22,33 +22,22 @@ class WechartUser
   has_many :orders
   after_create :get_basic_info
 
-
-  def self.subscribe(openid)
-    info = self.where(openid:openid).first
-    unless info.present?
-      self.create(openid:openid)
-    else
-      info.get_basic_info
-    end
-  end
-
-  def self.unsubscribe(openid)
-    info = self.where(openid:openid).first
-    info.update_attributes(subscribe:UNSUBSCRIBE)
-  end
-
-  def get_basic_info
-    info_hash           = Wechart.get_user_info(self.openid)
-    self.nickname       = info_hash['nickname']
-    self.sex            = info_hash['sex'].to_i
-    self.country        = info_hash['country']
-    self.province       = info_hash['province']
-    self.city           = info_hash['city']
-    self.language       = info_hash['language']
-    self.headimgurl     = info_hash['headimgurl']
-    self.subscribe_time = info_hash['subscribe_time'].to_i
-    self.subscribe      = info_hash['subscribe'].to_i
-    self.save   
+  def self.create_new(opt)
+    wuser = self.create()
+    wuser.openid         = opt['openid']
+    wuser.nickname       = opt['nickname']
+    wuser.sex            = opt['sex'].to_i
+    wuser.country        = opt['country']
+    wuser.province       = opt['province']
+    wuser.city           = opt['city']
+    wuser.language       = opt['language']
+    wuser.headimgurl     = opt['headimgurl']
+    wuser.subscribe_time = opt['subscribe_time'].to_i
+    wuser.subscribe      = opt['subscribe'].to_i
+    wuser.save  
+    puts '&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&'
+    puts wuser.inspect
+    puts '&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&' 
   end
 
 end
