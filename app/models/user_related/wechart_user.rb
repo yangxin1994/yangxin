@@ -1,4 +1,6 @@
 class WechartUser
+  include Mongoid::Document
+  include Mongoid::Timestamps  
   MALE    = 1
   FEMALE  = 2
   UNKNOWN = 0
