@@ -20,7 +20,6 @@ class WechartUser
   field :subscribe_time,type:Integer # 最后关注的时间
   field :subscribe,type:Integer
   has_many :orders
-  after_create :get_basic_info
 
   def self.create_new(opt)
     wuser = self.create()
