@@ -27,7 +27,7 @@ class WechartsController < ApplicationController
 		# redirect_to a special page and show that has already get the hongbao
 		unless order.present?
 			order  = Order.create_hongbao_order(params[:state],openid)
-			total_amount = answer.reward_scheme.wechart_reward_amount
+			total_amount = answer.reward_scheme.wechart_reward_amount.to_s
 			amount_arr   = total_amount.scan(/\d+/)
 			if amount_arr.length == 1
 				#设置了每份问卷奖励多少
