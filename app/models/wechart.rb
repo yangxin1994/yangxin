@@ -22,6 +22,10 @@ class Wechart
     @config['redirect_uri']
   end 
 
+  def self.mch_id
+    @config['mch_id']
+  end
+
 
   def self.access_token
     token = $redis.get('access_token')
