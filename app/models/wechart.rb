@@ -59,6 +59,9 @@ class Wechart
 
   def self.get_user_info(opt)
     openid = opt[:open_id]
+    puts '---------------------------------------------------'
+    puts "https://api.weixin.qq.com/cgi-bin/user/info?access_token=#{self.access_token}&openid=#{openid}&lang=zh_CN"
+    puts '---------------------------------------------------'
     uri = URI("https://api.weixin.qq.com/cgi-bin/user/info?access_token=#{self.access_token}&openid=#{openid}&lang=zh_CN")
     http = Net::HTTP.new(uri.host, uri.port)
     http.use_ssl = true
