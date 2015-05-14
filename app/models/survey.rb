@@ -229,8 +229,8 @@ class Survey
   end
 
 
-  def auth_url
-    return "https://open.weixin.qq.com/connect/oauth2/authorize?appid=#{Wechart.appid}&redirect_uri=#{Wechart.redirect_uri}&response_type=code&scope=snsapi_base&state=123#wechat_redirect"
+  def auth_url(answer_id)
+    return "https://open.weixin.qq.com/connect/oauth2/authorize?appid=#{Wechart.appid}&redirect_uri=#{Wechart.redirect_uri}&response_type=code&scope=snsapi_base&state=#{answer_id}#wechat_redirect"
   end
 
   def update_quillme_promote_reward_type

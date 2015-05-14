@@ -19,9 +19,11 @@ class WechartsController < ApplicationController
 
 	def wechart_auth
 		openid = Wechart.get_open_id(params[:code])
-		Rails.logger.info  '======================='
-		Rails.logger.info openid
-		Rails.logger.info  '======================='
+		order  = Order.where(open_id:openid,answer_id:params[:state])
+		# redirect_to a special page and show that has already get the hongbao
+		order  = Order.create_hongbao_order(params[:state],openid) unless order.present?
+		wuser  = WechartUser.where(openid:openid).first
+		WechartWorker.perform_async('get_user_info',{open_id:openid}) unless wuser.present?
 		render :text => 'false'
 	end
 

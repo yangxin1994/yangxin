@@ -55,6 +55,8 @@ gem 'roadie', '~> 2.3.4'# html email
 gem 'premailer-rails', '~> 1.4.0'
 gem 'nokogiri', '~> 1.6.6.2'
 gem "iconv", "~> 1.0.3"
+gem "typhoeus"
+gem 'redis'
 
 group :assets do
   gem 'sass-rails', '~> 3.2.6'
