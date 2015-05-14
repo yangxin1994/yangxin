@@ -27,6 +27,9 @@ class WechartsController < ApplicationController
 		# redirect_to a special page and show that has already get the hongbao
 		unless order.present?
 			order  = Order.create_hongbao_order(params[:state],openid)
+			Rails.logger.info '!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+			Rails.logger.info order.inspect
+			Rails.logger.info '!!!!!!!!!!!!!!!!!!!!!!!!!!!'
 			total_amount = answer.reward_scheme.wechart_reward_amount.to_s
 			amount_arr   = total_amount.scan(/\d+/)
 			if amount_arr.length == 1
@@ -41,14 +44,14 @@ class WechartsController < ApplicationController
 				total_amount = rand(min_value..max_value)
 			end
 			Rails.logger.info '************************************'
-			Rails.logger.info "order_code:#{order.order_code}"
+			Rails.logger.info "order_code:#{order.code}"
 			Rails.logger.info "openid:#{openid}"
 			Rails.logger.info "ip:#{request.remote_ip}"
 			Rails.logger.info "total_amount:#{total_amount}"
 			Rails.logger.info "min_value:#{min_value}"
 			Rails.logger.info "max_value:#{max_value}"
 			Rails.logger.info '************************************'
-			res = Wechart.send_red_pack(order.order_code,openid,request.remote_ip,total_amount,min_value,max_value)
+			res = Wechart.send_red_pack(order.code,openid,request.remote_ip,total_amount,min_value,max_value)
 			if res
 				#order.update_attributes(amount:total_amount)
 			end
