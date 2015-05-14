@@ -38,7 +38,7 @@ class Wechart
     res = Net::HTTP.new(uri.host, uri.port)
     res.use_ssl = true
     res.verify_mode = OpenSSL::SSL::VERIFY_NONE
-    res = http.get(uri.request_uri)
+    res = res.get(uri.request_uri)
     res = JSON.parse(res)
     tok = res['access_token']
     $redis.set('access_token',tok)
