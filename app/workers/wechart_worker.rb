@@ -5,6 +5,9 @@ class WechartWorker
   def perform(type,opt={})
     case type
     when 'get_user_info'
+      puts '****************************'
+      puts opt.inspect
+      puts '****************************'
       retval = Wechart.get_user_info(opt)
     end
     return true
