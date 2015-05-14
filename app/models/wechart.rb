@@ -39,7 +39,7 @@ class Wechart
     res.use_ssl = true
     res.verify_mode = OpenSSL::SSL::VERIFY_NONE
     res = res.get(uri.request_uri)
-    res = JSON.parse(res)
+    res = JSON.parse(res.body)
     tok = res['access_token']
     $redis.set('access_token',tok)
     data = YAML.load_file "#{Rails.root}/config/wechart.yml"
