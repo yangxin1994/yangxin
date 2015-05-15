@@ -20,16 +20,10 @@ class WechartsController < ApplicationController
 	def wechart_auth
 		openid = Wechart.get_open_id(params[:code])
 		order  = Order.where(open_id:openid,answer_id:params[:state]).first
-		Rails.logger.info '^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^'
-		Rails.logger.info order.inspect
-		Rails.logger.info '^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^'
 		answer = Answer.find(params[:state])
 		# redirect_to a special page and show that has already get the hongbao
 		unless order.present?
 			order  = Order.create_hongbao_order(params[:state],openid)
-			Rails.logger.info '!!!!!!!!!!!!!!!!!!!!!!!!!!!'
-			Rails.logger.info order.inspect
-			Rails.logger.info '!!!!!!!!!!!!!!!!!!!!!!!!!!!'
 			total_amount = answer.reward_scheme.wechart_reward_amount.to_s
 			amount_arr   = total_amount.scan(/\d+/)
 			if amount_arr.length == 1
