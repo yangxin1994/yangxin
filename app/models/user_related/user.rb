@@ -80,7 +80,8 @@ class User
   field :level_expire_time, :type => Integer, default: -1
   field :point, :type => Integer, :default => 0
   field :carnival_email_sent, :type => Boolean, default: false
-
+  # 新浪爬虫验证码数据信息
+  field :sina_verify_info,type:Hash,default:{commit:0,success:0,faild:0}
 
   has_and_belongs_to_many :messages, class_name: "Message", inverse_of: :receiver
   has_many :sended_messages, :class_name => "Message", :inverse_of => :sender
@@ -831,20 +832,32 @@ class User
 
   # 获取新浪微博爬虫的验证码图片
   def get_verify_code
-    # retval = HTTParty.get('asdfaf')
-    # body = JSON.parse(retval.body)    
+    ip_arr = ['123.56.95.229']
+    ip     = ip_arr.sample
+    retval = HTTParty.get("http://#{ip}:3000/captchas.json")
+    hash   = JSON.parse(retval.body).first
+    return {url:hash['img_url'],id:hash['cid'],ip:ip}
   end
   # 用户每输入正确一个新浪微博爬虫的验证码就奖励一积分
-  def add_verify_code_reward(code,cid)
-    result = HTTParty.post('adfad',:query => { :code => code,:id => cid})
+  def add_verify_code_reward(opt)
+    self.sina_verify_info[:commit] += 1
+    self.save
+    result = HTTParty.post("http://#{opt[:ip]}:3000/captchas",:query => { :code => opt[:code],:id => opt[:cid]})
     body   = JSON.parse(result.body)
     if body
-      new_point  = self.point +  1 
-      self.point = new_point
+      self.point += 1 
+      self.sina_verify_info[:success] += 1
       self.save
       sid        = self.id.to_s
       PointLog.create_weibo_verify_code_log(1,sid)
+    else
+      self.sina_verify_info[:faild] += 1
+      self.save
     end
+  end
+
+  def verify_judge_count
+    sina_verify_info[:commit].to_i -  sina_verify_info[:success].to_i - sina_verify_info[:faild].to_i
   end
 
   def self.clear_users
