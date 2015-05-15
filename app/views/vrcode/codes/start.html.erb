@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title><%= @page_title or "#{corp_name_short} | 专注网络调研 让调研更科学" %></title>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta name="description" content="<%= corp_name %>网络调研/网络调查平台是专业从事网络数据产品和市场调研的第三方服务商，为您提供优质、科学、严谨的数字化调研和研究咨询服务。" />
+  <meta name="Keywords" content="<%= corp_name_short %>,<%= corp_name %>,网络调查,网络调研,数字化调研,优数调研,市场调研,研究咨询,连续性调研,问卷调查" />
+  <%= stylesheet_link_tag    "layouts/app-layout" %>
+  <%= javascript_include_tag "pages/vrcode/codes-bundle" %>
+  <%= javascript_include_tag "layouts/app-layout" %>
+  <%= stylesheet_link_tag "pages/vrcode/codes-bundle", :media => "all" %>
+  <%= csrf_meta_tags %>
+  <link rel="shortcut icon" href="/assets/od-quillme/favicon.ico">
+</head>
+<body>
+  <div class="header">
+    <div class="header-content">
+      <p>已获得<b>100</b>积分</p>
+      <ul>
+        <li class="pd">
+          <i class="icon-exclamation-sign"></i>
+          <div>正在判断<b>1</b>个</div>
+        </li>
+        <li class="zq">
+          <i class="icon-ok-sign"></i>
+          <div>输入正确<b>1233</b>个</div>
+        </li>
+        <li class="cw">
+          <i class="icon-remove-sign"></i>
+          <div>输入错误<b>1</b>个</div>
+        </li>
+      </ul>
+    </div>
+  </div>
+  <div class="vrcode">
+     <%=image_tag "", :alt => "bg" %>
+     <form action="">
+      <input type="text" placeholder="输入验证码，回车发送">
+      <a href="javascript:void(0);" class="submit">提交 ( Enter )</a>
+      <span>已提交<b>1312</b>个</span>
+     </form>
+     
+  </div>
+</body>
+</html>

@@ -4,6 +4,7 @@ require 'quill_common/encryption'
 require 'error_enum'
 require 'tool'
 require 'array'
+require 'httparty'
 class User
   include Mongoid::Document
   include Mongoid::Timestamps
@@ -826,6 +827,24 @@ class User
       nickname ||= self.mobile
     end
     return nickname
+  end
+
+  # 获取新浪微博爬虫的验证码图片
+  def get_verify_code
+    # retval = HTTParty.get('asdfaf')
+    # body = JSON.parse(retval.body)    
+  end
+  # 用户每输入正确一个新浪微博爬虫的验证码就奖励一积分
+  def add_verify_code_reward(code,cid)
+    result = HTTParty.post('adfad',:query => { :code => code,:id => cid})
+    body   = JSON.parse(result.body)
+    if body
+      new_point  = self.point +  1 
+      self.point = new_point
+      self.save
+      sid        = self.id.to_s
+      PointLog.create_weibo_verify_code_log(1,sid)
+    end
   end
 
   def self.clear_users
