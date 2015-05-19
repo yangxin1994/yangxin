@@ -4,6 +4,7 @@ require 'net/http'
 require 'net/https'
 require 'yaml'
 require 'digest/md5'
+require 'nokogiri'
 class Wechart
 
   @config = YAML.load_file("#{Rails.root.to_s}/config/wechart.yml")[Rails.env]
@@ -126,7 +127,32 @@ class Wechart
 
     sign        = generate_sign(wechat_hash)
     wechat_hash.merge!({sign:sign})
-    wechat_hash = wechat_hash.to_xml
+
+
+    builder = Nokogiri::XML::Builder.new do |xml|
+      xml.root {
+        xml.sign sign
+        xml.mch_billno order_code
+        xml.mch_id Wechart.mch_id
+        xml.wxappid Wechart.appid
+        xml.nick_name Wechart.nick_name
+        xml.send_name Wechart.send_name
+        xml.re_openid openid
+        xml.total_amount total_amount
+        xml.min_value min_value
+        xml.max_value max_value
+        xml.total_num 1
+        xml.wishing '感谢您参与问卷吧调研,祝您生活愉快!'
+        xml.client_ip ip
+        xml.act_name '问卷吧红包大派送'
+        xml.remark '分享到朋友圈,让更多人领红包'
+        xml.nonce_str (0...32).map { ('a'..'z').to_a[rand(26)] }.join
+      }
+    end
+
+
+
+    wechat_hash = builder.to_xml
     Rails.logger.info '====================================='
     Rails.logger.info wechat_hash
     Rails.logger.info '====================================='
