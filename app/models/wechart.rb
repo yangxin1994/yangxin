@@ -124,7 +124,7 @@ class Wechart
 
     res  = Typhoeus::Request.post(uri, body: wechat_hash.to_json)
     Rails.logger.info '-------------------------------------'
-    Rails.logger.info JSON.parse(res.body).inspect
+    Rails.logger.info JSON.parse(res.body)
     Rails.logger.info '-------------------------------------'
     return res
   end 
