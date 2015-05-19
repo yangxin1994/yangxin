@@ -158,9 +158,9 @@ class Wechart
     https     = Net::HTTP.new(uri.host,uri.port)
     https.use_ssl = true
     pem       = File.read("#{Rails.root.to_s}/rootca.pem")
-    http.cert = OpenSSL::X509::Certificate.new(pem)
-    http.key  = OpenSSL::PKey::RSA.new(pem)
-    http.verify_mode = OpenSSL::SSL::VERIFY_PEER
+    https.cert = OpenSSL::X509::Certificate.new(pem)
+    https.key  = OpenSSL::PKey::RSA.new(pem)
+    https.verify_mode = OpenSSL::SSL::VERIFY_PEER
 
     req = Net::HTTP::Post.new(uri.path)
     req.body = wechat_hash
