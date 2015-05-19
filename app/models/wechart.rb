@@ -124,7 +124,9 @@ class Wechart
     sign        = generate_sign(wechat_hash)
     wechat_hash.merge!({sign:sign})
     wechat_hash = wechat_hash.to_json
-
+    Rails.logger.info '====================================='
+    Rails.logger.info wechat_hash
+    Rails.logger.info '====================================='
 
     uri = URI.parse("https://api.mch.weixin.qq.com/mmpaymkttransfers/sendredpack")
     https = Net::HTTP.new(uri.host,uri.port)
