@@ -1,4 +1,5 @@
 # encoding: utf-8
+require 'uri'
 require 'net/http'
 require 'net/https'
 require 'yaml'
@@ -103,32 +104,51 @@ class Wechart
     #total_num 红包发放总人数
     #total_amount 付款金额
     wechat_hash = {
-      nonce_str:(0...32).map { ('a'..'z').to_a[rand(26)] }.join,
-      mch_billno:order_code,
-      mch_id:Wechart.mch_id,
-      wxappid:Wechart.appid,
-      nick_name:Wechart.nick_name,
-      send_name:Wechart.send_name,
-      re_openid:openid,
-      total_amount:total_amount,
-      min_value:min_value,
-      max_value:max_value,
-      total_num:1,
-      wishing:'感谢您参与问卷吧调研,祝您生活愉快!',
-      client_ip:ip,
-      act_name:'问卷吧红包大派送',
-      remark:'分享到朋友圈,让更多人领红包'
+      "nonce_str" =>(0...32).map { ('a'..'z').to_a[rand(26)] }.join,
+      "mch_billno" => order_code,
+      "mch_id" => Wechart.mch_id,
+      "wxappid" => Wechart.appid,
+      "nick_name" => Wechart.nick_name,
+      "send_name" => Wechart.send_name,
+      "re_openid" => openid,
+      "total_amount" => total_amount,
+      "min_value" => min_value,
+      "max_value" => max_value,
+      "total_num" => 1,
+      "wishing" => '感谢您参与问卷吧调研,祝您生活愉快!',
+      "client_ip" => ip,
+      "act_name" => '问卷吧红包大派送',
+      "remark" => '分享到朋友圈,让更多人领红包'
     }
-    sign = generate_sign(wechat_hash)
+
+    sign        = generate_sign(wechat_hash)
     wechat_hash.merge!({sign:sign})
-    Rails.logger.info '====================================='
-    Rails.logger.info wechat_hash.to_json
-    Rails.logger.info '====================================='
-    res  = Typhoeus::Request.post(uri, body: wechat_hash.to_json)
+    wechat_hash = wechat_hash.to_json
+
+
+    uri = URI.parse("https://api.mch.weixin.qq.com/mmpaymkttransfers/sendredpack")
+    https = Net::HTTP.new(uri.host,uri.port)
+    https.use_ssl = true
+    req = Net::HTTP::Post.new(uri.path)
+    req.body = "[ #{wechat_hash} ]"
+    res = https.request(req)
     Rails.logger.info '-------------------------------------'
-    Rails.logger.info JSON.parse(res.body)
+    Rails.logger.info  res.body
     Rails.logger.info '-------------------------------------'
-    return res
+
+
+
+
+    # sign = generate_sign(wechat_hash)
+    # wechat_hash.merge!({sign:sign})
+    # Rails.logger.info '====================================='
+    # Rails.logger.info wechat_hash.to_json
+    # Rails.logger.info '====================================='
+    # res  = Typhoeus::Request.post(uri, body: wechat_hash.to_json)
+    # Rails.logger.info '-------------------------------------'
+    # Rails.logger.info JSON.parse(res.body)
+    # Rails.logger.info '-------------------------------------'
+    # return res
   end 
 end
 
