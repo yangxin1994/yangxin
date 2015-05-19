@@ -126,7 +126,7 @@ class Wechart
 
     sign        = generate_sign(wechat_hash)
     wechat_hash.merge!({sign:sign})
-    wechat_hash = wechat_hash.to_xml
+    wechat_hash = wechat_hash.to_xml(:root => nil)
     Rails.logger.info '====================================='
     Rails.logger.info wechat_hash
     Rails.logger.info '====================================='
