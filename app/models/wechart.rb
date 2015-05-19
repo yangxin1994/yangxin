@@ -93,7 +93,7 @@ class Wechart
   def self.generate_sign(wechat_hash)
     stringA        =  wechat_hash.sort.map{|e| e.join('=')}.join('&')
     stringSignTemp = stringA + "key=#{Wechart.apikey}"
-    sign           = Digest::MD5.hexdigest(stringSignTemp)
+    sign           = Digest::MD5.hexdigest(stringSignTemp).upcase
     return   sign 
   end
 
@@ -115,10 +115,13 @@ class Wechart
       "min_value" => min_value,
       "max_value" => max_value,
       "total_num" => 1,
-      "wishing" => '感谢您参与问卷吧调研,祝您生活愉快!',
+      # "wishing" => '感谢您参与问卷吧调研,祝您生活愉快!',
+      "wishing" => 'hellowenjuanba',
       "client_ip" => ip,
-      "act_name" => '问卷吧红包大派送',
-      "remark" => '分享到朋友圈,让更多人领红包'
+      # "act_name" => '问卷吧红包大派送',
+      "act_name" => 'hellowenjuanba',
+      # "remark" => '分享到朋友圈,让更多人领红包'
+      "remark" => 'hellowenjuanba'
     }
 
     sign        = generate_sign(wechat_hash)
