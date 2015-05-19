@@ -126,7 +126,7 @@ class Wechart
 
     sign        = generate_sign(wechat_hash)
     wechat_hash.merge!({sign:sign})
-    wechat_hash = wechat_hash.to_xml(:root => nil)
+    wechat_hash = wechat_hash.to_xml
     Rails.logger.info '====================================='
     Rails.logger.info wechat_hash
     Rails.logger.info '====================================='
@@ -140,20 +140,6 @@ class Wechart
     Rails.logger.info '-------------------------------------'
     Rails.logger.info  res.body
     Rails.logger.info '-------------------------------------'
-
-
-
-
-    # sign = generate_sign(wechat_hash)
-    # wechat_hash.merge!({sign:sign})
-    # Rails.logger.info '====================================='
-    # Rails.logger.info wechat_hash.to_json
-    # Rails.logger.info '====================================='
-    # res  = Typhoeus::Request.post(uri, body: wechat_hash.to_json)
-    # Rails.logger.info '-------------------------------------'
-    # Rails.logger.info JSON.parse(res.body)
-    # Rails.logger.info '-------------------------------------'
-    # return res
   end 
 end
 
