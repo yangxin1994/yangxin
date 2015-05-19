@@ -2,6 +2,7 @@
 require 'net/http'
 require 'net/https'
 require 'yaml'
+require 'digest/md5'
 class Wechart
 
   @config = YAML.load_file("#{Rails.root.to_s}/config/wechart.yml")[Rails.env]
@@ -24,6 +25,22 @@ class Wechart
 
   def self.mch_id
     @config['mch_id']
+  end
+
+  def self.nick_name
+    @config['nick_name']
+  end
+
+  def self.send_name
+    @config['send_name']
+  end 
+
+  def self.wxappid
+    @config['wxappid']
+  end   
+
+  def self.apikey
+    @config['apikey']
   end
 
 
@@ -72,6 +89,13 @@ class Wechart
     WechartUser.create_new(res)
   end
 
+  def self.generate_sign(wechat_hash)
+    stringA        =  wechat_hash.sort.map{|e| e.join('=')}.join('&')
+    stringSignTemp = stringA + "key=#{Wechart.apikey}"
+    sign           = Digest::MD5.hexdigest(stringSignTemp)
+    return   sign 
+  end
+
   def self.send_red_pack(order_code,openid,ip,total_amount,min_value,max_value)
     uri = "https://api.mch.weixin.qq.com/mmpaymkttransfers/sendredpack"
     #min_value 最小金额
@@ -79,25 +103,26 @@ class Wechart
     #total_num 红包发放总人数
     #total_amount 付款金额
     wechat_hash = {
-    	nonce_str:(0...32).map { ('a'..'z').to_a[rand(26)] }.join,
-    	sign:generate_sign,
-    	mch_billno:order_code,
-    	mch_id:Wechart.mch_id,
-    	wxappid:Wechart.appid,
-    	nick_name:Wechart.nick_name,
-    	send_name:Wechart.send_name,
-    	re_openid:openid,
-    	total_amount:total_amount,
-    	min_value:min_value,
-    	max_value:max_value,
-    	total_num:1,
-    	wishing:'感谢您参与问卷吧调研,祝您生活愉快!',
-    	client_ip:ip,
-    	act_name:'问卷吧红包大派送',
-    	remark:'分享到朋友圈,让更多人领红包'
+      nonce_str:(0...32).map { ('a'..'z').to_a[rand(26)] }.join,
+      mch_billno:order_code,
+      mch_id:Wechart.mch_id,
+      wxappid:Wechart.appid,
+      nick_name:Wechart.nick_name,
+      send_name:Wechart.send_name,
+      re_openid:openid,
+      total_amount:total_amount,
+      min_value:min_value,
+      max_value:max_value,
+      total_num:1,
+      wishing:'感谢您参与问卷吧调研,祝您生活愉快!',
+      client_ip:ip,
+      act_name:'问卷吧红包大派送',
+      remark:'分享到朋友圈,让更多人领红包'
     }
+    sign = generate_sign(wechat_hash)
+    wechat_hash.merge!({sign:sign})
 
-    res = Typhoeus::Request.post(uri, body: wechat_hash.to_json)
+    res  = Typhoeus::Request.post(uri, body: wechat_hash.to_json)
     Rails.logger.info '-------------------------------------'
     Rails.logger.info res.inspect
     Rails.logger.info '-------------------------------------'
