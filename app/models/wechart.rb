@@ -126,7 +126,7 @@ class Wechart
 
     sign        = generate_sign(wechat_hash)
     wechat_hash.merge!({sign:sign})
-    wechat_hash = wechat_hash.to_json
+    wechat_hash = wechat_hash.to_xml
     Rails.logger.info '====================================='
     Rails.logger.info wechat_hash
     Rails.logger.info '====================================='
@@ -135,7 +135,7 @@ class Wechart
     https = Net::HTTP.new(uri.host,uri.port)
     https.use_ssl = true
     req = Net::HTTP::Post.new(uri.path)
-    req.body = "[ #{wechat_hash} ]"
+    req.body = wechat_hash
     res = https.request(req)
     Rails.logger.info '-------------------------------------'
     Rails.logger.info  res.body
