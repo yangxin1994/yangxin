@@ -2,13 +2,17 @@
 require 'error_enum'
 class Vrcode::CodesController < Vrcode::VrcodeController
   def index
-    # redirect_to login_account_url unless current_user.present?
-    # @code = current_user.get_verify_code
+  end
+
+  def start
+  	img_ata = current_user.get_verify_code
+  	@img    = img_ata[:url]
+  	@cid    = img_ata[:id]
+  	@ip     = img_ata[:ip]
   end
 
   def create
-    render_json_e ErrorEnum::REQUIRE_LOGIN  and return unless current_user.present?
-    current_user.add_verify_code_reward
+    current_user.add_verify_code_reward(params)
     render_json_s current_user.get_verify_code
   end
 end
