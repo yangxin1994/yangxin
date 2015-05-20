@@ -147,7 +147,7 @@ class Wechart
       }
     end
 
-    wechat_hash = builder.to_xml
+    wechat_hash = builder.to_xml.force_encoding("UTF-8")
 
     Rails.logger.info '*******************************'
     Rails.logger.info wechat_hash
