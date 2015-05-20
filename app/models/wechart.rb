@@ -116,13 +116,10 @@ class Wechart
       "min_value" => min_value,
       "max_value" => max_value,
       "total_num" => 1,
-      # "wishing" => '感谢您参与问卷吧调研,祝您生活愉快!',
-      "wishing" => 'hellowenjuanba',
+      "wishing" => '感谢您参与问卷吧调研,祝您生活愉快!',
       "client_ip" => ip,
-      # "act_name" => '问卷吧红包大派送',
-      "act_name" => 'hellowenjuanba',
-      # "remark" => '分享到朋友圈,让更多人领红包'
-      "remark" => 'hellowenjuanba'
+      "act_name" => '问卷吧红包大派送',
+      "remark" => '分享到朋友圈,让更多人领红包'
     }
 
     sign        = generate_sign(wechat_hash)
