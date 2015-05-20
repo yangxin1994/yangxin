@@ -170,6 +170,28 @@ class Wechart
     p12 = OpenSSL::PKCS12.new(File.read(Rails.root.to_s + '/apiclient_cert.p12'), "#{Wechart.mch_id}")
     uri = URI.parse("https://api.mch.weixin.qq.com/mmpaymkttransfers/sendredpack")
 
+
+    wechat_hash = '<?xml version="1.0" encoding="UTF-8"?>
+<root>
+  <sign>1C03AC774C21597CAD8D8B958162D938</sign>
+  <mch_billno>1241798002201505201439654284</mch_billno>
+  <mch_id>1241798002</mch_id>
+  <wxappid>wx16343cb2c71e4c90</wxappid>
+  <nick_name>问卷吧</nick_name>
+  <send_name>问卷吧</send_name>
+  <re_openid>o4E72skyL0l3RcPXD0TTyaG_ac6M</re_openid>
+  <total_amount>200</total_amount>
+  <min_value>200</min_value>
+  <max_value>200</max_value>
+  <total_num>1</total_num>
+  <wishing>感谢您参与问卷吧调研,祝您生活愉快!</wishing>
+  <client_ip>218.241.178.170</client_ip>
+  <act_name>问卷吧红包大派送</act_name>
+  <remark>分享到朋友圈,让更多人领红包</remark>
+  <nonce_str>lghdxsbornttocrmszwxbaotclfbvoqf</nonce_str>
+</root>'
+
+
     Net::HTTP.start(uri.host,uri.port,use_ssl:true,ca_file:Rails.root.to_s + '/rootca.pem',key:p12.key,cert:p12.certificate) do |http|
       request  = Net::HTTP::Post.new(uri.path)
       request.body = wechat_hash
