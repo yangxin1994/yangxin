@@ -94,17 +94,8 @@ class Wechart
   def self.generate_sign(wechat_hash)
     wechat_hash    = JSON.parse(wechat_hash)
     stringA        = wechat_hash.sort.map{|e| e.join('=')}.join('&')
-    Rails.logger.info '==============================================='
-    Rails.logger.info stringA
-    Rails.logger.info '==============================================='
     stringSignTemp = stringA + "&key=#{Wechart.apikey}"
-    Rails.logger.info '&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&'
-    Rails.logger.info stringSignTemp
-    Rails.logger.info '&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&'
     sign           = Digest::MD5.hexdigest(stringSignTemp).upcase
-    Rails.logger.info '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
-    Rails.logger.info sign
-    Rails.logger.info '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
     return   sign 
   end
 
@@ -115,23 +106,26 @@ class Wechart
     #total_num 红包发放总人数
     #total_amount 付款金额
     wechat_hash = {
-      # "nonce_str" =>(0...32).map { ('a'..'z').to_a[rand(26)] }.join,
-      "nonce_str" => 'bjfegqryensgroewiztxalsynkjoxuzm',
-      # "mch_billno" => order_code,
-      "mch_billno" => '1241798002201505209355979018',
+      "nonce_str" =>(0...32).map { ('a'..'z').to_a[rand(26)] }.join,
+      "mch_billno" => order_code,
       "mch_id" => Wechart.mch_id,
       "wxappid" => Wechart.appid,
-      "nick_name" => Wechart.nick_name,
-      "send_name" => Wechart.send_name,
+      "nick_name" => 'wenjuanba',
+      # "nick_name" => Wechart.nick_name,
+      "send_name" => 'wenjuanba',
+      # "send_name" => Wechart.send_name,
       "re_openid" => openid,
       "total_amount" => total_amount,
       "min_value" => min_value,
       "max_value" => max_value,
       "total_num" => 1,
-      "wishing" => '感谢您参与问卷吧调研,祝您生活愉快!',
+      "wishing" => 'wenjuanba',
+      # "wishing" => '感谢您参与问卷吧调研,祝您生活愉快!',
       "client_ip" => ip,
-      "act_name" => '问卷吧红包大派送',
-      "remark" => '分享到朋友圈,让更多人领红包'
+      "act_name" => 'wenjuanba',
+      # "act_name" => '问卷吧红包大派送',
+      "remark" => 'wenjuanba'
+      # "remark" => '分享到朋友圈,让更多人领红包'
     }
 
     tmp_json    = wechat_hash.to_json.dup.encode("UTF-8")
