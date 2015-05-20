@@ -111,22 +111,17 @@ class Wechart
       "mch_billno" => order_code,
       "mch_id" => Wechart.mch_id,
       "wxappid" => Wechart.appid,
-      "nick_name" => 'wenjuanba',
-      # "nick_name" => Wechart.nick_name,
-      "send_name" => 'wenjuanba',
-      # "send_name" => Wechart.send_name,
+      "nick_name" => Wechart.nick_name,
+      "send_name" => Wechart.send_name,
       "re_openid" => openid,
       "total_amount" => total_amount,
       "min_value" => min_value,
       "max_value" => max_value,
       "total_num" => 1,
-      "wishing" => 'wenjuanba',
-      # "wishing" => '感谢您参与问卷吧调研,祝您生活愉快!',
+      "wishing" => '感谢您参与问卷吧调研,祝您生活愉快!',
       "client_ip" => ip,
-      "act_name" => 'wenjuanba',
-      # "act_name" => '问卷吧红包大派送',
-      "remark" => 'wenjuanba'
-      # "remark" => '分享到朋友圈,让更多人领红包'
+      "act_name" => '问卷吧红包大派送',
+      "remark" => '分享到朋友圈,让更多人领红包'
     }
 
     tmp_json    = wechat_hash.to_json.dup.encode("UTF-8")
@@ -139,22 +134,17 @@ class Wechart
         xml.mch_billno order_code
         xml.mch_id Wechart.mch_id
         xml.wxappid Wechart.wxappid
-        xml.nick_name 'wenjuanba'
-        # xml.nick_name Wechart.nick_name
-        xml.send_name 'wenjuanba'
-        # xml.send_name Wechart.send_name
+        xml.nick_name Wechart.nick_name
+        xml.send_name Wechart.send_name
         xml.re_openid openid
         xml.total_amount total_amount
         xml.min_value min_value
         xml.max_value max_value
         xml.total_num 1
-        xml.wishing 'wenjuanba'
-        # xml.wishing '感谢您参与问卷吧调研,祝您生活愉快!'
+        xml.wishing '感谢您参与问卷吧调研,祝您生活愉快!'
         xml.client_ip ip
-        xml.act_name 'wenjuanba'
-        # xml.act_name '问卷吧红包大派送'
-        xml.remark 'wenjuanba'
-        # xml.remark '分享到朋友圈,让更多人领红包'
+        xml.act_name '问卷吧红包大派送'
+        xml.remark '分享到朋友圈,让更多人领红包'
         xml.nonce_str nonce_str
       }
     end
@@ -166,13 +156,8 @@ class Wechart
     Rails.logger.info '*******************************'
 
 
-
     p12 = OpenSSL::PKCS12.new(File.read(Rails.root.to_s + '/apiclient_cert.p12'), "#{Wechart.mch_id}")
     uri = URI.parse("https://api.mch.weixin.qq.com/mmpaymkttransfers/sendredpack")
-
-
-    #wechat_hash = '<xml><sign>1C03AC774C21597CAD8D8B958162D938</sign><mch_billno>1241798002201505201439654284</mch_billno><mch_id>1241798002</mch_id><wxappid>wx16343cb2c71e4c90</wxappid><nick_name>问卷吧</nick_name><send_name>wenjuanba</send_name><re_openid>o4E72skyL0l3RcPXD0TTyaG_ac6M</re_openid><total_amount>200</total_amount><min_value>200</min_value><max_value>200</max_value><total_num>1</total_num><wishing>wenjuanba</wishing><client_ip>218.241.178.170</client_ip><act_name>wenjuanba</act_name><remark>wenjuanba</remark><nonce_str>lghdxsbornttocrmszwxbaotclfbvoqf</nonce_str></xml>'
-
 
     Net::HTTP.start(uri.host,uri.port,use_ssl:true,ca_file:Rails.root.to_s + '/rootca.pem',key:p12.key,cert:p12.certificate) do |http|
       request  = Net::HTTP::Post.new(uri.path)
