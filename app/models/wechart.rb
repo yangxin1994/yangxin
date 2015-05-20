@@ -163,7 +163,7 @@ class Wechart
       request.content_type = 'text/xml;charset=utf-8'
       response = http.request(request)
       Rails.logger.info '&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&'
-      Rails.logger.info request.inspect
+      Rails.logger.info request.body.inspect
       Rails.logger.info '&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&'
       Rails.logger.info '-------------------------------------'
       Rails.logger.info  response.body
