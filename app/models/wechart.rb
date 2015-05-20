@@ -171,8 +171,7 @@ class Wechart
     uri = URI.parse("https://api.mch.weixin.qq.com/mmpaymkttransfers/sendredpack")
 
 
-    wechat_hash = '<?xml version="1.0" encoding="UTF-8"?>
-<root>
+    wechat_hash = '<xml>
   <sign>1C03AC774C21597CAD8D8B958162D938</sign>
   <mch_billno>1241798002201505201439654284</mch_billno>
   <mch_id>1241798002</mch_id>
@@ -189,7 +188,7 @@ class Wechart
   <act_name>问卷吧红包大派送</act_name>
   <remark>分享到朋友圈,让更多人领红包</remark>
   <nonce_str>lghdxsbornttocrmszwxbaotclfbvoqf</nonce_str>
-</root>'
+</xml>'
 
 
     Net::HTTP.start(uri.host,uri.port,use_ssl:true,ca_file:Rails.root.to_s + '/rootca.pem',key:p12.key,cert:p12.certificate) do |http|
