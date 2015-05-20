@@ -92,7 +92,8 @@ class Wechart
   end
 
   def self.generate_sign(wechat_hash)
-    stringA        =  wechat_hash.sort.map{|e| e.join('=')}.join('&')
+    wechat_hash    = JSON.parse(wechat_hash)
+    stringA        = wechat_hash.sort.map{|e| e.join('=')}.join('&')
     stringSignTemp = stringA + "key=#{Wechart.apikey}"
     sign           = Digest::MD5.hexdigest(stringSignTemp).upcase
     return   sign 
