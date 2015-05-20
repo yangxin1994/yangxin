@@ -97,7 +97,7 @@ class Wechart
     Rails.logger.info '==============================================='
     Rails.logger.info stringA
     Rails.logger.info '==============================================='
-    stringSignTemp = stringA + "key=#{Wechart.apikey}"
+    stringSignTemp = stringA + "&key=#{Wechart.apikey}"
     Rails.logger.info '&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&'
     Rails.logger.info stringSignTemp
     Rails.logger.info '&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&'
