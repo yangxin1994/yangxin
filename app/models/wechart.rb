@@ -142,10 +142,13 @@ class Wechart
         xml.min_value min_value
         xml.max_value max_value
         xml.total_num 1
-        xml.wishing '感谢您参与问卷吧调研,祝您生活愉快!'
+        xml.wishing 'hello world!'
+        # xml.wishing '感谢您参与问卷吧调研,祝您生活愉快!'
         xml.client_ip ip
-        xml.act_name '问卷吧红包大派送'
-        xml.remark '分享到朋友圈,让更多人领红包'
+        xml.act_name 'hello world!'
+        # xml.act_name '问卷吧红包大派送'
+         xml.remark 'hello world!'
+        # xml.remark '分享到朋友圈,让更多人领红包'
         xml.nonce_str (0...32).map { ('a'..'z').to_a[rand(26)] }.join
       }
     end
