@@ -128,15 +128,34 @@ class Wechart
     sign        = generate_sign(wechat_hash)
     wechat_hash.merge!({sign:sign})
 
+      Rails.logger.info '************************************'
+      Rails.logger.info "sign:#{sign}"
+      Rails.logger.info "mch_billno:#{order_code}"
+      Rails.logger.info "mch_id:#{Wechart.mch_id}"
+      Rails.logger.info "wxappid:#{Wechart.appid}"
+      Rails.logger.info "nick_name:#hello world!}"
+      Rails.logger.info "send_name:#{hello world!}"
+      Rails.logger.info "re_openid:#{openid}"
+      Rails.logger.info "total_amount:#{total_amount}"
+      Rails.logger.info "min_value:#{min_value}"
+      Rails.logger.info "max_value:#{max_value}"
+      Rails.logger.info "total_num:#{total_num}"
+      Rails.logger.info "wishing:#{hello world!}"
+      Rails.logger.info "client_ip:#{ip}"
+      Rails.logger.info "act_name:#{hello world!}"
+      Rails.logger.info "remark:#{hello world!}"
+      Rails.logger.info "nonce_str:#{(0...32).map { ('a'..'z').to_a[rand(26)] }.join}"       
+      Rails.logger.info '************************************'
 
     builder = Nokogiri::XML::Builder.new(:encoding => 'UTF-8') do |xml|
       xml.root {
         xml.sign sign
         xml.mch_billno order_code
         xml.mch_id Wechart.mch_id
-        xml.wxappid Wechart.appid
-        xml.nick_name Wechart.nick_name
-        xml.send_name Wechart.send_name
+        xml.wxappid 'hello world!'
+        xml.nick_name 'hello world!'
+        # xml.nick_name Wechart.nick_name
+        # xml.send_name Wechart.send_name
         xml.re_openid openid
         xml.total_amount total_amount
         xml.min_value min_value

@@ -37,14 +37,6 @@ class WechartsController < ApplicationController
 				max_value    = amount_arr.last.to_i
 				total_amount = rand(min_value..max_value)
 			end
-			Rails.logger.info '************************************'
-			Rails.logger.info "order_code:#{order.code}"
-			Rails.logger.info "openid:#{openid}"
-			Rails.logger.info "ip:#{request.remote_ip}"
-			Rails.logger.info "total_amount:#{total_amount}"
-			Rails.logger.info "min_value:#{min_value}"
-			Rails.logger.info "max_value:#{max_value}"
-			Rails.logger.info '************************************'
 			res = Wechart.send_red_pack(order.code,openid,request.remote_ip,total_amount,min_value,max_value)
 			if res
 				#order.update_attributes(amount:total_amount)
