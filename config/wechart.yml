@@ -6,8 +6,8 @@ default:
   mch_id: '1241798002'
   wxappid: 'wx16343cb2c71e4c90'
   apikey: 'muqqxunwythkwfantfvyvkcyzsvielrw'
-  nick_name: 'wenjuanba'
-  send_name: 'wenjuanba'
+  nick_name: '问卷吧'
+  send_name: '问卷吧'
   access_token: 
   redirect_uri: http://staging.wenjuanba.com/wecharts/wechart_auth
 production:
@@ -17,8 +17,8 @@ production:
   mch_id: '1241798002'
   wxappid: 'wx16343cb2c71e4c90'
   apikey: 'muqqxunwythkwfantfvyvkcyzsvielrw'
-  nick_name: 'wenjuanba'
-  send_name: 'wenjuanba'
+  nick_name: '问卷吧'
+  send_name: '问卷吧'
   access_token: 
   redirect_uri: http://staging.wenjuanba.com/wecharts/wechart_auth
 staging:
@@ -28,8 +28,8 @@ staging:
   mch_id: '1241798002'
   wxappid: 'wx16343cb2c71e4c90'
   apikey: 'muqqxunwythkwfantfvyvkcyzsvielrw'
-  nick_name: 'wenjuanba'
-  send_name: 'wenjuanba'
+  nick_name: '问卷吧'
+  send_name: '问卷吧'
   access_token: 
   redirect_uri: http://staging.wenjuanba.com/wecharts/wechart_auth
 development:
@@ -39,7 +39,7 @@ development:
   mch_id: '1241798002'
   wxappid: 'wx16343cb2c71e4c90'
   apikey: 'muqqxunwythkwfantfvyvkcyzsvielrw'
-  nick_name: 'wenjuanba'
-  send_name: 'wenjuanba'
+  nick_name: '问卷吧'
+  send_name: '问卷吧'
   access_token: 
   redirect_uri: http://staging.wenjuanba.com/wecharts/wechart_auth
