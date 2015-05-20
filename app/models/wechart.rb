@@ -139,7 +139,7 @@ class Wechart
       Rails.logger.info "total_amount:#{total_amount}"
       Rails.logger.info "min_value:#{min_value}"
       Rails.logger.info "max_value:#{max_value}"
-      Rails.logger.info "total_num:#{total_num}"
+      Rails.logger.info "total_num:#{1}"
       Rails.logger.info "wishing:#{'hello world!'}"
       Rails.logger.info "client_ip:#{ip}"
       Rails.logger.info "act_name:#{'hello world!'}"
