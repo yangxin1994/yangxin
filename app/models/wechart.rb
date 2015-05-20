@@ -133,7 +133,7 @@ class Wechart
       Rails.logger.info "mch_billno:#{order_code}"
       Rails.logger.info "mch_id:#{Wechart.mch_id}"
       Rails.logger.info "wxappid:#{Wechart.appid}"
-      Rails.logger.info "nick_name:#hello world!}"
+      Rails.logger.info "nick_name:#{hello world!}"
       Rails.logger.info "send_name:#{hello world!}"
       Rails.logger.info "re_openid:#{openid}"
       Rails.logger.info "total_amount:#{total_amount}"
