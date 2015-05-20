@@ -120,12 +120,12 @@ class Wechart
       "client_ip" => ip,
       "act_name" => '问卷吧红包大派送',
       "remark" => '分享到朋友圈,让更多人领红包'
-    }
+    }.to_json.dup.encode("UTF-8")
 
     sign        = generate_sign(wechat_hash)
     wechat_hash.merge!({sign:sign})
 
-    builder = Nokogiri::XML::Builder.new(:encoding => 'GB18030:utf-8') do |xml|
+    builder = Nokogiri::XML::Builder.new(:encoding => 'UTF-8') do |xml|
       xml.root {
         xml.sign sign
         xml.mch_billno order_code
@@ -146,7 +146,7 @@ class Wechart
       }
     end
 
-    wechat_hash = builder.to_xml.force_encoding("UTF-8")
+    wechat_hash = builder.to_xml
 
     Rails.logger.info '*******************************'
     Rails.logger.info wechat_hash
