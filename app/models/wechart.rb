@@ -132,7 +132,7 @@ class Wechart
       Rails.logger.info "sign:#{sign}"
       Rails.logger.info "mch_billno:#{order_code}"
       Rails.logger.info "mch_id:#{Wechart.mch_id}"
-      Rails.logger.info "wxappid:#{Wechart.appid}"
+      Rails.logger.info "wxappid:#{Wechart.wxappid}"
       Rails.logger.info "nick_name:#{'hello world!'}"
       Rails.logger.info "send_name:#{'hello world!'}"
       Rails.logger.info "re_openid:#{openid}"
@@ -152,7 +152,7 @@ class Wechart
         xml.sign sign
         xml.mch_billno order_code
         xml.mch_id Wechart.mch_id
-        xml.wxappid 'hello world!'
+        xml.wxappid Wechart.wxappid
         xml.nick_name 'hello world!'
         # xml.nick_name Wechart.nick_name
         # xml.send_name Wechart.send_name
