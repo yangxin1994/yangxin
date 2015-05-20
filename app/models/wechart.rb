@@ -115,8 +115,10 @@ class Wechart
     #total_num 红包发放总人数
     #total_amount 付款金额
     wechat_hash = {
-      "nonce_str" =>(0...32).map { ('a'..'z').to_a[rand(26)] }.join,
-      "mch_billno" => order_code,
+      # "nonce_str" =>(0...32).map { ('a'..'z').to_a[rand(26)] }.join,
+      "nonce_str" => 'bjfegqryensgroewiztxalsynkjoxuzm',
+      # "mch_billno" => order_code,
+      "mch_billno" => '1241798002201505209355979018',
       "mch_id" => Wechart.mch_id,
       "wxappid" => Wechart.appid,
       "nick_name" => Wechart.nick_name,
