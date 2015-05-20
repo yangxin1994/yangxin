@@ -121,9 +121,10 @@ class Wechart
       "client_ip" => ip,
       "act_name" => '问卷吧红包大派送',
       "remark" => '分享到朋友圈,让更多人领红包'
-    }.to_json.dup.encode("UTF-8")
-
-    sign        = generate_sign(wechat_hash)
+    }
+    
+    tmp_json    = wechat_hash.to_json.dup.encode("UTF-8")
+    sign        = generate_sign(tmp_json)
     wechat_hash.merge!({sign:sign})
 
     builder = Nokogiri::XML::Builder.new(:encoding => 'UTF-8') do |xml|
