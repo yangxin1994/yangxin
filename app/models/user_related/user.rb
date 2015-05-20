@@ -836,8 +836,11 @@ class User
     ip     = ip_arr.sample
     retval = HTTParty.get("http://#{ip}:3000/captchas.json")
     hash   = JSON.parse(retval.body).first
-   # return {url:hash['img_url'],id:hash['cid'],ip:ip}
-    return {url:"123",id:"456",ip:ip}
+    unless hash.present?
+      return {url:nil,id:nil,ip:nil} 
+    else
+      return {url:hash['img_url'],id:hash['cid'],ip:ip}
+    end
   end
   # 用户每输入正确一个新浪微博爬虫的验证码就奖励一积分
   def add_verify_code_reward(opt)

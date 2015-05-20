@@ -15,31 +15,37 @@
 <body>
   <div class="header">
     <div class="header-content">
-      <p>已获得<b><%= current_user.sina_verify_info[:commit]%></b>积分</p>
+      <p>已获得<b><%= current_user.sina_verify_info[:commit] || 0%></b>积分</p>
       <ul>
         <li class="pd">
           <i class="icon-exclamation-sign"></i>
-          <div>正在判断<b><%= current_user.verify_judge_count %></b>个</div>
+          <div>正在判断<b><%= current_user.verify_judge_count  || 0 %></b>个</div>
         </li>
         <li class="zq">
           <i class="icon-ok-sign"></i>
-          <div>输入正确<b><%= current_user.sina_verify_info[:success]%></b>个</div>
+          <div>输入正确<b><%= current_user.sina_verify_info[:success]  || 0%></b>个</div>
         </li>
         <li class="cw">
           <i class="icon-remove-sign"></i>
-          <div>输入错误<b><%= current_user.sina_verify_info[:faild]%></b>个</div>
+          <div>输入错误<b><%= current_user.sina_verify_info[:faild]  || 0%></b>个</div>
         </li>
       </ul>
     </div>
   </div>
   <div class="vrcode">
-     <%=image_tag  @img, :alt => "bg" %>
+     <% if @img.present? %>
+      <%=image_tag @img, :alt => "bg" %>
+     <% else %>
+      <div style='height:24px;line-height:24px;font-size:24px;padding:15px;'>目前没有多余的验证码,可以过段时间再来</div>
+     <% end %>
+
      <form action="">
       <input type="text" placeholder="输入验证码，回车发送">
       <input type="hidden" id="image_id" value="<%= @cid %>">
       <input type="hidden" id="remote_ip" value="<%= @ip %>">
-      <a href="javascript:;" class="submit">提交 ( Enter )</a>
-      <span>已提交<b><%= current_user.sina_verify_info[:commit]%></b>个</span>
+
+      <a href="javascript:void(0);" class="submit">提交 ( Enter )</a>
+      <span>已提交<b><%= current_user.sina_verify_info[:commit] || 0 %></b>个</span>
      </form>
      
   </div>
