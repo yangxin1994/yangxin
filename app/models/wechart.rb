@@ -138,7 +138,6 @@ class Wechart
         xml.min_value min_value
         xml.max_value max_value
         xml.total_num 1
-        xml.wishing 'hello world!'
         xml.wishing '感谢您参与问卷吧调研,祝您生活愉快!'
         xml.client_ip ip
         xml.act_name '问卷吧红包大派送'
@@ -163,6 +162,9 @@ class Wechart
       request.body = wechat_hash
       request.content_type = 'text/xml;charset=utf-8'
       response = http.request(request)
+      Rails.logger.info '&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&'
+      Rails.logger.info request.inspect
+      Rails.logger.info '&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&'
       Rails.logger.info '-------------------------------------'
       Rails.logger.info  response.body
       Rails.logger.info '-------------------------------------'       
