@@ -77,9 +77,6 @@ class Wechart
     http.verify_mode = OpenSSL::SSL::VERIFY_NONE
     res = http.get(uri.request_uri)
     res = JSON.parse(res.body)
-    Rails.logger.info '&&&&&&&&&&&&&&&&&&&&&&&&&&&&&'
-    Rails.logger.info res.inspect
-    Rails.logger.info '&&&&&&&&&&&&&&&&&&&&&&&&&&&&&'
     return res['openid']
   end
 
@@ -131,53 +128,35 @@ class Wechart
     sign        = generate_sign(wechat_hash)
     wechat_hash.merge!({sign:sign})
 
-      Rails.logger.info '************************************'
-      Rails.logger.info "sign:#{sign}"
-      Rails.logger.info "mch_billno:#{order_code}"
-      Rails.logger.info "mch_id:#{Wechart.mch_id}"
-      Rails.logger.info "wxappid:#{Wechart.wxappid}"
-      Rails.logger.info "nick_name:#{'hello world!'}"
-      Rails.logger.info "send_name:#{'hello world!'}"
-      Rails.logger.info "re_openid:#{openid}"
-      Rails.logger.info "total_amount:#{total_amount}"
-      Rails.logger.info "min_value:#{min_value}"
-      Rails.logger.info "max_value:#{max_value}"
-      Rails.logger.info "total_num:#{1}"
-      Rails.logger.info "wishing:#{'hello world!'}"
-      Rails.logger.info "client_ip:#{ip}"
-      Rails.logger.info "act_name:#{'hello world!'}"
-      Rails.logger.info "remark:#{'hello world!'}"
-      Rails.logger.info "nonce_str:#{(0...32).map { ('a'..'z').to_a[rand(26)] }.join}"       
-      Rails.logger.info '************************************'
-
     builder = Nokogiri::XML::Builder.new(:encoding => 'UTF-8') do |xml|
       xml.root {
         xml.sign sign
         xml.mch_billno order_code
         xml.mch_id Wechart.mch_id
         xml.wxappid Wechart.wxappid
-        xml.nick_name 'hello world!'
-        # xml.nick_name Wechart.nick_name
-        # xml.send_name Wechart.send_name
+        xml.nick_name Wechart.nick_name
+        xml.send_name Wechart.send_name
         xml.re_openid openid
         xml.total_amount total_amount
         xml.min_value min_value
         xml.max_value max_value
         xml.total_num 1
         xml.wishing 'hello world!'
-        # xml.wishing '感谢您参与问卷吧调研,祝您生活愉快!'
+        xml.wishing '感谢您参与问卷吧调研,祝您生活愉快!'
         xml.client_ip ip
-        xml.act_name 'hello world!'
-        # xml.act_name '问卷吧红包大派送'
-         xml.remark 'hello world!'
-        # xml.remark '分享到朋友圈,让更多人领红包'
+        xml.act_name '问卷吧红包大派送'
+        xml.remark '分享到朋友圈,让更多人领红包'
         xml.nonce_str (0...32).map { ('a'..'z').to_a[rand(26)] }.join
       }
     end
 
-
-
     wechat_hash = builder.to_xml
+
+    Rails.logger.info '*******************************'
+    Rails.logger.info wechat_hash
+    Rails.logger.info '*******************************'
+
+
 
     p12 = OpenSSL::PKCS12.new(File.read(Rails.root.to_s + '/apiclient_cert.p12'), "#{Wechart.mch_id}")
     uri = URI.parse("https://api.mch.weixin.qq.com/mmpaymkttransfers/sendredpack")
@@ -185,7 +164,6 @@ class Wechart
     Net::HTTP.start(uri.host,uri.port,use_ssl:true,ca_file:Rails.root.to_s + '/rootca.pem',key:p12.key,cert:p12.certificate) do |http|
       request  = Net::HTTP::Post.new(uri.path)
       request.body = wechat_hash
-      # request.set_form_data(wechat_hash)
       request.content_type = 'text/xml'
       response = http.request(request)
       Rails.logger.info '-------------------------------------'
