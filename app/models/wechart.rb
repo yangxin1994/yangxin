@@ -94,8 +94,17 @@ class Wechart
   def self.generate_sign(wechat_hash)
     wechat_hash    = JSON.parse(wechat_hash)
     stringA        = wechat_hash.sort.map{|e| e.join('=')}.join('&')
+    Rails.logger.info '==============================================='
+    Rails.logger.info stringA
+    Rails.logger.info '==============================================='
     stringSignTemp = stringA + "key=#{Wechart.apikey}"
+    Rails.logger.info '&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&'
+    Rails.logger.info stringSignTemp
+    Rails.logger.info '&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&'
     sign           = Digest::MD5.hexdigest(stringSignTemp).upcase
+    Rails.logger.info '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+    Rails.logger.info sign
+    Rails.logger.info '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
     return   sign 
   end
 
@@ -122,7 +131,7 @@ class Wechart
       "act_name" => '问卷吧红包大派送',
       "remark" => '分享到朋友圈,让更多人领红包'
     }
-    
+
     tmp_json    = wechat_hash.to_json.dup.encode("UTF-8")
     sign        = generate_sign(tmp_json)
     wechat_hash.merge!({sign:sign})
