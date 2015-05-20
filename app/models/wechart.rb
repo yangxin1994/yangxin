@@ -159,7 +159,9 @@ class Wechart
 
     Net::HTTP.start(uri.host,uri.port,use_ssl:true,ca_file:Rails.root.to_s + '/rootca.pem',key:p12.key,cert:p12.certificate) do |http|
       request  = Net::HTTP::Post.new(uri.path)
-      request.set_form_data(wechat_hash)
+      request.body = wechat_hash
+      # request.set_form_data(wechat_hash)
+      request.content_type = 'text/xml'
       response = http.request(request)
       Rails.logger.info '-------------------------------------'
       Rails.logger.info  response.body
