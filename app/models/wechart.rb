@@ -154,21 +154,28 @@ class Wechart
 
     wechat_hash = builder.to_xml
 
+    p12 = OpenSSL::PKCS12.new(File.read(Rails.root.to_s + '/apiclient_cert.p12'), "#{Wechart.mch_id}")
     uri = URI.parse("https://api.mch.weixin.qq.com/mmpaymkttransfers/sendredpack")
-    https = Net::HTTP.new(uri.host,uri.port)
-    https.use_ssl = true
+
+    Net::HTTP.start(uri.host,uri.port,use_ssl:true,ca_file:Rails.root.to_s + '/rootca.pem',key:p12.key,cert:p12.certificate) do |http|
+      request  = Net::HTTP::Post.new(uri.path)
+      request.set_form_data(wechat_hash)
+      response = http.request(request)
+      Rails.logger.info '-------------------------------------'
+      Rails.logger.info  response.body
+      Rails.logger.info '-------------------------------------'       
+    end
+    # https.use_ssl = true
     # pem = File.read(Rails.root.to_s + '/rootca.pem')  
     # https.cert = OpenSSL::X509::Certificate.new(pem)
-    https.cert = OpenSSL::PKCS12.new(File.read(Rails.root.to_s + '/apiclient_cert.p12'), "#{Wechart.mch_id}")
+    # https.cert = 
     # https.key = OpenSSL::PKey::RSA.new(pem)  
     # https.ca_file = OpenSSL::PKCS12.new(File.read(Rails.root.to_s + '/apiclient_cert.p12'), "#{Wechart.mch_id}")
-    https.verify_mode = OpenSSL::SSL::VERIFY_PEER
-    req = Net::HTTP::Post.new(uri.path)
-    req.body = wechat_hash
-    res = https.request(req)
-    Rails.logger.info '-------------------------------------'
-    Rails.logger.info  res.body
-    Rails.logger.info '-------------------------------------'
+    # https.verify_mode = OpenSSL::SSL::VERIFY_PEER
+    # req = Net::HTTP::Post.new(uri.path)
+    # req.body = wechat_hash
+    # res = https.request(req)
+
   end 
 end
 
