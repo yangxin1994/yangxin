@@ -1,7 +1,7 @@
 ---
 default:
   appid: wx16343cb2c71e4c90
-  secret: 440490022d47d6907d857c6968f2e291
+  secret: 5f2c6fddb3824d439c7be9d177d209f5
   token: wenjuanba2015wecharts
   mch_id: '1241798002'
   wxappid: 'wx16343cb2c71e4c90'
@@ -12,7 +12,7 @@ default:
   redirect_uri: http://staging.wenjuanba.com/wecharts/wechart_auth
 production:
   appid: wx16343cb2c71e4c90
-  secret: 440490022d47d6907d857c6968f2e291
+  secret: 5f2c6fddb3824d439c7be9d177d209f5
   token: wenjuanba2015wecharts
   mch_id: '1241798002'
   wxappid: 'wx16343cb2c71e4c90'
@@ -23,7 +23,7 @@ production:
   redirect_uri: http://staging.wenjuanba.com/wecharts/wechart_auth
 staging:
   appid: wx16343cb2c71e4c90
-  secret: 440490022d47d6907d857c6968f2e291
+  secret: 5f2c6fddb3824d439c7be9d177d209f5
   token: wenjuanba2015wecharts
   mch_id: '1241798002'
   wxappid: 'wx16343cb2c71e4c90'
@@ -34,7 +34,7 @@ staging:
   redirect_uri: http://staging.wenjuanba.com/wecharts/wechart_auth
 development:
   appid: wx16343cb2c71e4c90
-  secret: 440490022d47d6907d857c6968f2e291
+  secret: 5f2c6fddb3824d439c7be9d177d209f5
   token: wenjuanba2015wecharts
   mch_id: '1241798002'
   wxappid: 'wx16343cb2c71e4c90'
