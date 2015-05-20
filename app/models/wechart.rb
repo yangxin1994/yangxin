@@ -129,7 +129,7 @@ class Wechart
     wechat_hash.merge!({sign:sign})
 
 
-    builder = Nokogiri::XML::Builder.new do |xml|
+    builder = Nokogiri::XML::Builder.new(:encoding => 'UTF-8') do |xml|
       xml.root {
         xml.sign sign
         xml.mch_billno order_code
