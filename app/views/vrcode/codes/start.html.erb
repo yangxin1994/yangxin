@@ -33,12 +33,12 @@
     </div>
   </div>
   <div class="vrcode">
-     <%=image_tag @img, :alt => "bg" %>
+     <%=image_tag  @img, :alt => "bg" %>
      <form action="">
       <input type="text" placeholder="输入验证码，回车发送">
       <input type="hidden" id="image_id" value="<%= @cid %>">
       <input type="hidden" id="remote_ip" value="<%= @ip %>">
-      <a href="javascript:void(0);" class="submit">提交 ( Enter )</a>
+      <a href="javascript:;" class="submit">提交 ( Enter )</a>
       <span>已提交<b><%= current_user.sina_verify_info[:commit]%></b>个</span>
      </form>
      

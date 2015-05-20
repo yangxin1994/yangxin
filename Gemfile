@@ -27,7 +27,7 @@ gem 'memcache-client', '~> 1.8.5'
 gem 'certified', '~> 0.1.1'
 gem 'bson_ext', '~> 1.8.2'
 gem 'mongoid', " ~> 3.0"
-gem 'mongoid_shortener', :path => "../mongoid_shortener"
+gem 'mongoid_shortener'
 gem 'kaminari', '~> 0.14.1'
 
 gem 'rest-client', '~> 1.6.7'
