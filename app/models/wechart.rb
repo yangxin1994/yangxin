@@ -157,9 +157,10 @@ class Wechart
     uri = URI.parse("https://api.mch.weixin.qq.com/mmpaymkttransfers/sendredpack")
     https = Net::HTTP.new(uri.host,uri.port)
     https.use_ssl = true
-    pem = File.read(Rails.root.to_s + '/rootca.pem')  
-    https.cert = OpenSSL::X509::Certificate.new(pem)
-    https.key = OpenSSL::PKey::RSA.new(pem)  
+    # pem = File.read(Rails.root.to_s + '/rootca.pem')  
+    # https.cert = OpenSSL::X509::Certificate.new(pem)
+    https.cert = OpenSSL::PKCS12.new(File.read(Rails.root.to_s + '/apiclient_cert.p12'), "#{Wechart.mch_id}")
+    # https.key = OpenSSL::PKey::RSA.new(pem)  
     # https.ca_file = OpenSSL::PKCS12.new(File.read(Rails.root.to_s + '/apiclient_cert.p12'), "#{Wechart.mch_id}")
     https.verify_mode = OpenSSL::SSL::VERIFY_PEER
     req = Net::HTTP::Post.new(uri.path)
