@@ -105,8 +105,9 @@ class Wechart
     #max_value 最大金额
     #total_num 红包发放总人数
     #total_amount 付款金额
+    nonce_str   = (0...32).map { ('a'..'z').to_a[rand(26)] }.join
     wechat_hash = {
-      "nonce_str" =>(0...32).map { ('a'..'z').to_a[rand(26)] }.join,
+      "nonce_str" =>nonce_str,
       "mch_billno" => order_code,
       "mch_id" => Wechart.mch_id,
       "wxappid" => Wechart.appid,
@@ -154,7 +155,7 @@ class Wechart
         # xml.act_name '问卷吧红包大派送'
         xml.remark 'wenjuanba'
         # xml.remark '分享到朋友圈,让更多人领红包'
-        xml.nonce_str (0...32).map { ('a'..'z').to_a[rand(26)] }.join
+        xml.nonce_str nonce_str
       }
     end
 
