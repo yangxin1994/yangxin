@@ -42,7 +42,7 @@ class WechartsController < ApplicationController
 			res = Wechart.send_red_pack(order.code,openid,request.remote_ip,total_amount,min_value,max_value)
 			if res
 				Rails.logger.info "send_red_pack ok ---------"
-				order.update_attributes(amount:total_amount)
+				order.update_attributes(amount:total_amount,status:Order::SUCCESS)
 			else
 				Rails.logger.info "send_red_pack fail ---------"
 				order.destroy
