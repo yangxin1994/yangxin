@@ -157,7 +157,7 @@ class Wechart
       request  = Net::HTTP::Post.new(uri.path)
       request.body = wechat_hash
       response = http.request(request)
-      res      = Hash.from_xml(response).to_json
+      res      = Hash.from_xml(response.body).to_json
       Rails.logger.info '-------------------------------------'
       Rails.logger.info  res.inspect
       Rails.logger.info '-------------------------------------'       
