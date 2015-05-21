@@ -54,7 +54,6 @@ class WechartsController < ApplicationController
 		end
 		
 		wuser  = WechartUser.where(openid:openid).first
-		Rails.logger.info "wuser:#{wuser.id.to_s}"
 		unless wuser.present?
 			WechartWorker.perform_async('get_user_info',{open_id:openid}) 
 		end
