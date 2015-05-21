@@ -491,6 +491,7 @@ $(function() {
                         }, this));
                     } else {
                         this.hbs({
+                            is_wechart:this.model.get('wechart_promotable'),
                             reward_money: this.options.reward.reward_money,
                             waiting: value.order_status != 4 && value.order_status != 8,
                             success: value.order_status == 4,
