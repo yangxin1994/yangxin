@@ -21,7 +21,7 @@
 				if(wechart){
 					var ua = navigator.userAgent.toLowerCase();	
 					if(ua.match(/MicroMessenger/i)!="micromessenger") {
-						$('.un-wechart').show().siblings('.page').remove()
+						$('#sf_main').empty().append('<div style="font-size:14pt;text-align:center;"><a href="weixin://contacts/qr/wx16343cb2c71e4c90">复制网址并使用微信浏览器进行答题</a></div>')
 					}else{
 						normal_flow();
 					}					
@@ -79,89 +79,79 @@
 <% if @survey_closed %>
 	<div class='error-con'>对不起，您所访问的问卷达到回收要求已经关闭，感谢您的关注，欢迎参加其他调研。</div>
 <% elsif !@survey.nil? %>
-		<h2 class="title"><%= @survey.title %></h2>
-		<div class="un-wechart">
-			<div class="page">
-				<% if @survey.welcome.present? %>
-					<div class="describe"><%= raw @survey.welcome %></div>
-				<% end %>
-				<div class="login-panel">
-					<div class="wechart-channel">
-						<a href="weixin://contacts/qr/wx16343cb2c71e4c90" class='btn btn-block btn-info'>复制网址并使用微信浏览器进行答题</a>
-					</div>
-				</div>		
-			</div>			
-		</div>		
-		<div class="page">
-			<% if @survey.welcome.present? %>
-				<div class="describe"><%= raw @survey.welcome %></div>
-			<% end %>
-			<div class="login-panel">
-				<% password_type = @survey['access_control_setting']['password_control']['password_type'] %>
-				<% if password_type == 2 %>
-					<p>
-						<input id='username_ipt' type="text" class='username' placeholder="答题用户名" autofocus />
-					</p>
-				<% end %>
-				<% if password_type >= 0 %>
-					<p><input id='password_ipt' type="password" placeholder="答题密码" autofocus /></p>
-				<% end %>
-				<p class="error" id="error_msg" style="display:none;">调查问卷尚未发布，请等待问卷发布之后再进行填写。<	/p>
+	<h2 class="title"><%= @survey.title %></h2>
+	<div class="page">
+		<% if @survey.welcome.present? %>
+			<div class="describe"><%= raw @survey.welcome %></div>
+		<% end %>
+		<div class="login-panel">
+			<% password_type = @survey['access_control_setting']['password_control']['password_type'] %>
+			<% if password_type == 2 %>
 				<p>
-					<% if @forbidden_ip %>
-						<a href="javascript:void(0);" id='' class='btn disabled'>IP地址答题次数超过限制</a>
-					<% else %>
-						<a href="javascript:void(0);" id='start_btn' class='btn'>开始答题</a>
-					<% end %>
+					<input id='username_ipt' type="text" class='username' placeholder="答题用户名" autofocus />
 				</p>
-				<% unless params[:ati].present? %>
-					<% unless @is_preview %> <!-- 为住建委项目特殊添加-->
-						<% unless params[:id] == '5485611beb0e5b8af10002e1' or ['55120905eb0e5b2984000003', '551208dbeb0e5be514000004', '55069ab7eb0e5bba6300001e', '54365c14eb0e5bba58000204'].include?(@survey['_id'].to_s) or @survey['title'].include?('北京市城镇基本住房保障条例') %> <!-- 2014年北京市公安局群众安全感和满意度调查问卷 -->
-							<p class="tip">
-								<span class='fl'>耗时<span id="left_time"></span></span>
-								<span class="fr">奖励<span id="reward_info"></span></span>
-							</p>
-						<% end %>
+			<% end %>
+			<% if password_type >= 0 %>
+				<p><input id='password_ipt' type="password" placeholder="答题密码" autofocus /></p>
+			<% end %>
+			<p class="error" id="error_msg" style="display:none;">调查问卷尚未发布，请等待问卷发布之后再进行填写。<	/p>
+			<p>
+				<% if @forbidden_ip %>
+					<a href="javascript:void(0);" id='' class='btn disabled'>IP地址答题次数超过限制</a>
+				<% else %>
+					<a href="javascript:void(0);" id='start_btn' class='btn'>开始答题</a>
+				<% end %>
+				
+			</p>
+			<% unless params[:ati].present? %>
+				<% unless @is_preview %> <!-- 为住建委项目特殊添加-->
+					<% unless params[:id] == '5485611beb0e5b8af10002e1' or ['55120905eb0e5b2984000003', '551208dbeb0e5be514000004', '55069ab7eb0e5bba6300001e', '54365c14eb0e5bba58000204'].include?(@survey['_id'].to_s) or @survey['title'].include?('北京市城镇基本住房保障条例') %> <!-- 2014年北京市公安局群众安全感和满意度调查问卷 -->
+						<p class="tip">
+							<span class='fl'>耗时<span id="left_time"></span></span>
+							<span class="fr">奖励<span id="reward_info"></span></span>
+						</p>
 					<% end %>
 				<% end %>
-				<div class="reward_show">
-					<div class="rtype"></div>
-					<div class="type_info">
-          				<% if @reward_scheme_type == 1 %>
-          					<% unless @survey.wechart_promotable%>
-            					<div class="r_cash">
-            	  					<img src="/assets/filler/zhifubao.png" />
-            	  					<p>支付宝转账<%= @reward_money %>元</p>
-            					</div>
-            					<div class="r_cash">
-            					  <img src="/assets/filler/chongzhi.png" />
-            					  <p>话费充值<%= @reward_money %>元</p>    
-            					</div> 
-          					<% end %>
-          				<% elsif @reward_scheme_type == 2 %>
-            				<% @hot_gift.each do |gift| %>
-              					<div class="r_poit">
-              					  <img src="<%= gift.photo_src %>" />
-              					  <p><%= gift.title %><span><%= gift.point %>积分</span></p>
-              					</div>            
-            				<% end %>             
-          				<% elsif @reward_scheme_type == 3 %>
-							<div id="slideBox" class="slideBox">
-								<div class="bd">
-									<ul>
-										<% @prizes.each do |prize|%>
-											<li><img src="<%= prize[:photo_url]%>" /></li>
-										<% end %>
-									</ul>
-								</div>
-								<a class="prev" href="javascript:void(0)"></a>
-								<a class="next" href="javascript:void(0)"></a>
-							</div>            
-          				<% end %>
-					</div>
+			<% end %>
+			<div class="reward_show">
+				<div class="rtype"></div>
+				<div class="type_info">
+
+          <% if @reward_scheme_type == 1 %>
+          	<% unless @survey.wechart_promotable%>
+            	<div class="r_cash">
+            	  <img src="/assets/filler/zhifubao.png" />
+            	  <p>支付宝转账<%= @reward_money %>元</p>
+            	</div>
+            	<div class="r_cash">
+            	  <img src="/assets/filler/chongzhi.png" />
+            	  <p>话费充值<%= @reward_money %>元</p>    
+            	</div> 
+          	<% end %>
+          <% elsif @reward_scheme_type == 2 %>
+            <% @hot_gift.each do |gift| %>
+              <div class="r_poit">
+                <img src="<%= gift.photo_src %>" />
+                <p><%= gift.title %><span><%= gift.point %>积分</span></p>
+              </div>            
+            <% end %>             
+          <% elsif @reward_scheme_type == 3 %>
+						<div id="slideBox" class="slideBox">
+							<div class="bd">
+								<ul>
+									<% @prizes.each do |prize|%>
+										<li><img src="<%= prize[:photo_url]%>" /></li>
+									<% end %>
+								</ul>
+							</div>
+							<a class="prev" href="javascript:void(0)"></a>
+							<a class="next" href="javascript:void(0)"></a>
+						</div>            
+          <% end %>
 				</div>
 			</div>
-			<!-- <div class="copyright">OopsData Consultant Co.,Ltd</div> -->
-		</div>		
+		</div>
+		<!-- <div class="copyright">OopsData Consultant Co.,Ltd</div> -->
+	</div>
 <% end %>
 </div>
