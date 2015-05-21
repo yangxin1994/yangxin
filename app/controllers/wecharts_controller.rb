@@ -54,8 +54,7 @@ class WechartsController < ApplicationController
 			WechartWorker.perform_async('get_user_info',{open_id:openid}) 
 		end
 		
-
-		render :text => 'false'
+		redirect_to "/s/#{answer.survey.wechart_scheme_id}"
 	end
 
 	def verify

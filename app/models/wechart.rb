@@ -159,10 +159,8 @@ class Wechart
       response = http.request(request)
       res      = Nokogiri::XML(response.body,nil,'UTF-8')
       if res.css('return_code').text.match(/SUCCESS/) && res.css('result_code').text.match(/SUCCESS/)
-        Rails.logger.info '-------success--------'
         return true
       else
-        Rails.logger.info '-------false--------'
         return false
       end    
     end
