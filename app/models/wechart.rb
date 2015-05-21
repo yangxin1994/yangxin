@@ -49,7 +49,7 @@ class Wechart
   def self.access_token
     token = $redis.get('access_token')
     unless token.present?
-      token = @config['access_token']
+      token = refresh_access_token
     end
     return token
   end
@@ -65,9 +65,7 @@ class Wechart
     res = JSON.parse(res.body)
     tok = res['access_token']
     $redis.set('access_token',tok)
-    data = YAML.load_file "#{Rails.root}/config/wechart.yml"
-    data["#{Rails.env}"]["access_token"] = tok
-    File.open("#{Rails.root}/config/wechart.yml", 'w') { |f| YAML.dump(data, f) }
+    return token
   end
 
   def self.get_open_id(code)
