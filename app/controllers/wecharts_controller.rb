@@ -39,7 +39,9 @@ class WechartsController < ApplicationController
 			end
 			res = Wechart.send_red_pack(order.code,openid,request.remote_ip,total_amount,min_value,max_value)
 			if res
-				#order.update_attributes(amount:total_amount)
+				order.update_attributes(amount:total_amount)
+			else
+				order.destroy
 			end
 		else
 			Rails.logger.info '============================'

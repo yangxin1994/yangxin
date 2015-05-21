@@ -159,8 +159,15 @@ class Wechart
       response = http.request(request)
       res      = Hash.from_xml(response.body).to_json
       Rails.logger.info '-------------------------------------'
-      Rails.logger.info  res.inspect
-      Rails.logger.info '-------------------------------------'       
+      Rails.logger.info  res['xml']['return_code']
+      Rails.logger.info  res['xml']['result_code']
+      Rails.logger.info  res['xml']['total_amount']
+      Rails.logger.info '-------------------------------------'
+      if  res['xml']['return_code'] == 'SUCCESS' &&  res['xml']['result_code'] == 'SUCCESS' 
+        return true
+      else
+        return false
+      end    
     end
   end 
 end
