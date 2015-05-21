@@ -1,3 +1,4 @@
+# encoding: utf-8
 class Filler::FillerController < ApplicationController
 
   before_filter :force_tablet_html, :check_mobile_param
@@ -33,10 +34,15 @@ class Filler::FillerController < ApplicationController
     case r['type']
     when RewardScheme::MOBILE, RewardScheme::ALIPAY, RewardScheme::JIFENBAO, RewardScheme::HONGBAO
       if r['type'].to_i == RewardScheme::HONGBAO.to_i
-        if r['amount'].to_s.length > 0
+        if r['amount'].to_s
           @reward_scheme_type = 1
-          @reward_money = r['amount'].to_f / 100 if r['amount'].match(/^\d$/)
-          @reward_money = '少于' + r['amount'].split('-').last.to_f / 100 if r['amount'].match(/-/)
+          if r['amount'].to_s.match(/^\d+$/)
+            @reward_money = r['amount'].to_f / 100 
+          elsif r['amount'].to_s.match(/-/)
+            min = r['amount'].split('-').first
+            max = r['amount'].split('-').last
+            @reward_money = (min.to_f / 100).to_s + '~' + (max.to_f / 100).to_s
+          end
         end
       else
         if r['amount'] > 0

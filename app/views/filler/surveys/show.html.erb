@@ -17,7 +17,7 @@
       var ua = navigator.userAgent.toLowerCase(); 
       if(ua.match(/MicroMessenger/i)!="micromessenger") {
         // 提示必须在微信浏览器答题
-        condole.log('必须在微信浏览器打开')
+        $('#qrcode').qrcode({width: 200,height: 200,text: window.location.href});
       }else{
         normal();
       }
@@ -202,9 +202,14 @@
           <% end %>
         <% else %>
           <% if @survey[:lang] == 'en' %>
-        <button id='start_btn' >Start Survey</button>
+            <button id='start_btn' >Start Survey</button>
           <% else %>
-        <button id='start_btn' >开始答题</button>
+            <% if  @survey.wechart_promotable%>
+              <div style='font-size:18px;margin-bottom:15px;'>微信扫描二维码!</div>
+              <div id="qrcode"></div>
+            <% else%>
+              <button id='start_btn' >开始答题</button>
+            <% end %>
           <% end %>
         <% end %>
         <% if @survey['publish_result'] %>
@@ -222,13 +227,18 @@
     <% if @reward_scheme_type > 0 %>
     <div class='reward'>
       <% if @reward_scheme_type == 1 %>
-      <h1>答题奖励<em>￥<%= @reward_money %></em>元</h1>
-      <h2>奖励兑换方式：</h2>
-      <div class='awards'>
-        <em class='chongzhi' data-content='向您的手机号充值￥<%= @reward_money %>元' data-trigger='hover' data-placement='bottom'></em>
-        <em class='zhifubao' data-content='向您的支付宝账号转账￥<%= @reward_money %>元' data-trigger='hover' data-placement='bottom'></em>
-        <!-- <em class='jifenbao' data-content='向您的集分宝转账<%= @reward_money * 100 %>积分' data-trigger='hover' data-placement='bottom'></em> -->
-      </div>
+        <% if @survey.wechart_promotable %>
+          <h1>答题奖励<em><%= @reward_money %></em>元</h1>     
+        <% else %>
+          <h1>答题奖励<em>￥<%= @reward_money %></em>元</h1>
+          <h2>奖励兑换方式：</h2>
+          <div class='awards'>
+            <em class='chongzhi' data-content='向您的手机号充值￥<%= @reward_money %>元' data-trigger='hover' data-placement='bottom'></em>
+            <em class='zhifubao' data-content='向您的支付宝账号转账￥<%= @reward_money %>元' data-trigger='hover' data-placement='bottom'></em>
+            <!-- <em class='jifenbao' data-content='向您的集分宝转账<%#= @reward_money * 100 %>积分' data-trigger='hover' data-placement='bottom'></em> -->
+          </div>
+        <% end %>
+
       <% elsif @reward_scheme_type == 2 %>
       <h1>答题奖励<em><%= @reward_point %></em>积分</h1>
       <% if !@hot_gift.nil? %>
