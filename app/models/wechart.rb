@@ -157,17 +157,12 @@ class Wechart
       request  = Net::HTTP::Post.new(uri.path)
       request.body = wechat_hash
       response = http.request(request)
-      res      = Hash.from_xml(response.body).to_json
+      res      = Nokogiri::XML(response.body,nil,'UTF-8')
       Rails.logger.info '-------------------------------------'
-      Rails.logger.info  res['xml']['return_code']
-      Rails.logger.info  res['xml']['result_code']
-      Rails.logger.info  res['xml']['total_amount']
-      Rails.logger.info '-------------------------------------'
-      if  res['xml']['return_code'] == 'SUCCESS' &&  res['xml']['result_code'] == 'SUCCESS' 
-        return true
-      else
-        return false
-      end    
+      Rails.logger.info  res.css('return_msg')
+      Rails.logger.info  res.css('return_code')
+      Rails.logger.info  res.css('result_code')
+      Rails.logger.info '-------------------------------------'       
     end
   end 
 end
