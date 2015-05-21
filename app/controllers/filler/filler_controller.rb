@@ -32,9 +32,17 @@ class Filler::FillerController < ApplicationController
     r = rewards[0]
     case r['type']
     when RewardScheme::MOBILE, RewardScheme::ALIPAY, RewardScheme::JIFENBAO, RewardScheme::HONGBAO
-      if r['amount'] > 0
-        @reward_scheme_type = 1
-        @reward_money = r["type"] == RewardScheme::JIFENBAO ? r['amount'].to_f / 100 : r['amount']
+      if r['type'] == RewardScheme::HONGBAO
+        if r['amount'].to_s.length > 0
+          @reward_scheme_type = 1
+          @reward_money = r['amount'].to_f / 100 if r['amount'].match(/^\d$/)
+          @reward_money = '少于' + r['amount'].split('-').last.to_f / 100 if r['amount'].match(/-/)
+        end
+      else
+        if r['amount'] > 0
+          @reward_scheme_type = 1
+          @reward_money = r["type"] == RewardScheme::JIFENBAO ? r['amount'].to_f / 100 : r['amount']
+        end
       end
     when RewardScheme::POINT
       if r['amount'] > 0

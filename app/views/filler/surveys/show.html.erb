@@ -12,32 +12,47 @@
     window.rsi = '<%=params[:id]  %>';
     window.referer = "<%= raw escape_javascript(@referer_host) %>";
     window.channel = <%= @channel %>;
+    window.wechart = <%= @survey.wechart_promotable %>;
+    if(wechart){
+      var ua = navigator.userAgent.toLowerCase(); 
+      if(ua.match(/MicroMessenger/i)!="micromessenger") {
+        // 提示必须在微信浏览器答题
+        condole.log('必须在微信浏览器打开')
+      }else{
+        normal();
+      }
+    }else{
+      normal();
+    }
 
-    // set start button text
-    <% if @percentage > 0 %>
-      <% if @survey[:lang] == 'en' %>
-        $('#start_btn').text('Continue ( ' + Math.round(<%= @percentage * 100 %>) + '% finished )');
+    function normal(){
+      // set start button text
+      <% if @percentage > 0 %>
+        <% if @survey[:lang] == 'en' %>
+          $('#start_btn').text('Continue ( ' + Math.round(<%= @percentage * 100 %>) + '% finished )');
+        <% else %>
+          $('#start_btn').text('继续答题（已完成' + Math.round(<%= @percentage * 100 %>) + '%）');
+        <% end %>
       <% else %>
-        $('#start_btn').text('继续答题（已完成' + Math.round(<%= @percentage * 100 %>) + '%）');
-      <% end %>
-    <% else %>
-      <% if !@survey.style_setting['cancel_time_shown'] and !["533bc7c6eb0e5badf200001d", "53191980eb0e5b99ea000020", "52a156f0eb0e5b697800000b", "52a59fc6eb0e5bb2c5000007",
+        <% if !@survey.style_setting['cancel_time_shown'] and !["533bc7c6eb0e5badf200001d", "53191980eb0e5b99ea000020", "52a156f0eb0e5b697800000b", "52a59fc6eb0e5bb2c5000007",
       "544a0602eb0e5b829e000016", "544a0ab5eb0e5bfab700019d", "54365c14eb0e5bba58000204", 
       "544b6d8eeb0e5bef46000006","547fb68beb0e5b4cc4000016"].include?(@survey['_id'].to_s) %>
-        <% if @survey[:lang] == 'en' %>
-          $('#start_btn').text('Start Survey');
-        <% elsif @survey['_id'].to_s == '53faa7ddeb0e5b58bc000039' %>
-          <% unless params[:ati].present? %>
-            $('#start_btn').text('开始答题（耗时10-15分钟）');
-          <% end %>
-        <% else %>
-          <% unless params[:ati].present? %>
-            var left_time = <%=@survey.estimate_answer_time %>;
-            $('#start_btn').text('开始答题' + (left_time > 0 ? '（耗时' + $.util.printTimeFriendly(left_time) + '）' : ''));
+          <% if @survey[:lang] == 'en' %>
+            $('#start_btn').text('Start Survey');
+          <% elsif @survey['_id'].to_s == '53faa7ddeb0e5b58bc000039' %>
+            <% unless params[:ati].present? %>
+              $('#start_btn').text('开始答题（耗时10-15分钟）');
+            <% end %>
+          <% else %>
+            <% unless params[:ati].present? %>
+              var left_time = <%=@survey.estimate_answer_time %>;
+              $('#start_btn').text('开始答题' + (left_time > 0 ? '（耗时' + $.util.printTimeFriendly(left_time) + '）' : ''));
+            <% end %>
           <% end %>
         <% end %>
       <% end %>
-    <% end %>
+    }
+
   });
   </script>
 <% end %>
