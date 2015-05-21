@@ -158,6 +158,9 @@ class Wechart
       request.body = wechat_hash
       response = http.request(request)
       res      = Nokogiri::XML(response.body,nil,'UTF-8')
+      Rails.logger.info  '%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'
+      Rails.logger.info  res.inspect
+      Rails.logger.info  '%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'
       if res.css('return_code').text.match(/SUCCESS/) && res.css('result_code').text.match(/SUCCESS/)
         return true
       else
