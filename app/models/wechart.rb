@@ -159,9 +159,9 @@ class Wechart
       response = http.request(request)
       res      = Nokogiri::XML(response.body,nil,'UTF-8')
       Rails.logger.info '-------------------------------------'
-      Rails.logger.info  res.css('return_msg')
-      Rails.logger.info  res.css('return_code')
-      Rails.logger.info  res.css('result_code')
+      Rails.logger.info  res.xml.return_msg.content
+      Rails.logger.info  res.xml.return_code.content
+      Rails.logger.info  res.xml.result_code.content
       Rails.logger.info '-------------------------------------'       
     end
   end 
