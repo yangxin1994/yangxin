@@ -19,12 +19,13 @@ $(function() {
 		var notice_class = $(this).next().attr('class');
 		if ($.regex.isMobile(account)) {
 			var code_html = '<div class="identifying_code  wraper">验证码：<br />\
-							<input type="text" name="verify_code" class="verify_code"  placeholder="请输入验证码"  />\
+							<input type="text" name="verify_code" class="verify_code"  placeholder="输入手机验证码"  />\
 							<button class="send_code disabled" disabled="disabled">免费获取手机验证码</button>\
 							<div style="clear:both"></div>\
 						</div>'
 			if ($('.identifying_code').length < 1) {
-				$('.login_password').after(code_html);
+				$('#captcha').parents('.wraper').after(code_html);
+				//$('.login_password').after(code_html);
 				$('input[name="verify_code"]').odEnter({
 					enter: submit_form
 				});
@@ -32,7 +33,7 @@ $(function() {
 			//SEND AJAX  REQUEST FOR CHECKING ACCOUNT IF EXIST
 			check_account_exist(account, notice_class)
 		} else {
-			// remove the button  when the account is not a mobile 	
+			// remove the button  when the account is not a mobile 
 			$('.identifying_code').remove();
 			if ($.regex.isEmail(account)) {
 				//SEND AJAX  REQUEST FOR CHECKING ACCOUNT IF EXIST
@@ -48,6 +49,11 @@ $(function() {
 		clear_notice($(this))
 	})
 
+	$('input#captcha').blur(function(){
+		code = $(this).val();
+		check_picture_code(code)
+	})
+
 	$('[name="password"]').blur(function() {
 		password_check($(this), $(this).val())
 	}).focus(function() {
@@ -60,6 +66,11 @@ $(function() {
 		clear_notice($(this))
 	})
 
+	$('input#captcha').blur(function() {
+		check_picture_code($(this).val())
+	}).focus(function() {
+		clear_notice($(this))
+	})
 
 
 	$('.login_btn').click(function() {
@@ -68,6 +79,8 @@ $(function() {
 		var acc_obj = $('input.account');
 		var pass_obj = $('[name="password"]')
 		var pass_con_obj = $('[name="password_confirmation"]')
+		var pic_obj  = $('input#captcha')
+		var pic_value = $.trim(pic_obj.val());
 		var code_obj = $('[name="verify_code"]')
 		var account = acc_obj.val();
 		var password = pass_obj.val();
@@ -89,6 +102,7 @@ $(function() {
 
 		password_check(pass_obj, password)
 		password_confirmation_check(pass_con_obj, password_confirmation)
+		picture_code_check(pic_obj,pic_value)
 		verify_code_check(code_obj, code)
 		//protocol_check()
 
@@ -106,6 +120,13 @@ $(function() {
 
 	})
 
+	$("img[alt='captcha']").bind('click',function(e){
+		this.src = this.src + '?'
+		setTimeout(function(){
+			$.postJSON('/account/transfer_picture_code.json',{code:true},function(ret){})
+		},1000)
+		
+	})
 
 	function clear_notice(obj) {
 		obj.removeClass('error')
@@ -127,6 +148,23 @@ $(function() {
 		} else {
 			clear_notice(pass_obj)
 			pass_obj.after('<span class="success"></span>')
+		}
+	}
+
+
+	function picture_code_check(obj,value){
+		if (value.length <= 0){
+			obj.addClass('error');
+			if (obj.next('span.faild').length < 1) {
+				obj.after('<span class="faild"></span><span class="notice">请输入验证码</span>');
+			} else {
+				obj.next('span.faild').remove();
+				obj.next('span.notice').remove();
+				obj.after('<span class="success"></span>')
+			}			
+		}else{
+			clear_notice(obj);
+			obj.after('<span class="success"></span>');
 		}
 	}
 
@@ -159,6 +197,26 @@ $(function() {
 	}
 
 
+	function check_picture_code(code){
+		$.postJSON('/account/check_picture_code.json',{code:code},function(retval){
+			acc = $.trim($('input.account').val())
+			if ($.regex.isMobile(acc)) {
+				if (retval.success){
+					$('button.send_code').attr('disabled', false).removeClass('disabled');
+				}else{
+					$('button.send_code').attr('disabled', true).addClass('disabled');
+				}
+			}else{
+				if (retval.success){
+					$('input.login_btn').attr('disabled', false).removeClass('disabled');
+				}else{
+					$('input.login_btn').attr('disabled', true).addClass('disabled');
+				}				
+			}
+		})
+	}
+
+
 	function protocol_check() {
 		if ($('.protocol').is(':checked')) {
 			clear_notice($('.proto_info'));
@@ -186,10 +244,10 @@ $(function() {
 						$('input.account').removeClass('error')
 						$('input.account').next('span.success').remove();
 						$('input.account').after('<span class="success"></span>')
-						if ($.regex.isMobile(account)) {
-							// when the mobile is correct and not exist enabled the button
-							$('button.send_code').attr('disabled', false).removeClass('disabled')
-						}
+						// if ($.regex.isMobile(account)) {
+						// 	// when the mobile is correct and not exist enabled the button
+						// 	$('button.send_code').attr('disabled', false).removeClass('disabled')
+						// }
 					}
 				}
 			} else {

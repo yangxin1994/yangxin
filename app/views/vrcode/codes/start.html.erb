@@ -38,15 +38,13 @@
      <% else %>
       <div style='height:24px;line-height:24px;font-size:24px;padding:15px;'>目前没有多余的验证码,可以过段时间再来</div>
      <% end %>
-     
-     <form action="">
-      <input type="text" placeholder="输入验证码，回车发送">
+     <form action="" id="submitform" method="post">
+      <input type="text"  id="code" placeholder="输入验证码，回车发送">
       <input type="hidden" id="image_id" value="<%= @cid %>">
       <input type="hidden" id="remote_ip" value="<%= @ip %>">
-      <a href="javascript:void(0);" class="submit">提交 ( Enter )</a>
+      <a href="javascript:submitvrcode();" class="submit">提交 ( Enter )</a>
       <span>已提交<b><%= current_user.sina_verify_info[:commit] || 0 %></b>个</span>
      </form>
-     
   </div>
 </body>
 </html>

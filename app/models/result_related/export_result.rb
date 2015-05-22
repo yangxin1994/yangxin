@@ -104,7 +104,7 @@ class ExportResult < Result
 
 
     # #========================
-
+    puts "aa"
     spss_data_json = {"spss_header" => survey.spss_header,
                       "answer_contents" => survey.formated_answers(answers, result_key, task_id.to_s),
                       "header_name" => survey.csv_header,
@@ -112,11 +112,14 @@ class ExportResult < Result
 
     puts "answer_contents_length:#{spss_data_json["answer_contents"].length}"
 
-
+    puts spss_data_json.inspect
+    puts spss_data_json.gsub(/<[^>]*>/, '')
     retval = ConnectDotNet.send_data('/ToSpss.aspx') do
       {'spss_data' => spss_data_json.gsub(/<[^>]*>/, ''), 'job_id' => task_id.to_s}
     end
+    puts 'a'
     File.open("public/uploads/spss.html", "wb") { |file| file.puts(retval.body.to_s)}
+    puts 'b'
     if retval.to_s.start_with?('error')
       self.status = -1
       self.error_code = retval
