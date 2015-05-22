@@ -19,8 +19,9 @@ class WechartsController < ApplicationController
 
 	def wechart_auth
 		openid = Wechart.get_open_id(params[:code])
-		Rails.logger.info "openid:#{openid}"
+		Rails.logger.info "--------------openid:#{openid}"
 		order  = Order.where(open_id:openid,answer_id:params[:state]).first
+		Rails.logger.info "--------------order:#{order.try(:id).to_s}"
 		answer = Answer.find(params[:state])
 		Rails.logger.info "answer: #{answer.id.to_s}"
 		unless order.present?
