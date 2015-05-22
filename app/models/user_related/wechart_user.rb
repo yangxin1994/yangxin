@@ -33,10 +33,10 @@ class WechartUser
   end
 
   def get_basic_info
+    opt = Wechart.get_user_info(self.openid)
     puts '------------更新wechart_user----------'
     puts opt.inspect
     puts '-------------------------------------'
-    opt = Wechart.get_user_info(self.openid)
     self.nickname       = opt['nickname']
     self.sex            = opt['sex'].to_i
     self.country        = opt['country']
