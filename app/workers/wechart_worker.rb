@@ -5,6 +5,7 @@ class WechartWorker
   def perform(type,opt={})
     case type
     when 'create'
+      puts "**************openid:#{opt.inspect}*************"
       retval = WechartUser.add_new_user(opt)
     end
     return true
