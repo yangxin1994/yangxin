@@ -6,13 +6,6 @@ class Vrcode::CodesController < Vrcode::VrcodeController
   	@img    = img_ata[:url]
   	@cid    = img_ata[:id]
   	@ip     = img_ata[:ip]
-      respond_to do |format|
-        format.html 
-        format.js 
-        puts  "just ok"
-        format.json { render :json => params }
-      end
-      puts params
   end
   def create
     current_user.add_verify_code_reward(params)

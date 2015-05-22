@@ -836,11 +836,11 @@ class User
     ip     = ip_arr.sample
     retval = HTTParty.get("http://#{ip}:3000/captchas.json")
     hash   = JSON.parse(retval.body).first
-    count_hash = {commit:self.current_user.sina_verify_info['commit'],judge:verify_judge_count,succ:current_user.sina_verify_info['success'],fail:current_user.sina_verify_info['faild']}
+    count_hash = {commit:self.sina_verify_info['commit'],judge:verify_judge_count,succ:self.sina_verify_info['success'],fail:self.sina_verify_info['faild']}
     unless hash.present?
       return {url:nil,id:nil,ip:nil}.merge(count_hash) 
     else
-      return {url:hash['img_url'],id:hash['cid'],ip:ip}.mmerge(count_hash)
+      return {url:hash['img_url'],id:hash['cid'],ip:ip}.merge(count_hash)
     end
   end
   # 用户每输入正确一个新浪微博爬虫的验证码就奖励一积分
