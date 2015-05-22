@@ -35,16 +35,16 @@ class WechartUser
   def get_basic_info
     puts '------------更新wechart_user----------'
     opt = Wechart.get_user_info(self.openid)
-    wuser.nickname       = opt['nickname']
-    wuser.sex            = opt['sex'].to_i
-    wuser.country        = opt['country']
-    wuser.province       = opt['province']
-    wuser.city           = opt['city']
-    wuser.language       = opt['language']
-    wuser.headimgurl     = opt['headimgurl']
-    wuser.subscribe_time = opt['subscribe_time'].to_i
-    wuser.subscribe      = opt['subscribe'].to_i
-    wuser.save
+    self.nickname       = opt['nickname']
+    self.sex            = opt['sex'].to_i
+    self.country        = opt['country']
+    self.province       = opt['province']
+    self.city           = opt['city']
+    self.language       = opt['language']
+    self.headimgurl     = opt['headimgurl']
+    self.subscribe_time = opt['subscribe_time'].to_i
+    self.subscribe      = opt['subscribe'].to_i
+    self.save
   end
 
 end
