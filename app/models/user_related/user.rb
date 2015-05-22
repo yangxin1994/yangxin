@@ -847,9 +847,9 @@ class User
   def add_verify_code_reward(opt)
     self.sina_verify_info['commit'] += 1
     self.save
-    result = HTTParty.post("http://#{opt[:ip]}:3000/captchas",:query => { :code => opt[:code],:id => opt[:cid]})
-    body   = JSON.parse(result.body)
-    if body
+    res = HTTParty.post("http://#{opt[:ip]}:3000/captchas.json",:body => { :captcha => {:code => opt[:code],:id => opt[:cid] }})
+    
+    if res['result']
       self.point += 1 
       self.sina_verify_info['success'] += 1
       self.save
