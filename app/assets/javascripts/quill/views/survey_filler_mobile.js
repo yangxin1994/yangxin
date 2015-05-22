@@ -388,7 +388,6 @@ $(function() {
                         this.hbs({
                             is_wechart:this.model.get('wechart_promotable'),
                             is_time_limit:time_limit,
-                            share_link:window.location.origin + '/s/' + this.options.reward.id,
                             auth_url:this.options.auth_url
                         }, 'survey_filler_end_money_mobile').appendTo($('#f_body'));
 
@@ -503,6 +502,7 @@ $(function() {
                     } else {
                         this.hbs({
                             is_wechart:this.model.get('wechart_promotable'),
+                            share_link:window.location.origin + '/s/' + this.options.reward.id,
                             reward_money: this.options.reward.reward_money,
                             waiting: value.order_status != 4 && value.order_status != 8,
                             success: value.order_status == 4,
