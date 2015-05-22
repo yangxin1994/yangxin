@@ -21,7 +21,7 @@
 				if(wechart){
 					var ua = navigator.userAgent.toLowerCase();	
 					if(ua.match(/MicroMessenger/i)!="micromessenger") {
-						$('#sf_main').empty().append('<div style="font-size:14pt;text-align:center;"><a href="weixin://contacts/qr/wx16343cb2c71e4c90">复制网址并使用微信浏览器进行答题</a></div>')
+						$('#sf_main .page').empty().append('<div class="un-wechart"><div class="page"><div class="login-panel"><div class="wechart-channel"><a href="weixin://contacts/qr/wx16343cb2c71e4c90" class="btn">复制网址并使用微信浏览器进行答题</a></div></div></div></div>')
 					}else{
 						normal_flow();
 					}					
