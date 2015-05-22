@@ -29,6 +29,19 @@ class WechartsController < ApplicationController
 			unless sids.include?(sid)
 				#未领红包	
 				order  = Order.create_hongbao_order(params[:state],openid)
+				Rails.logger.info "--------new_order:#{order.id.to_s}"
+
+				total_amount = answer.reward_scheme.wechart_reward_amount.to_s
+				amount_arr   = total_amount.scan(/\d+/)
+				if amount_arr.length == 1
+					#设置了每份问卷奖励多少
+					min_value    = max_value  = total_amount = amount_arr.first.to_i
+				elsif amount_arr.length == 2
+					#设置了每份问卷奖励的金额范围,具体金额由微信随机分配
+					value        = rand(amount_arr.first.to_i..amount_arr.last.to_i)
+					min_value    = max_value = total_amount = value
+				end
+								
 			else
 				#已领红包
 				Rails.logger.info '============================'
