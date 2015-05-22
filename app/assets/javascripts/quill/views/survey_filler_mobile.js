@@ -376,8 +376,18 @@ $(function() {
                 } else if (this.options.reward.reward_scheme_type == 1) {
 
                     if (value.order_id == null) {
+                        var time_limit = false;
+                        if(this.model.get('wechart_promotable')){
+                            var d    = Date.new();
+                            var t    = (d + '').split(' ')[4];
+                            if(t >= '00:00:00' && t <= '08:00:00'){
+                                var time_limit = true;
+                            }
+                        }
+                        
                         this.hbs({
                             is_wechart:this.model.get('wechart_promotable'),
+                            is_time_limit:time_limit,
                             auth_url:this.options.auth_url
                         }, 'survey_filler_end_money_mobile').appendTo($('#f_body'));
 

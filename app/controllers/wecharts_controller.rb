@@ -35,9 +35,8 @@ class WechartsController < ApplicationController
 				max_value    = total_amount
 			elsif amount_arr.length == 2
 				#设置了每份问卷奖励的金额范围,具体金额由微信随机分配
-				min_value    = amount_arr.first.to_i
-				max_value    = amount_arr.last.to_i
-				total_amount = rand(min_value..max_value)
+				value        = rand(amount_arr.first.to_i..amount_arr.last.to_i)
+				min_value    = max_value = total_amount = value
 			end
 			res = Wechart.send_red_pack(order.code,openid,request.remote_ip,total_amount,min_value,max_value)
 			if res

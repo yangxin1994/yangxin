@@ -164,6 +164,11 @@ class Wechart
       if res.css('return_code').text.match(/SUCCESS/) && res.css('result_code').text.match(/SUCCESS/)
         return true
       else
+        if res.css('err_code').text.match(/TIME_LIMITED/)
+          Rails.logger.info '=================================='
+          Rails.logger.info '时间受限'
+          Rails.logger.info '=================================='
+        end
         return false
       end    
     end
