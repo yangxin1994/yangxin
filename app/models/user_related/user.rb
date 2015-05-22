@@ -836,28 +836,29 @@ class User
     ip     = ip_arr.sample
     retval = HTTParty.get("http://#{ip}:3000/captchas.json")
     hash   = JSON.parse(retval.body).first
+    count_hash = {commit:self.sina_verify_info['commit'],judge:verify_judge_count,succ:self.sina_verify_info['success'],fail:self.sina_verify_info['faild']}
     unless hash.present?
-      return {url:nil,id:nil,ip:nil} 
+      return {url:nil,id:nil,ip:nil}.merge(count_hash) 
     else
-      return {url:hash['img_url'],id:hash['cid'],ip:ip}
+      return {url:hash['img_url'],id:hash['cid'],ip:ip}.merge(count_hash)
     end
   end
   # 用户每输入正确一个新浪微博爬虫的验证码就奖励一积分
   def add_verify_code_reward(opt)
-    self.sina_verify_info['commit'] += 1
-    self.save
-    result = HTTParty.post("http://#{opt[:ip]}:3000/captchas",:query => { :code => opt[:code],:id => opt[:cid]})
-    body   = JSON.parse(result.body)
-    if body
-      self.point += 1 
-      self.sina_verify_info['success'] += 1
-      self.save
-      sid        = self.id.to_s
-      PointLog.create_weibo_verify_code_log(1,sid)
-    else
-      self.sina_verify_info['faild'] += 1
-      self.save
-    end
+    # self.sina_verify_info['commit'] += 1
+    # self.save
+    # result = HTTParty.post("http://#{opt[:ip]}:3000/captchas",:query => { :code => opt[:code],:id => opt[:cid]})
+    # body   = JSON.parse(result.body)
+    # if body
+    #   self.point += 1 
+    #   self.sina_verify_info['success'] += 1
+    #   self.save
+    #   sid        = self.id.to_s
+    #   PointLog.create_weibo_verify_code_log(1,sid)
+    # else
+    #   self.sina_verify_info['faild'] += 1
+    #   self.save
+    # end
   end
 
   def verify_judge_count

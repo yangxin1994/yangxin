@@ -15,7 +15,8 @@
 <body>
   <div class="header">
     <div class="header-content">
-      <p>已获得<b id="grades"><%= current_user.sina_verify_info[:commit] || 0%></b>积分</p>
+
+      <p>已获得<b id="grades"><%= current_user.sina_verify_info['commit'] || 0%></b>积分</p>
       <ul>
         <li class="pd">
           <i class="icon-exclamation-sign"></i>
@@ -23,11 +24,12 @@
         </li>
         <li class="zq">
           <i class="icon-ok-sign"></i>
-          <div>输入正确<b id="correct"><%= current_user.sina_verify_info[:success]  || 0%></b>个</div>
+
+          <div>输入正确<b id="correct"><%= current_user.sina_verify_info['success']  || 0%></b>个</div>
         </li>
         <li class="cw">
           <i class="icon-remove-sign"></i>
-          <div>输入错误<b id="wrong"><%= current_user.sina_verify_info[:faild]  || 0%></b>个</div>
+          <div>输入错误<b id="wrong"><%= current_user.sina_verify_info['faild']  || 0%></b>个</div>
         </li>
       </ul>
     </div>
@@ -43,7 +45,7 @@
       <input type="hidden" id="image_id" value="<%= @cid %>">
       <input type="hidden" id="remote_ip" value="<%= @ip %>">
       <a href="javascript:submitvrcode();" class="submit">提交 ( Enter )</a>
-      <span>已提交<b><%= current_user.sina_verify_info[:commit] || 0 %></b>个</span>
+      <span>已提交<b id="total"><%= current_user.sina_verify_info['commit'] || 0 %></b>个</span>
      </form>
   </div>
 </body>
