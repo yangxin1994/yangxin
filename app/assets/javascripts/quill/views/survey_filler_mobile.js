@@ -378,7 +378,7 @@ $(function() {
                     if (value.order_id == null) {
                         var time_limit = false;
                         if(this.model.get('wechart_promotable')){
-                            var d    = Date.new();
+                            var d    = new Date();
                             var t    = (d + '').split(' ')[4];
                             if(t >= '00:00:00' && t <= '08:00:00'){
                                 var time_limit = true;
