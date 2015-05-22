@@ -26,10 +26,9 @@ class WechartUser
 
   def self.add_new_user(opt)
     puts '------------创建wechart_user----------'
-    puts "------------openid:#{opt[:openid]}---"
-    puts "------------openid:#{opt['openid']}---"
-    wuser = self.create(openid:opt[:open_id])
-    Order.where(:type => Order::HONGBAO,:open_id => opt[:open_id],:wechart_user_id => nil).each do |order|
+    puts "------------openid:#{opt['open_id']}---"
+    wuser = self.create(openid:opt['open_id'])
+    Order.where(:type => Order::HONGBAO,:open_id => opt['open_id'],:wechart_user_id => nil).each do |order|
       order.update_attributes(wechart_user:wuser.id.to_s)
     end
   end
