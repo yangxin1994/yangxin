@@ -388,6 +388,7 @@ $(function() {
                         this.hbs({
                             is_wechart:this.model.get('wechart_promotable'),
                             is_time_limit:time_limit,
+                            share_link:window.location.origin + '/s/' + this.options.reward.id,
                             auth_url:this.options.auth_url
                         }, 'survey_filler_end_money_mobile').appendTo($('#f_body'));
 
