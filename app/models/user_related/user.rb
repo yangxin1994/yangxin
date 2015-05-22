@@ -844,20 +844,24 @@ class User
   end
   # 用户每输入正确一个新浪微博爬虫的验证码就奖励一积分
   def add_verify_code_reward(opt)
-    self.sina_verify_info[:commit] += 1
-    self.save
-    result = HTTParty.post("http://#{opt[:ip]}:3000/captchas",:query => { :code => opt[:code],:id => opt[:cid]})
-    body   = JSON.parse(result.body)
-    if body
-      self.point += 1 
-      self.sina_verify_info[:success] += 1
-      self.save
-      sid        = self.id.to_s
-      PointLog.create_weibo_verify_code_log(1,sid)
-    else
-      self.sina_verify_info[:faild] += 1
-      self.save
-    end
+    # self.sina_verify_info[:commit]  = self. sina_verify_info[:commit] .to_i + 1
+    # self.save
+    #               HTTParty.post("http://rubygems.org/api/v1/gems/httparty/owners",
+    # :query => { :email => "alan+thinkvitamin@carsonified.com" })
+    # result = HTTParty.post("http://#{opt[:ip]}:3000/captchas",,:query => { :code => opt[:code],:id => opt[:cid]})
+    # body   = JSON.parse(result.body)
+    # if body
+    #   self.point += 1 
+
+    #   self.sina_verify_info[:success] =  self.sina_verify_info[:success] .to_i+  1
+    #   self.save
+    #   sid        = self.id.to_s
+    #   PointLog.create_weibo_verify_code_log(1,sid)
+    # else
+    #   self.sina_verify_info[:faild] =  self.sina_verify_info[:faild].to_i +  1
+    #   self.save
+    # end
+    return '123'
   end
 
   def verify_judge_count
