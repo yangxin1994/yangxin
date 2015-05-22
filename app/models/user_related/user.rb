@@ -845,24 +845,24 @@ class User
   end
   # 用户每输入正确一个新浪微博爬虫的验证码就奖励一积分
   def add_verify_code_reward(opt)
-    self.sina_verify_info[:commit] += 1
+    self.sina_verify_info['commit'] += 1
     self.save
     result = HTTParty.post("http://#{opt[:ip]}:3000/captchas",:query => { :code => opt[:code],:id => opt[:cid]})
     body   = JSON.parse(result.body)
     if body
       self.point += 1 
-      self.sina_verify_info[:success] += 1
+      self.sina_verify_info['success'] += 1
       self.save
       sid        = self.id.to_s
       PointLog.create_weibo_verify_code_log(1,sid)
     else
-      self.sina_verify_info[:faild] += 1
+      self.sina_verify_info['faild'] += 1
       self.save
     end
   end
 
   def verify_judge_count
-    sina_verify_info[:commit].to_i -  sina_verify_info[:success].to_i - sina_verify_info[:faild].to_i
+    sina_verify_info['commit'].to_i -  sina_verify_info['success'].to_i - sina_verify_info['faild'].to_i
   end
 
   def self.clear_users
