@@ -68,7 +68,7 @@ class Order
   belongs_to :survey
   belongs_to :gift
   belongs_to :answer
-  belongs_to :wechart_user
+  belongs_to :wechart_user,foreign_key: "open_id"
   belongs_to :sample, :class_name => "User", :inverse_of => :orders
   belongs_to :movie_activity
 

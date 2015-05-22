@@ -33,10 +33,7 @@ class WechartUser
     wuser.headimgurl     = opt['headimgurl']
     wuser.subscribe_time = opt['subscribe_time'].to_i
     wuser.subscribe      = opt['subscribe'].to_i
-    wuser.save  
-    puts '&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&'
-    puts wuser.inspect
-    puts '&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&' 
+    wuser.save
   end
 
 end
