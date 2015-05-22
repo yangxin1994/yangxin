@@ -23,26 +23,16 @@ class WechartUser
 
   after_create :get_basic_info
 
-  # def self.create_new(opt)
-  #   wuser = self.create()
-  #   wuser.openid         = opt['openid']
-  #   wuser.nickname       = opt['nickname']
-  #   wuser.sex            = opt['sex'].to_i
-  #   wuser.country        = opt['country']
-  #   wuser.province       = opt['province']
-  #   wuser.city           = opt['city']
-  #   wuser.language       = opt['language']
-  #   wuser.headimgurl     = opt['headimgurl']
-  #   wuser.subscribe_time = opt['subscribe_time'].to_i
-  #   wuser.subscribe      = opt['subscribe'].to_i
-  #   wuser.save
-  # end
-
   def self.add_new_user(opt)
+    puts '------------创建wechart_user----------'
     wuser = self.create(openid:opt[:open_id])
+    Order.where(:type => Order::HONGBAO,:open_id => opt[:open_id],:wechart_user_id => nil).each do |order|
+      order.update_attributes(wechart_user:wuser.id.to_s)
+    end
   end
 
   def get_basic_info
+    puts '------------更新wechart_user----------'
     opt = Wechart.get_user_info(self.openid)
     wuser.nickname       = opt['nickname']
     wuser.sex            = opt['sex'].to_i

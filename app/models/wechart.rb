@@ -87,7 +87,6 @@ class Wechart
     res = http.get(uri.request_uri)
     res = JSON.parse(res.body)
     return res
-    #WechartUser.create_new(res)
   end
 
   def self.generate_sign(wechat_hash)

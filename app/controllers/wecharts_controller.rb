@@ -48,6 +48,7 @@ class WechartsController < ApplicationController
 				end
 				wuser  = WechartUser.where(openid:openid).first
 				unless wuser.present?
+					Rails.logger.info "openid:#{openid}  的wechart_user 不存在,需要创建---------"
 					WechartWorker.perform_async('create',{open_id:openid}) 
 				end
 			else
@@ -59,7 +60,7 @@ class WechartsController < ApplicationController
 		else
 			Rails.logger.info '------系统错误,没有找到对应的answer----'
 		end
-		
+
 		redirect_to "/s/#{answer.survey.wechart_scheme_id}"
 
 

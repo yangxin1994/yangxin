@@ -80,7 +80,7 @@
 <% if @survey_closed %>
 	<div class='error-con'>对不起，您所访问的问卷达到回收要求已经关闭，感谢您的关注，欢迎参加其他调研。</div>
 <% elsif !@survey.nil? %>
-	<h2 class="title"><%= @survey.title %></h2>
+<!-- 	<h2 class="title"><%= @survey.title %></h2> -->
 	<div class="page">
 		<% if @survey.welcome.present? %>
 			<div class="describe"><%= raw @survey.welcome %></div>
