@@ -78,6 +78,7 @@ class Wechart
     return res['openid']
   end
 
+  #只有关注了公众号才能获取基本信息,如果没有关注的话,只会返回openid
   def self.get_user_info(openid)
     uri = URI("https://api.weixin.qq.com/cgi-bin/user/info?access_token=#{self.access_token}&openid=#{openid}&lang=zh_CN")
     http = Net::HTTP.new(uri.host, uri.port)
@@ -157,9 +158,9 @@ class Wechart
       request.body = wechat_hash
       response = http.request(request)
       res      = Nokogiri::XML(response.body,nil,'UTF-8')
-      Rails.logger.info  '%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'
-      Rails.logger.info  res.inspect
-      Rails.logger.info  '%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'
+      # Rails.logger.info  '%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'
+      # Rails.logger.info  res.inspect
+      # Rails.logger.info  '%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'
       if res.css('return_code').text.match(/SUCCESS/) && res.css('result_code').text.match(/SUCCESS/)
         return true
       else

@@ -25,20 +25,17 @@ class WechartUser
   after_create :get_basic_info
 
   def self.add_new_user(opt)
-    puts '------------创建wechart_user----------'
-    puts "------------openid:#{opt['open_id']}---"
-    wuser = self.create(openid:opt['open_id'])
-    Order.where(:type => Order::HONGBAO,:open_id => opt['open_id'],:wechart_user_id => nil).each do |order|
-      order.update_attributes(wechart_user:wuser.id.to_s)
+    wuser = self.where(openid:opt['open_id']).first
+    unless wuser.present?
+      wuser = self.create(openid:opt['open_id']) 
+      Order.where(:type => Order::HONGBAO,:open_id => opt['open_id'],:wechart_user_id => nil).each do |order|
+        order.update_attributes(wechart_user:wuser.id.to_s)
+      end
     end
   end
 
   def get_basic_info
     opt = Wechart.get_user_info(self.openid)
-    puts '------------更新wechart_user----------'
-    puts "------------openid:#{self.openid}----"
-    puts opt.inspect
-    puts '-------------------------------------'
     self.nickname       = opt['nickname']
     self.sex            = opt['sex'].to_i
     self.country        = opt['country']
