@@ -28,6 +28,7 @@ class WechartsController < ApplicationController
 			sids  = Order.where(type:Order::HONGBAO,open_id:openid).map{|order| order.answer.survey.id.to_s}.uniq
 			unless sids.include?(sid)
 				#未领红包	
+				order  = Order.create_hongbao_order(params[:state],openid)
 			else
 				#已领红包
 				Rails.logger.info '============================'
