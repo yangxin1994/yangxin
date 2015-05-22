@@ -4,8 +4,8 @@ class WechartWorker
 
   def perform(type,opt={})
     case type
-    when 'get_user_info'
-      retval = Wechart.get_user_info(opt)
+    when 'create'
+      retval = WechartUser.add_new_user(opt)
     end
     return true
   end

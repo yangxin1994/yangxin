@@ -19,10 +19,25 @@ class WechartsController < ApplicationController
 
 	def wechart_auth
 		openid = Wechart.get_open_id(params[:code])
-		Rails.logger.info "--------------openid:#{openid}"
-		order  = Order.where(open_id:openid,answer_id:params[:state]).first
-		Rails.logger.info "--------------order:#{order.try(:id).to_s}"
-		answer = Answer.find(params[:state])
+		#Rails.logger.info "--------------openid:#{openid}"
+		
+		#Rails.logger.info "--------------order:#{order.try(:id).to_s}"
+		answer    = Answer.where(id:params[:state]).first
+		if answer
+			sid   = answer.survey.id.to_s
+			sids  = Order.where(type:Order::HONGBAO,open_id:openid).map{|order| order.answer.survey.id.to_s}.uniq
+			unless sids.include?(sid)
+				#未领红包	
+			else
+				#已领红包
+				Rails.logger.info '============================'
+				Rails.logger.info '您已经领取过红包╮(╯▽╰)╭'
+				Rails.logger.info '============================'					
+			end
+		else
+			Rails.logger.info '------系统错误,没有找到对应的answer----'
+		end
+		
 		Rails.logger.info "answer: #{answer.id.to_s}"
 		unless order.present?
 			order  = Order.create_hongbao_order(params[:state],openid)
@@ -55,7 +70,7 @@ class WechartsController < ApplicationController
 		
 		wuser  = WechartUser.where(openid:openid).first
 		unless wuser.present?
-			WechartWorker.perform_async('get_user_info',{open_id:openid}) 
+			WechartWorker.perform_async('create',{open_id:openid}) 
 		end
 		
 		redirect_to "/s/#{answer.survey.wechart_scheme_id}"

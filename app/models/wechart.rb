@@ -86,7 +86,8 @@ class Wechart
     http.verify_mode = OpenSSL::SSL::VERIFY_NONE
     res = http.get(uri.request_uri)
     res = JSON.parse(res.body)
-    WechartUser.create_new(res)
+    return res
+    #WechartUser.create_new(res)
   end
 
   def self.generate_sign(wechat_hash)
