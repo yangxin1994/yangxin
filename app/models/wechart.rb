@@ -79,7 +79,10 @@ class Wechart
   # 定时任务 每一个小时执行一次
   def self.refresh_jsapi_ticket
     uri    = URI("https://api.weixin.qq.com/cgi-bin/ticket/getticket?access_token=#{self.access_token}&type=jsapi")
-    res    = Net::HTTP.get(uri)
+    res = Net::HTTP.new(uri.host, uri.port)
+    res.use_ssl = true
+    res.verify_mode = OpenSSL::SSL::VERIFY_NONE
+    res = res.get(uri.request_uri)
     res    = JSON.parse(res)
     ticket = res['ticket']
     $redis.set('jsapi_ticket',ticket)
