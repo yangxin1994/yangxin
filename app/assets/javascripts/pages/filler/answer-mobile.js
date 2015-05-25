@@ -15,16 +15,16 @@ jQuery(function($) {
 			});
 	
 			wx.onMenuShareTimeline({
-			    title: '答问卷领红包,大家快来抢啊!!!',
+			    title: '答问卷领红包,大家快来抢!',
 			    link: window.share_link,
-			    imgUrl: '/assets/images/od-quillme/favicon.ico'
+			    imgUrl: '/assets/od-quillme/favicon.ico'
 			});
 	
 			wx.onMenuShareAppMessage({
-			    title: '答问卷领红包,大家快来抢啊!!!', // 分享标题
+			    title: '答问卷领红包,大家快来抢!',
 			    desc: '问卷吧邀您一起答问卷抢红包,答题越多奖励越多!!!',
 			    link: window.share_link,
-			    imgUrl: '/assets/images/od-quillme/favicon.ico'
+			    imgUrl: '/assets/od-quillme/favicon.ico'
 			});
 		})
 	}
