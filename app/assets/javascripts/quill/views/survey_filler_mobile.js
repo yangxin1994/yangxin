@@ -508,6 +508,7 @@ $(function() {
                             success: value.order_status == 4,
                             failed: value.order_status == 8,
                             order_code: value.order_code,
+                            order_amount:(value.order_amount / 100),
                             signin: this.options.signin,
                             allow_multianswer:this.model.get('style_setting').allow_multianswer,
                             survey_id: this.model.get('_id'),

@@ -1,13 +1,14 @@
 <div class="page">
 	{{#if is_wechart}}
-		<div class="describe">
+		<div class="describe wechart">
 			<div class="answer_finish">
-				<b><i></i>恭喜您获得了一个微信红包!</b>
+				<img src="/assets/filler/hongbao.png" />
+				<b><i></i>领取成功啦!</b>
+				<div class='amount'>恭喜您获得了<span>{{order_amount}}</span>元的微信红包!</div>
 			</div>
 			<div class="share">
-				复制以下链接:<br/>
-				<input type="text"  class="share-ipt" value="{{share_link}}"  style="width:90%;"/><br/>
-				点击右上角分享到朋友圈
+				<!-- {{share_link}} -->
+				<a class='btn'>点击右上角分享到朋友圈</a>
 			</div>
 		</div>
 	{{else}}

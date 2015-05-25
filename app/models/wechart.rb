@@ -45,6 +45,13 @@ class Wechart
     @config['apikey']
   end
 
+  def self.jsapi_ticket
+    ticket  = $redis.get('jsapi_ticket')
+    unless ticket.present?
+      ticket = refresh_jsapi_ticket
+    end
+    return ticket
+  end
 
   def self.access_token
     token = $redis.get('access_token')
@@ -67,6 +74,18 @@ class Wechart
     $redis.set('access_token',tok)
     return token
   end
+
+
+  # 定时任务 每一个小时执行一次
+  def self.refresh_jsapi_ticket
+    uri    = URI("https://api.weixin.qq.com/cgi-bin/ticket/getticket?access_token=#{self.access_token}&type=jsapi")
+    res    = Net::HTTP.get(uri)
+    res    = JSON.parse(res)
+    ticket = res['ticket']
+    $redis.set('jsapi_ticket',ticket)
+    return ticket      
+  end
+
 
   def self.get_open_id(code)
     uri = URI.parse("https://api.weixin.qq.com/sns/oauth2/access_token?appid=#{self.appid}&secret=#{self.secret}&code=#{code}&grant_type=authorization_code")

@@ -122,6 +122,7 @@ class Filler::AnswersController < Filler::FillerController
           "answer_audit_message" => @answer.audit_message,
           "order_id" => @answer.order.try(:id),
           "order_code" => @answer.order.try(:code),
+          "order_amount" => @answer.order.try(:amount),
           "order_status" => @answer.order.try(:status)}
       else
         answers = @answer.answer_content.merge(@answer.random_quality_control_answer_content)
@@ -136,6 +137,7 @@ class Filler::AnswersController < Filler::FillerController
           "repeat_time" => @answer.repeat_time,
           "order_id" => @answer.order.try(:_id),
           "order_code" => @answer.order.try(:code),
+          "order_amount" => @answer.order.try(:amount),
           "order_status" => @answer.order.try(:status)}
       end
     else
@@ -144,6 +146,7 @@ class Filler::AnswersController < Filler::FillerController
         "answer_audit_message" => @answer.audit_message,
         "order_id" => @answer.order.try(:_id),
         "order_code" => @answer.order.try(:code),
+        "order_amount" => @answer.order.try(:amount),
         "order_status" => @answer.order.try(:status)}
     end
     @data = {:success => true, :value => retval}
@@ -166,6 +169,10 @@ class Filler::AnswersController < Filler::FillerController
 
 
     @binded = user_signed_in ? (current_user.email_activation || current_user.mobile_activation) : false
+    #调用微信的分享接口需要的配置
+    if @survey.wechart_promotable
+      generate_wechart_sign
+    end
   end
 
 
@@ -293,4 +300,24 @@ class Filler::AnswersController < Filler::FillerController
     }
     render_json_auto
   end
+
+  # 生成微信js-sdk签名
+  def generate_wechart_sign
+      @appid        = Wechart.appid
+      @noncestr     = newpass
+      @jsapi_ticket = Wechart.jsapi_ticket
+      @timestamp    = Time.now.to_i
+      @url          = request.url
+      string1       = "jsapi_ticket=#{@jsapi_ticket}&noncestr=#{@noncestr}&timestamp=#{@timestamp}&url=#{@url}"
+      @signure      =  Digest::SHA1.hexdigest(string1)
+  end
+
+  def newpass
+    chars = ("a".."z").to_a + ("A".."Z").to_a + ("0".."9").to_a
+    newpass = ""
+    1.upto(16) { |i| newpass << chars[rand(chars.size-1)] }
+    return newpass
+  end
+
+
 end

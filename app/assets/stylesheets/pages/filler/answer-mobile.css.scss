@@ -152,6 +152,35 @@ textarea{
 			}
 		}
 	}
+	&.wechart{
+		background:#c6373d;
+		min-height: inherit;
+		img{
+			display: block;
+			margin:0 auto;
+		}
+		b{
+			color:#fff;
+		}
+		.amount{
+			color:#f9e452;
+			padding:10px 0px;
+			font-size:12pt;
+			span{
+				font-size:18pt;
+			}
+		}
+		a{
+			display:block;
+			background:#f9e452;
+			color:#337ab7;
+			font-size:14pt;
+			text-decoration: none;
+			height:40px;
+			line-height:40px;
+			@include border-radius(3px);
+		}		
+	}
 }
 
 .free_describe{
