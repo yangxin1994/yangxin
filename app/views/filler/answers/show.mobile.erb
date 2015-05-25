@@ -55,7 +55,7 @@
 			window.signure   	= <%= raw (@signure).to_json %>;
 			window.share_link   = window.location.origin + '/s/' + <%= raw @reward_scheme_id.to_json %>;
 			wx.config({
-			    debug: false,
+			    debug: true,
 			    appId: window.appid,
 			    timestamp: window.timestamp,
 			    nonceStr: window.noncestr,
