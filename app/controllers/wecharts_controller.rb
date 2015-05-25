@@ -22,6 +22,9 @@ class WechartsController < ApplicationController
 		answer    = Answer.where(id:params[:state]).first
 		if answer
 			sid   = answer.survey.id.to_s
+			Rails.logger.info '--------------------------'
+			Rails.logger.info openid
+			Rails.logger.info '--------------------------'
 			sids  = Order.where(type:Order::HONGBAO,open_id:openid).map{|order| order.answer.survey.id.to_s}.uniq
 			unless sids.include?(sid)
 				#未领红包	
