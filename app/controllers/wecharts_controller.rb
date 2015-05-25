@@ -22,8 +22,7 @@ class WechartsController < ApplicationController
 		answer    = Answer.where(id:params[:state]).first
 		if answer
 			sid   = answer.survey.id.to_s
-			aids  = Order.where(type:Order::HONGBAO,open_id:openid).map{|order| order.answer_id.to_s}
-			aids
+			sids  = Order.where(type:Order::HONGBAO,open_id:openid).map{|order| order.answer.survey.id.to_s}
 			unless sids.include?(sid)
 				#未领红包	
 				order  = Order.create_hongbao_order(params[:state],openid)
