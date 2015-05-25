@@ -83,7 +83,7 @@ class Wechart
     res.use_ssl = true
     res.verify_mode = OpenSSL::SSL::VERIFY_NONE
     res = res.get(uri.request_uri)
-    res    = JSON.parse(res)
+    res    = JSON.parse(res.body)
     ticket = res['ticket']
     $redis.set('jsapi_ticket',ticket)
     return ticket      
