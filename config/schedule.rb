@@ -28,6 +28,10 @@ every :hour do
   runner "Wechart.refresh_access_token"
 end
 
+every :hour do 
+	runner "Wechart.refresh_jsapi_ticket"
+end
+
 every 1.days, :at => '4:30 pm' do
 	runner "SmsInvitationWorker.perform_async"
 end
