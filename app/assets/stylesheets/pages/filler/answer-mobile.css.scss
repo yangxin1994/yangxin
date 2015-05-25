@@ -107,6 +107,31 @@ textarea{
 	margin:0 auto;
 	min-height: 366px
 }
+.share-direc{
+	// display:none;
+	width:90%;
+	height:90%;
+	position:absolute;
+	top:2%;
+	right:5%;
+	background:#000;
+	opacity:0.8;
+	img{
+		width:100%;
+	}
+}
+.length-desc{
+	text-align:center;
+	margin-top:40px;
+	font-size:18pt;
+	color:#fff;
+}
+.qrcode{
+	margin-top:40px;
+	img{
+		width:100%;
+	}
+}
 /*进度条*/
 .progress{
 	height:8px;

@@ -17,16 +17,17 @@ jQuery(function($) {
 			wx.onMenuShareTimeline({
 			    title: '答问卷领红包,大家快来抢!',
 			    link: window.share_link,
-			    imgUrl: '/assets/od-quillme/favicon.ico'
+			    imgUrl: window.location.origin + '/assets/od-quillme/favicon.ico'
 			});
 	
 			wx.onMenuShareAppMessage({
 			    title: '答问卷领红包,大家快来抢!',
 			    desc: '问卷吧邀您一起答问卷抢红包,答题越多奖励越多!!!',
 			    link: window.share_link,
-			    imgUrl: '/assets/od-quillme/favicon.ico'
+			    imgUrl: window.location.origin + '/assets/od-quillme/favicon.ico'
 			});
 		})
+		
 	}
 });
 

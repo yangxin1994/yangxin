@@ -523,6 +523,15 @@ $(function() {
                         if (!this.options.signin) {
                             this._set_reward();
                         }
+                        //微信红包分享按钮
+                        $('.wechart .share a.btn').click($.proxy(function(){
+                            $('.share-direc').show()
+                        },this))
+
+                        $('.share-direc').click($.proxy(function(){
+                            $('.share-direc').hide()
+                        },this))
+
 
                         $('#get_order').click($.proxy(function() {
                             $.util.disable($('#get_order').text('正在跳转...'));
