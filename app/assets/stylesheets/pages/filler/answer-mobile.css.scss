@@ -108,11 +108,11 @@ textarea{
 	min-height: 366px
 }
 .share-direc{
-	// display:none;
+	display:none;
 	width:90%;
-	height:90%;
+	height:100%;
 	position:absolute;
-	top:2%;
+	top:0;
 	right:5%;
 	background:#000;
 	opacity:0.8;
@@ -122,12 +122,12 @@ textarea{
 }
 .length-desc{
 	text-align:center;
-	margin-top:40px;
+	margin-top:10px;
 	font-size:18pt;
 	color:#fff;
 }
 .qrcode{
-	margin-top:40px;
+	margin-top:10px;
 	img{
 		width:100%;
 	}
