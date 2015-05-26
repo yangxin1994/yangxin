@@ -38,6 +38,7 @@
 			mobile: <%= raw current_user.try(:mobile).to_json %>,
 			spread_point: <%= raw @survey['spread_point'] %>,
 			spread_url: window.spread_url,
+			iqiyi_redirect:<%= raw @redirect_link.to_json %>,
 			binded: <%= raw @binded %>
 		});
 	});

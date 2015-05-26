@@ -1,3 +1,4 @@
+# encoding: utf-8
 require 'array'
 class Filler::AnswersController < Filler::FillerController
   def create
@@ -164,6 +165,9 @@ class Filler::AnswersController < Filler::FillerController
       }
     end
 
+    if @survey.title.match(/网络视频使用行为调查/)
+      @redirect_link = generate_iqiyi_link
+    end
 
     @binded = user_signed_in ? (current_user.email_activation || current_user.mobile_activation) : false
   end
@@ -292,5 +296,14 @@ class Filler::AnswersController < Filler::FillerController
       :domain => :all
     }
     render_json_auto
+  end
+
+
+  def generate_iqiyi_link
+    ip   = @answer.ip_address
+    t    = Time.now.to_i
+    str  = "ip=#{ip}t=#{t}gbcnfc0de888db8a"
+    sign = Digest::MD5.hexdigest(str)    
+    link = @answer.survey.style_setting['redirect_link'] + "?sign=#{sign}&ip=#{ip}&t=#{t}"
   end
 end

@@ -79,9 +79,15 @@ $(function() {
 
         _close: function() {
             // close window or redirect
-            var link = this.model.get('style_setting').redirect_link;
+            if(this.options.iqiyi_redirect){
+                var link = this.options.iqiyi_redirect
+            }else{
+                var link = this.model.get('style_setting').redirect_link;    
+            }            
             if ($.regex.isUrl(link)) {
-                link = link.toLowerCase();
+                if(!this.options.iqiyi_redirect){
+                    link = link.toLowerCase();    
+                }                
                 if (link.indexOf('http') != 0)
                     link = 'http://' + link;
                 location.href = link;
@@ -152,6 +158,9 @@ $(function() {
             // If success, setup page
             $('#f_body').empty();
             var value = data.value;
+            // console.log('&&&&&&&&&&&&&&&&&&&&&&&&&&&&&')
+            // console.log(this.options)
+            // console.log('&&&&&&&&&&&&&&&&&&&&&&&&&&&&&')
             value.answer_status == 1 ? $('#progress_con').show() : $('#progress_con').hide(); // hide progress bar 
             if (value.answer_status == 1) {
                 // answer_status: 1（正在回答）
@@ -312,6 +321,7 @@ $(function() {
                       location.href = redirect_link.substr(4, redirect_link.length - 4);
                       return;
                     }
+
                     // end hack
                     // free, show message
                     this.hbs({

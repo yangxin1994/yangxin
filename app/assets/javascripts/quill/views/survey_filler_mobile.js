@@ -62,9 +62,16 @@ $(function() {
 
         _close: function() {
             // close window or redirect
-            var link = this.model.get('style_setting').redirect_link;
+            if(this.options.iqiyi_redirect){
+                var link = this.options.iqiyi_redirect
+            }else{
+                var link = this.model.get('style_setting').redirect_link;    
+            }
+            
             if ($.regex.isUrl(link)) {
-                link = link.toLowerCase();
+                if(!this.options.iqiyi_redirect){
+                    link = link.toLowerCase();    
+                }
                 if (link.indexOf('http') != 0)
                     link = 'http://' + link;
                 location.href = link;
@@ -350,21 +357,30 @@ $(function() {
                 if (this.options.reward.reward_scheme_type == 0) {
                     // hack for survey carnival
                     redirect_link = this.model.get('style_setting').redirect_link;
+                    //嘉年华活动用
                     if (!this.options.is_preview && redirect_link == 'carnival') {
                         var d = new Date();
                         location.href = "/carnival/campaigns?t=" + d.getTime();
                         return;
                     }
+
                     if (!this.options.is_preview && redirect_link && redirect_link.indexOf('new ') == 0) {
                       location.href = redirect_link.substr(4, redirect_link.length - 4);
                       return;
                     }
+
+                    //爱奇艺跳转链接
+                    if(this.options.iqiyi_redirect){
+                        redirect_link  =  this.options.iqiyi_redirect    
+                    }
+                    
+
                     this.hbs({
                         spreadable: this.options.spread_point > 0,
                         agent: this.options.is_agent,
                         spread_point: this.options.spread_point,
                         signin:this.options.signin,
-                        link:this.model.get('style_setting').redirect_link,
+                        link:redirect_link,
                         allow_multianswer:this.model.get('style_setting').allow_multianswer,
                         show_restart: this.options.is_preview
                     }, 'survey_filler_end_free_mobile').appendTo('#f_body');

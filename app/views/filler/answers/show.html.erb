@@ -21,7 +21,7 @@
 				<% end %>
 			},
 			answer_id: '<%="#{params[:id]}" %>',
-      agent_task_id: <%= raw @answer.agent_task_id.to_s.to_json %>,
+			agent_task_id: <%= raw @answer.agent_task_id.to_s.to_json %>,
 			is_agent:<%= !@answer.agent_task_id.blank? %>,
 			data: <%=@data ? (raw @data.to_json.gsub("</", "<\\/")) : 'null' %>, // 避免script标签
 			signin: <%= user_signed_in %>,
@@ -29,8 +29,9 @@
 			mobile: <%= raw current_user.try(:mobile).to_json %>,
 			spread_point: <%= raw @survey['spread_point'] %>,
 			spread_url: window.spread_url,
+			iqiyi_redirect:<%= raw @redirect_link.to_json %>,
 			binded: <%= raw @binded %>,
-      lang: <%= raw @survey[:lang].to_json %>
+			lang: <%= raw @survey[:lang].to_json %>
 		});
 	});
 	</script>
