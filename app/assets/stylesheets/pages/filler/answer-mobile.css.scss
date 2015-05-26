@@ -9,6 +9,18 @@
 @import "compass/utilities/general/clearfix";
 @import "od-button/*.png";
 @import "od-mobile/*.png";
+html,body{
+	height:100%;
+}
+#f_body{
+	height:100%;
+	.page{
+		height:100%;
+		.describe{
+			height:100%;
+		}
+	}
+}
 
 .spread{
 	top:-2000px;
