@@ -390,8 +390,23 @@ $(function() {
                         this._close()
                     }, this));
                 } else if (this.options.reward.reward_scheme_type == 1) {
+
                     if (value.order_id == null) {
-                        this.hbs({}, 'survey_filler_end_money_mobile').appendTo($('#f_body'));
+                        var time_limit = false;
+                        if(this.model.get('wechart_promotable')){
+                            var d    = new Date();
+                            var t    = (d + '').split(' ')[4];
+                            if(t >= '00:00:00' && t <= '08:00:00'){
+                                var time_limit = true;
+                            }
+                        }
+                        
+                        this.hbs({
+                            is_wechart:this.model.get('wechart_promotable'),
+                            is_time_limit:time_limit,
+                            auth_url:this.options.auth_url
+                        }, 'survey_filler_end_money_mobile').appendTo($('#f_body'));
+
                         $('.s_type select').children('option[value="zhifubao"]').text('为您支付宝付款￥' + this.options.reward.reward_money + '元')
                         $('.s_type select').children('option[value="chongzhi"]').text('为您手机充值￥' + this.options.reward.reward_money + '元')
 
@@ -502,11 +517,14 @@ $(function() {
                         }, this));
                     } else {
                         this.hbs({
+                            is_wechart:this.model.get('wechart_promotable'),
+                            share_link:window.location.origin + '/s/' + this.options.reward.id,
                             reward_money: this.options.reward.reward_money,
                             waiting: value.order_status != 4 && value.order_status != 8,
                             success: value.order_status == 4,
                             failed: value.order_status == 8,
                             order_code: value.order_code,
+                            order_amount:(value.order_amount / 100),
                             signin: this.options.signin,
                             allow_multianswer:this.model.get('style_setting').allow_multianswer,
                             survey_id: this.model.get('_id'),
@@ -521,6 +539,15 @@ $(function() {
                         if (!this.options.signin) {
                             this._set_reward();
                         }
+                        //微信红包分享按钮
+                        $('.wechart .share a.btn').click($.proxy(function(){
+                            $('.share-direc').show()
+                        },this))
+
+                        $('.share-direc').click($.proxy(function(){
+                            $('.share-direc').hide()
+                        },this))
+
 
                         $('#get_order').click($.proxy(function() {
                             $.util.disable($('#get_order').text('正在跳转...'));

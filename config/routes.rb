@@ -153,6 +153,13 @@ OopsData::Application.routes.draw do
 
   resources :realogs
 
+  resources :wecharts ,:only => [] do 
+   collection do 
+     get  'wechart_api'
+     post 'wechart_api' 
+     get  'wechart_auth'
+   end    
+  end
 
   # surveys, pages and questions
   scope :module => "quill" do
@@ -610,7 +617,7 @@ OopsData::Application.routes.draw do
   # Survey filler
   scope :module => "filler" do
     match "s/:id" => "surveys#show", :as => :show_s, :via => :get
-    resources :surveys, :only => [:show] 
+    resources :surveys, :only => [:show]
 
     match "p/:id" => "previews#show", :as => :show_p, :via => :get
     resources :previews, :only => [:show]

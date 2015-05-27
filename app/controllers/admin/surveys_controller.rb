@@ -75,6 +75,8 @@ class Admin::SurveysController < Admin::AdminController
           @editing_rs["prizes"] = reward["prizes"]
         when 16
           @editing_rs["jifenbao"] = reward["amount"]
+        when 32
+          @editing_rs["hongbao"] = reward["amount"]
         else
 
         end
@@ -139,6 +141,7 @@ class Admin::SurveysController < Admin::AdminController
 
   def promote
     if survey = Survey.where(:_id => params[:id]).first
+      @s       = survey
       @promote = survey.serialize_in_promote_setting
       gon.push({:id => params[:id]})
       gon.push({:pmt_attrs => survey.sample_attributes_for_promote})

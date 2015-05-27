@@ -2,11 +2,13 @@
 //=require ui/plugins/od_button_text
 //=require ui/widgets/od_popup
 //=require ui/widgets/od_share
+//=require jquery.qrcode
 
 //=require twitter/bootstrap/tooltip
 //=require twitter/bootstrap/popover
 
 jQuery(function($) {
+	// wechart spread
 	// start invite friends
 	$('#start_invite').click(function() {
 		$.od.odShare({

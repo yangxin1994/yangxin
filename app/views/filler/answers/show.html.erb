@@ -12,7 +12,7 @@
 				id: <%= raw @reward_scheme_id.to_json %>,
 				reward_scheme_type: <%= @reward_scheme_type %>,
 				<% if @reward_scheme_type == 1 %>
-				reward_money: <%= @reward_money %>,
+				reward_money: '<%= "#{@reward_money}" %>',
 				<% elsif @reward_scheme_type == 2 %>
 				reward_point: <%= @reward_point %>,
 				<% elsif @reward_scheme_type == 3 %>

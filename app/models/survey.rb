@@ -61,6 +61,7 @@ class Survey
   # reward for introducing others
   field :spread_point, :type => Integer, default: 0
   field :quillme_promotable, :type => Boolean, default: false
+  field :wechart_promotable, :type => Boolean, default: false
   field :quillme_hot, :type => Boolean, :default => false #是否为热点小调查(quillme用)
   field :recommend_position, :type => Integer, :default => nil  #推荐位
   field :email_promotable, :type => Boolean, default: false
@@ -70,6 +71,9 @@ class Survey
   field :quillme_promote_info, :type => Hash, :default => {
     "reward_scheme_id" => ""
   }
+  field :wechart_promote_info, :type => Hash, :default => {
+    "reward_scheme_id" => ""
+  }  
   # 0 免费, 1 表示话费，2表示支付宝转账，4表示积分，8表示抽奖，16表示发放集分宝
   field :quillme_promote_reward_type,:type => Integer, default: nil
   field :email_promote_info, :type => Hash, default: {
@@ -193,6 +197,10 @@ class Survey
     self.quillme_promote_info['reward_scheme_id']
   end
 
+  def wechart_scheme_id
+    self.wechart_promote_info['reward_scheme_id']
+  end
+
   # 查找某个sample 某个survey的answer
   def answer_by_sample(user=nil)
     self.answers.where(:is_preview => false,:user_id => user.id).first if user.present?
@@ -218,6 +226,11 @@ class Survey
 
   def self.find_by_ids(survey_id_list)
     return Survey.all.in(_id: survey_id_list)
+  end
+
+
+  def auth_url(answer_id)
+    return "https://open.weixin.qq.com/connect/oauth2/authorize?appid=#{Wechart.appid}&redirect_uri=#{Wechart.redirect_uri}&response_type=code&scope=snsapi_base&state=#{answer_id}#wechat_redirect"
   end
 
   def update_quillme_promote_reward_type
@@ -264,7 +277,7 @@ class Survey
     options["browser_extension"]["browser_extension_promote_setting"]["filters"] = filters
     _promote_email_count = email_promote_info["promote_email_count"]
     _promote_sms_count = sms_promote_info["promote_sms_count"]
-    [:quillme, :email, :sms, :browser_extension, :weibo].each do |promote_type|
+    [:quillme,:wechart, :email, :sms, :browser_extension, :weibo].each do |promote_type|
       _params = options[promote_type]
       self.update_attributes(
       "#{promote_type}_promotable".to_sym => _params[:promotable],
@@ -277,6 +290,9 @@ class Survey
     if self.quillme_promotable && self.quillme_promote_info["reward_scheme_id"].blank?
       self.quillme_promote_info["reward_scheme_id"] = self.reward_schemes.where(default: true).first.id.to_s
     end
+    if self.wechart_promotable && self.wechart_promote_info["reward_scheme_id"].blank?
+      self.wechart_promote_info["reward_scheme_id"] = self.reward_schemes.where(default: true).first.id.to_s
+    end    
     if self.email_promotable && self.email_promote_info["reward_scheme_id"].blank?
       self.email_promote_info["reward_scheme_id"] = self.reward_schemes.where(default: true).first.id.to_s
     end
@@ -907,6 +923,8 @@ class Survey
     survey_obj = Hash.new
     survey_obj["quillme_promotable"] = self.quillme_promotable
     survey_obj["quillme_promote_info"] = Marshal.load(Marshal.dump(self.quillme_promote_info))
+    survey_obj["wechart_promotable"] = self.wechart_promotable
+    survey_obj["wechart_promote_info"] = Marshal.load(Marshal.dump(self.wechart_promote_info))    
     survey_obj["email_promotable"] = self.email_promotable
     survey_obj["email_promote_info"] = Marshal.load(Marshal.dump(self.email_promote_info))
     survey_obj["sms_promotable"] = self.sms_promotable

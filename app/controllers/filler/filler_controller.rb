@@ -1,3 +1,4 @@
+# encoding: utf-8
 class Filler::FillerController < ApplicationController
 
   before_filter :force_tablet_html, :check_mobile_param
@@ -31,10 +32,23 @@ class Filler::FillerController < ApplicationController
     return if rewards.blank?
     r = rewards[0]
     case r['type']
-    when RewardScheme::MOBILE, RewardScheme::ALIPAY, RewardScheme::JIFENBAO
-      if r['amount'] > 0
-        @reward_scheme_type = 1
-        @reward_money = r["type"] == RewardScheme::JIFENBAO ? r['amount'].to_f / 100 : r['amount']
+    when RewardScheme::MOBILE, RewardScheme::ALIPAY, RewardScheme::JIFENBAO, RewardScheme::HONGBAO
+      if r['type'].to_i == RewardScheme::HONGBAO.to_i
+        if r['amount'].to_s
+          @reward_scheme_type = 1
+          if r['amount'].to_s.match(/^\d+$/)
+            @reward_money = r['amount'].to_f / 100 
+          elsif r['amount'].to_s.match(/-/)
+            min = r['amount'].split('-').first
+            max = r['amount'].split('-').last
+            @reward_money = (min.to_f / 100).to_s + '~' + (max.to_f / 100).to_s
+          end
+        end
+      else
+        if r['amount'] > 0
+          @reward_scheme_type = 1
+          @reward_money = r["type"] == RewardScheme::JIFENBAO ? r['amount'].to_f / 100 : r['amount']
+        end
       end
     when RewardScheme::POINT
       if r['amount'] > 0

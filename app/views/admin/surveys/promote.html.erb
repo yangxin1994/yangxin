@@ -108,6 +108,30 @@
       </div>
 
       <div class="control-group">
+        <label class="control-label" >微信发布:</label>
+        <div class="controls">
+          <div class="input-append">
+            <div class="btn-group" data-toggle="buttons-checkbox">
+              <button type="button" class="btn btn-info btn-ckb <%= "active" if @promote['wechart_promotable'] %> " data-toggle="wechart" >推送</button>
+              <input value="<%= @promote['wechart_promotable'] ? true : false %>" id="wechart_promotable" type="hidden" name="wechart[promotable]">
+              <button class="btn dropdown-toggle" data-toggle="dropdown">
+                奖励方案
+                <span class="caret"></span>
+              </button>
+              <ul class="dropdown-menu dropselect" id="type_select">
+                <li><a href="#reward-">不设置奖励方案</a></li>
+                <% @promote['reward_schemes'].each do |reward_scheme| %>
+                  <li><a href="#reward-<%= reward_scheme['_id'] %>"><%= reward_scheme['name'] %></a></li>
+                <% end %>
+              </ul>
+              <input value="<%= @promote['wechart_promote_info']['reward_scheme_id'] %>" type='hidden' id="wechart_reward_scheme" name="wechart[wechart_promote_setting][reward_scheme_id]">
+            </div>
+          </div>
+          <span>(<a href="/s/<%=@s.wechart_scheme_id%>"><%= request.protocol + '/' + request.host_with_port %>/s/<%= @s.wechart_scheme_id %></a>)</span> 
+        </div>
+      </div>
+
+      <div class="control-group">
         <label class="control-label" >邮件订阅:</label>
         <div class="controls">
           <div class="input-append">

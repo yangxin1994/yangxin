@@ -16,6 +16,21 @@ body{
 .page{
 	width:90%;
 	margin:0 auto;
+	.login-panel{
+		.wechart-channel{
+			padding:10px 0px;
+			text-align:center;
+			a{
+				text-decoration: none;
+			}
+		}	
+	}
+	.wechart-focus{
+		text-align:center;
+		font-weight: bold;
+		font-size:18pt;
+	}
+
 }
 .title{
 	font-size: 18px;

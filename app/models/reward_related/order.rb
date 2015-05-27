@@ -28,6 +28,7 @@ class Order
   JIFENBAO = 16
   QQ_COIN = 32
   SMALL_MOBILE_CHARGE = 64
+  HONGBAO = 128
 
   # source
   ANSWER_SURVEY = 1
@@ -45,6 +46,7 @@ class Order
   field :remark, :type => String, :default => "正常"
   field :amount, :type => Integer, :default => 0
   field :alipay_account, :type => String
+  field :open_id,:type => String
   field :mobile, :type => String
   field :qq, :type => String
   field :receiver, :type => String
@@ -66,6 +68,7 @@ class Order
   belongs_to :survey
   belongs_to :gift
   belongs_to :answer
+  belongs_to :wechart_user
   belongs_to :sample, :class_name => "User", :inverse_of => :orders
   belongs_to :movie_activity
 
@@ -201,6 +204,29 @@ class Order
       SMALL_MOBILE_CHARGE,
       reward["amount"],
       order_info)
+  end
+
+  def self.create_hongbao_order(answer_id,openid)
+    wechart_user  = WechartUser.find_by_openid(openid)
+    answer        = Answer.find(answer_id)
+    survey        = answer.survey
+    return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
+    order_code    = nil
+    loop do 
+      order_code  = rand(1000000000..9999999999)
+      order_code  = Wechart.mch_id.to_s + Date.today.strftime('%Y%m%d').to_s +  order_code.to_s
+      exist       = Order.find_by_code(order_code)
+      break unless exist.present?
+    end
+    
+
+    order         = Order.create(:source => ANSWER_SURVEY,:type => HONGBAO,:code => order_code)
+    order.survey  = survey
+    order.answer  = answer
+    order.open_id = openid
+    order.status  = FROZEN
+    order.save
+    return order
   end
 
 
