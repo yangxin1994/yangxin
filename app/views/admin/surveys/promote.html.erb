@@ -127,7 +127,7 @@
               <input value="<%= @promote['wechart_promote_info']['reward_scheme_id'] %>" type='hidden' id="wechart_reward_scheme" name="wechart[wechart_promote_setting][reward_scheme_id]">
             </div>
           </div>
-          <span>(<a href="/s/<%=@s.wechart_scheme_id%>"><%= request.protocol + '/' + request.host_with_port %>/s/<%= @s.wechart_scheme_id %></a>)</span> 
+          <span>(<a href="/s/<%=@s.wechart_scheme_id%>"><%= request.protocol + request.host_with_port %>/s/<%= @s.wechart_scheme_id %></a>)</span> 
         </div>
       </div>
 
