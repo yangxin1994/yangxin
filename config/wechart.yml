@@ -9,7 +9,7 @@ default:
   nick_name: '问卷吧'
   send_name: '问卷吧'
   access_token: 
-  redirect_uri: http://staging.wenjuanba.com/wecharts/wechart_auth
+  redirect_uri: http://wenjuanba.com/wecharts/wechart_auth
 production:
   appid: wx16343cb2c71e4c90
   secret: 5f2c6fddb3824d439c7be9d177d209f5
@@ -20,7 +20,7 @@ production:
   nick_name: '问卷吧'
   send_name: '问卷吧'
   access_token: 
-  redirect_uri: http://staging.wenjuanba.com/wecharts/wechart_auth
+  redirect_uri: http://wenjuanba.com/wecharts/wechart_auth
 staging:
   appid: wx16343cb2c71e4c90
   secret: 5f2c6fddb3824d439c7be9d177d209f5
@@ -31,7 +31,7 @@ staging:
   nick_name: '问卷吧'
   send_name: '问卷吧'
   access_token: 
-  redirect_uri: http://staging.wenjuanba.com/wecharts/wechart_auth
+  redirect_uri: http://wenjuanba.com/wecharts/wechart_auth
 development:
   appid: wx16343cb2c71e4c90
   secret: 5f2c6fddb3824d439c7be9d177d209f5
@@ -42,4 +42,4 @@ development:
   nick_name: '问卷吧'
   send_name: '问卷吧'
   access_token: 
-  redirect_uri: http://staging.wenjuanba.com/wecharts/wechart_auth
+  redirect_uri: http://wenjuanba.com/wecharts/wechart_auth
