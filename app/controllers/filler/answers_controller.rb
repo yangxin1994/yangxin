@@ -311,7 +311,7 @@ class Filler::AnswersController < Filler::FillerController
     t    = Time.now.to_i
     str  = "ip=#{ip}t=#{t}gbcnfc0de888db8a"
     sign = Digest::MD5.hexdigest(str)    
-    link = @answer.survey.style_setting['redirect_link'] + "?sign=#{sign}&ip=#{ip}&t=#{t}"
+    link = @answer.survey.style_setting['redirect_link'].to_s + "?sign=#{sign}&ip=#{ip}&t=#{t}"
   end
 
   # 生成微信js-sdk签名

@@ -116,9 +116,11 @@ class Answer
 
 
   after_create do |doc|
-    unless doc.region.present?
-      doc.region = QuillCommon::AddressUtility.find_address_code_by_ip(doc.ip_address) 
-      doc.save
+    if(!doc.region.present? || doc.region < 0)
+      if doc.ip_address.present?
+        doc.region = QuillCommon::AddressUtility.find_address_code_by_ip(doc.ip_address) 
+        doc.save
+      end
     end
   end
 
