@@ -4,7 +4,7 @@
 		$.post("/vrcode/codes",{img_id: $("#image_id").val(), remote_ip:$("#remote_ip").val(), code:$("#code").val()}, function(data){
 			console.log(data)
 			//alert("Your answer has been submitted.  Please fill the next~~~");
-			if (data.value.url ===  undefined )  
+			if (data.value.url ===  null )  
 			{
 				$(".vrcode>span").hide();
 			}else{
