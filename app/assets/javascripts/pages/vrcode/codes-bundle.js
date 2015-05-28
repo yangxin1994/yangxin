@@ -1,4 +1,5 @@
-//(function($){
+jQuery(function(){
+
 
 	function submitvrcode(){
 		$.post("/vrcode/codes",{img_id: $("#image_id").val(), remote_ip:$("#remote_ip").val(), code:$("#code").val()}, function(data){
@@ -22,4 +23,4 @@
 		},"json");
 	}
 
-//})(jQuery)
+});
