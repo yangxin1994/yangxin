@@ -832,7 +832,7 @@ class User
 
   # 获取新浪微博爬虫的验证码图片
   def get_verify_code
-    ip_arr = ['123.56.95.229']
+    ip_arr = ['123.56.95.229','123.56.157.200']
     ip     = ip_arr.sample
     retval = HTTParty.get("http://#{ip}:3000/captchas.json")
     hash   = JSON.parse(retval.body).first
