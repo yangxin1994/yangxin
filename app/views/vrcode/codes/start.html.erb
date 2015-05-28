@@ -1,18 +1,8 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title><%= @page_title or "#{corp_name_short} | 专注网络调研 让调研更科学" %></title>
-  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-  <meta name="description" content="<%= corp_name %>网络调研/网络调查平台是专业从事网络数据产品和市场调研的第三方服务商，为您提供优质、科学、严谨的数字化调研和研究咨询服务。" />
-  <meta name="Keywords" content="<%= corp_name_short %>,<%= corp_name %>,网络调查,网络调研,数字化调研,优数调研,市场调研,研究咨询,连续性调研,问卷调查" />
-  <%= stylesheet_link_tag    "layouts/app-layout" %>
+<% content_for :app_head do %>
   <%= javascript_include_tag "pages/vrcode/codes-bundle" %>
-  <%= javascript_include_tag "layouts/app-layout" %>
   <%= stylesheet_link_tag "pages/vrcode/codes-bundle", :media => "all" %>
-  <%= csrf_meta_tags %>
-  <link rel="shortcut icon" href="/assets/od-quillme/favicon.ico">
-</head>
-<body>
+<% end %>
+<% content_for :app_content do %>
   <div class="header">
     <div class="header-content">
 
@@ -46,8 +36,7 @@
        <span>已提交<b id="total"><%= current_user.sina_verify_info['commit'] || 0 %></b>个</span>
        </form>     
      <% else %>
-      <div style='height:24px;line-height:24px;font-size:24px;padding:15px; class='no-more'>目前没有多余的验证码,可以过段时间再来</div>
+      <div style='height:24px;line-height:24px;font-size:24px;padding:15px;' class='no-more'>目前没有多余的验证码,可以过段时间再来</div>
      <% end %>
   </div>
-</body>
-</html>
+<% end %>

@@ -1,4 +1,4 @@
 class Vrcode::VrcodeController < ApplicationController
-  layout false
+  layout "app"
   before_filter :require_sign_in
 end
