@@ -163,9 +163,6 @@ $(function() {
             // If success, setup page
             $('#f_body').empty();
             var value = data.value;
-            // console.log('&&&&&&&&&&&&&&&&&&&&&&&&&&&&&')
-            // console.log(this.options)
-            // console.log('&&&&&&&&&&&&&&&&&&&&&&&&&&&&&')
             value.answer_status == 1 ? $('#progress_con').show() : $('#progress_con').hide(); // hide progress bar 
             if (value.answer_status == 1) {
                 // answer_status: 1（正在回答）
@@ -322,6 +319,7 @@ $(function() {
                       location.href = "/carnival/campaigns?t=" + d.getTime();
                       return;
                     }
+                    
                     if (!this.options.is_preview && redirect_link && redirect_link.indexOf('new ') == 0) {
                       location.href = redirect_link.substr(4, redirect_link.length - 4);
                       return;
