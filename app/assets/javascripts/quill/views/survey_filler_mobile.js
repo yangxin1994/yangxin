@@ -381,6 +381,7 @@ $(function() {
                         spread_point: this.options.spread_point,
                         signin:this.options.signin,
                         link:redirect_link,
+                        is_iqiyi:this.options.iqiyi_redirect,
                         allow_multianswer:this.model.get('style_setting').allow_multianswer,
                         show_restart: this.options.is_preview
                     }, 'survey_filler_end_free_mobile').appendTo('#f_body');
