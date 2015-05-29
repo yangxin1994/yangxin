@@ -18,7 +18,11 @@
 				</span>
 			</div>
 			<div class='form'>
-				<button id='close_btn'>关闭窗口</button>
+				{{#if is_iqiyi}}
+					<button id='close_btn'>领取答题奖励</button>
+				{{else}}
+					<button id='close_btn'>关闭窗口</button>
+				{{/if}}
 			</div>
 		</div>
 	</div>
