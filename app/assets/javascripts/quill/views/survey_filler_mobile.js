@@ -137,7 +137,7 @@ $(function() {
                 if (this.options.signin) {
                     this._share_info();
                 } else {
-                    if (this.options.spread_point > 0) {
+                    if (this.options.spread_point >= 0) {
                         ref = window.location.href
                         location.href = '/account/sign_in?ref=' + ref;
                     } else {
