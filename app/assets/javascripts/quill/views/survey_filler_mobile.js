@@ -64,7 +64,7 @@ $(function() {
             // close window or redirect
             if(this.options.iqiyi_redirect){
                 answer_stat = this.options.data.value.answer_status
-                if ($.inArray(answer_stat,[4,8,32]) > 0 ){
+                if ($.inArray(answer_stat,[1,4,8,32]) > 0 ){
                     var link = this.options.iqiyi_redirect;
                 }else{
                     var link = '';
