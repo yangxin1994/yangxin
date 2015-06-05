@@ -6,7 +6,11 @@
 				<em></em>
 				<span>
 					<b>答题完成啦！{{#if publish_result}}<a href='/surveys/{{survey_id}}/result'>查看问卷报告</a>{{/if}}</b>
-					<br />您的观点对我们很重要，感谢您参加本次调研。
+          {{#if is_iqiyi}}
+          <br />答题完成了!去领爱奇艺黄金会员大礼包吧！ 
+          {{else}}
+          <br />您的观点对我们很重要，感谢您参加本次调研。
+          {{/if}}
 					{{#unless agent}}
 					{{#if spreadable}}
 					<a id='start_spread' href='javascript:void(0);'>邀请好友答题</a> 获取<em>{{spread_point}}</em>积分奖励。
@@ -19,7 +23,7 @@
 			</div>
 			<div class='form'>
 				{{#if is_iqiyi}}
-					<button id='close_btn'>领取答题奖励</button>
+					<button id='close_btn' style="font-size: 22px;">领取答题奖励</button>
 				{{else}}
 					<button id='close_btn'>关闭窗口</button>
 				{{/if}}
