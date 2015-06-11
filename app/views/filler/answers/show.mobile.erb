@@ -47,8 +47,7 @@
 
 
 	<script type='text/javascript'>
-		window.is_wechart      = <%= raw @survey.wechart_promotable.to_json %>;
-		if(window.is_wechart){
+		window.is_wechart       = <%= raw @survey.wechart_promotable.to_json %>;
 			window.appid     	= <%= raw (@appid).to_json %>;
 			window.noncestr  	= <%= raw (@noncestr).to_json %>;    
 			window.timestamp 	= <%= raw (@timestamp).to_json %>;
@@ -63,7 +62,6 @@
 			    signature: window.signure,
 			    jsApiList: ['onMenuShareTimeline','onMenuShareAppMessage','hideMenuItems']
 			})
-		}
 	</script>
 <% end %>
 

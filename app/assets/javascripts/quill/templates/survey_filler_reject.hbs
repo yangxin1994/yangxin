@@ -2,7 +2,6 @@
 	<div class='welcome no_reward'>
 		<div class='inner'>
 			<h1>{{title}}</h1>
-
 			{{#if filter}}
 			<div class='msg red'>
 				<em></em>
@@ -18,19 +17,18 @@
 				</span>
 			</div>
 			{{/if}}
-
-      {{#if reach_max}}
-      <div class='msg red'>
-        <em></em>
-        <span>
-          <b>对不起，问卷已经达到回收数量，下次请记得提前来哦。</b>
-          <!--<br />问卷针对不同人群进行了配额，根据您的答题情况，您不在我们的调研范围内，感谢您的热心参与！-->
-          {{#if show_subscribe}}
-          <!--<br />（<a id='subscribe_btn' href='/surveys#subscribe' target='_blank'>订阅</a>问卷提醒，不错过任何问卷）-->
-          {{/if}}
-        </span>
-      </div>
-      {{/if}}
+      		{{#if reach_max}}
+      		<div class='msg red'>
+        		<em></em>
+        		<span>
+         		<b>对不起，问卷已经达到回收数量，下次请记得提前来哦。</b>
+          		<!--<br />问卷针对不同人群进行了配额，根据您的答题情况，您不在我们的调研范围内，感谢您的热心参与！-->
+          		{{#if show_subscribe}}
+          		<!--<br />（<a id='subscribe_btn' href='/surveys#subscribe' target='_blank'>订阅</a>问卷提醒，不错过任何问卷）-->
+          		{{/if}}
+        		</span>
+      		</div>
+      		{{/if}}
 
 			{{#if quality}}
 			<div class='msg red'>
@@ -65,6 +63,23 @@
 			<div class='form'>
 				<button id='close_btn'>关闭窗口</button>
 			</div>
+			<div class="share">
+				<div class="jiathis_style">
+					<span class="jiathis_txt">分享到：</span>
+					<a class="jiathis_button_tools_1"></a>
+					<a class="jiathis_button_tools_2"></a>
+					<a class="jiathis_button_tools_3"></a>
+					<a class="jiathis_button_tools_4"></a>
+					<a class="jiathis_button_tools_5"></a>
+					<a class="jiathis_button_tools_6"></a>
+					<a class="jiathis_button_tools_7"></a>
+					<a class="jiathis_button_tools_8"></a>	
+					<a class="jiathis_button_tools_9"></a>
+					<a class="jiathis_button_tools_10"></a>	
+					<a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis" target="_blank">更多</a>
+				</div>	
+			</div>
+			
 		</div>
 	</div>
 </div>
