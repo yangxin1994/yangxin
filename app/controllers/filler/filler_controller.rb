@@ -1,7 +1,7 @@
 # encoding: utf-8
 class Filler::FillerController < ApplicationController
 
-  before_filter :force_tablet_html, :check_mobile_param
+  before_filter :force_tablet_html, :check_mobile_param,:get_wx_config_info
   has_mobile_fu
 
   layout 'filler'
@@ -159,4 +159,17 @@ class Filler::FillerController < ApplicationController
     # 12. check ip restrict
     @forbidden_ip = !is_preview && !answer.present? && @survey.max_num_per_ip_reached?(request.remote_ip)
   end
+
+
+  def get_wx_config_info
+    @appid        = Wechart.appid
+    @noncestr     = Wechart.random_string
+    @jsapi_ticket = Wechart.jsapi_ticket
+    @timestamp    = Time.now.to_i
+    @url          = request.url
+    string1       = "jsapi_ticket=#{@jsapi_ticket}&noncestr=#{@noncestr}&timestamp=#{@timestamp}&url=#{@url}"
+    @signure      =  Digest::SHA1.hexdigest(string1)    
+  end
+
+
 end
