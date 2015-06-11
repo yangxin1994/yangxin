@@ -100,6 +100,15 @@ class Wechart
     return res['openid']
   end
 
+  # 随机字符串
+  def self.random_string
+    chars = ("a".."z").to_a + ("A".."Z").to_a + ("0".."9").to_a
+    newpass = ""
+    1.upto(16) { |i| newpass << chars[rand(chars.size-1)] }
+    return newpass
+  end
+
+
   #只有关注了公众号才能获取基本信息,如果没有关注的话,只会返回openid
   def self.get_user_info(openid)
     uri = URI("https://api.weixin.qq.com/cgi-bin/user/info?access_token=#{self.access_token}&openid=#{openid}&lang=zh_CN")
