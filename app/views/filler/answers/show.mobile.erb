@@ -48,20 +48,20 @@
 
 	<script type='text/javascript'>
 		window.is_wechart       = <%= raw @survey.wechart_promotable.to_json %>;
-			window.appid     	= <%= raw (@appid).to_json %>;
-			window.noncestr  	= <%= raw (@noncestr).to_json %>;    
-			window.timestamp 	= <%= raw (@timestamp).to_json %>;
-			window.url       	= <%= raw (@url).to_json %>;
-			window.signure   	= <%= raw (@signure).to_json %>;
-			window.share_link   = window.location.origin + '/s/' + <%= raw @reward_scheme_id.to_json %>;
-			wx.config({
-			    debug: false,
-			    appId: window.appid,
-			    timestamp: window.timestamp,
-			    nonceStr: window.noncestr,
-			    signature: window.signure,
-			    jsApiList: ['onMenuShareTimeline','onMenuShareAppMessage','hideMenuItems']
-			})
+		window.appid     	= <%= raw (@appid).to_json %>;
+		window.noncestr  	= <%= raw (@noncestr).to_json %>;    
+		window.timestamp 	= <%= raw (@timestamp).to_json %>;
+		window.url       	= <%= raw (@url).to_json %>;
+		window.signure   	= <%= raw (@signure).to_json %>;
+		window.share_link   = window.location.origin + '/s/' + <%= raw @reward_scheme_id.to_json %>;
+		wx.config({
+		    debug: true,
+		    appId: window.appid,
+		    timestamp: window.timestamp,
+		    nonceStr: window.noncestr,
+		    signature: window.signure,
+		    jsApiList: ['onMenuShareTimeline','onMenuShareAppMessage','hideMenuItems']
+		})
 	</script>
 <% end %>
 
