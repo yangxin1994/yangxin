@@ -72,7 +72,7 @@ class Wechart
     res = JSON.parse(res.body)
     tok = res['access_token']
     $redis.set('access_token',tok)
-    return token
+    return tok
   end
 
 
