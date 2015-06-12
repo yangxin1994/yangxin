@@ -1,4 +1,5 @@
 //=require ../../templates/fillers_mobile/scale
+//=require ../../templates/fillers_mobile/scale_guide
 //=require ../../templates/fillers_mobile/scale_op
 
 /* ================================
@@ -15,8 +16,25 @@ $(function(){
 			var indexes = _.range(this.model_issue.items.length);
 			if(this.model_issue.is_rand)
 				var indexes = _.shuffle(indexes);
-
 			// setup options
+			var labels = this.model_issue.labels
+			if(this.model_issue.show_unknown) {
+				labels = ['不清楚'].concat(this.model_issue.labels)			
+			}
+
+			for(var i = 0;i < labels.length;i ++){
+				if($.inArray('不清楚',labels) >= 0){
+					this.hbs({
+						item_text: i + ":" + labels[i]
+					}, '/fillers_mobile/scale_guide', true).appendTo(this.$('.q-content'));		
+				}else{
+					this.hbs({
+						item_text: (i + 1) + ":" + labels[i]
+					}, '/fillers_mobile/scale_guide', true).appendTo(this.$('.q-content'));	
+				}
+			}
+
+
 			for(var i = 0; i < indexes.length; i ++) {
 				var item = this.model_issue.items[indexes[i]];
 				var $div = this.hbs({
@@ -30,7 +48,7 @@ $(function(){
 						item_id: item.id,
 						label_id: item.id + "-" + c,
 						index: c,
-						label_text: this.model_issue.labels[c]
+						label_text: c + 1
 					}, '/fillers_mobile/scale_op', true).insertAfter($('.subhead', $div));
 				};
 				if(this.model_issue.show_unknown) {
@@ -38,7 +56,7 @@ $(function(){
 						item_id: item.id,
 						label_id: item.id + "-unknown",
 						index: -1,
-						label_text: "不清楚"
+						label_text: 0
 					}, '/fillers_mobile/scale_op', true).insertBefore($('.q-divide', $div));
 				};
 				if(i == (indexes.length - 1))

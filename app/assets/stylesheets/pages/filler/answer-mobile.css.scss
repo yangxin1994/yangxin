@@ -15,7 +15,9 @@ html,body{
 #f_body{
 	height:100%;
 	.page{
-		min-height:100%;
+		min-height:-moz-calc(100% - 50px);
+		min-height:-webkit-calc(100% - 50px);
+		min-height: calc(100% - 50px);
 		&.true{
 			height:100%;	
 		}
@@ -437,6 +439,14 @@ textarea{
 }
 /*副标题*/
 .subhead{
+	margin-left:5%;
+}
+.opt-guide{
+	display:inline-block;
+	margin-left:5%;
+}
+.opt-info{
+	display:inline-block;
 	margin-left:5%;
 }
 /*分割线*/

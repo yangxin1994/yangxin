@@ -664,8 +664,8 @@ $(function() {
               location.href = restart_ref;
             }, this));            
 
-            var minHeight = $(window).height() - 114;
-            $('.page').css('minHeight', minHeight);
+            // var minHeight = $(window).height() - 114;
+            // $('.page').css('minHeight', minHeight);
 
             // scroll to window top
             $("html, body").animate({
