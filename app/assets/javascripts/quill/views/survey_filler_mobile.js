@@ -103,7 +103,7 @@ $(function() {
             $('.spread').animate({
                 "top": "0px"
             }, 'fast');
-            var href = window.location.href
+            var href = this.options.spread_url
             _.each(['SinaWeibo', 'TencentWeibo', 'Renren', 'Douban', 'QQSpace',
                 'Kaixin001', 'Diandian', 'Gmail', 'Fetion'
             ], function(v) {
@@ -137,12 +137,13 @@ $(function() {
                 if (this.options.signin) {
                     this._share_info();
                 } else {
-                    if (this.options.spread_point >= 0) {
-                        ref = window.location.href
-                        location.href = '/account/sign_in?ref=' + ref;
-                    } else {
-                        this._share_info();
-                    }
+                    this._share_info();
+                    // if (this.options.spread_point >= 0) {
+                    //     ref = window.location.href
+                    //     location.href = '/account/sign_in?ref=' + ref;
+                    // } else {
+                    //     this._share_info();
+                    // }
                 }
             }, this));
 
