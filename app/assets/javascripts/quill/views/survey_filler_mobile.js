@@ -129,28 +129,35 @@ $(function() {
                 if ($(e.target).attr('id') !== 'socal_share') {
                     $('.spread').animate({
                         "top": "-2000px"
-                    }, 'fast');
+                    }, 'fast',function(){
+                        $('#socal_share').show();
+                    });
                 }
             })
 
             $('#socal_share').click($.proxy(function() {
-                if (this.options.signin) {
-                    this._share_info();
-                } else {
-                    this._share_info();
-                    // if (this.options.spread_point >= 0) {
-                    //     ref = window.location.href
-                    //     location.href = '/account/sign_in?ref=' + ref;
-                    // } else {
-                    //     this._share_info();
-                    // }
-                }
+                $('#socal_share').hide();
+                this._share_info();
+                // if (this.options.signin) {
+                //     this._share_info();
+                // } else {
+                //     this._share_info();
+                //     // if (this.options.spread_point >= 0) {
+                //     //     ref = window.location.href
+                //     //     location.href = '/account/sign_in?ref=' + ref;
+                //     // } else {
+                //     //     this._share_info();
+                //     // }
+                // }
             }, this));
 
             $('.spread').click(function() {
                 $('.spread').animate({
                     "top": "-2000px"
-                }, 'fast');
+                }, 'fast',function(){
+                    $('#socal_share').show();
+                });
+                
             })
         },
 
