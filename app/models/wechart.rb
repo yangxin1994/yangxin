@@ -89,6 +89,11 @@ class Wechart
     return ticket      
   end
 
+  def self.batch_refresh_tasks
+    refresh_access_token
+    refresh_jsapi_tickets
+  end
+
 
   def self.get_open_id(code)
     uri = URI.parse("https://api.weixin.qq.com/sns/oauth2/access_token?appid=#{self.appid}&secret=#{self.secret}&code=#{code}&grant_type=authorization_code")

@@ -65,7 +65,6 @@
 	}else{
 		url = <%= raw "http://wenjunaba.com/s/#{@reward_scheme_id}".to_json %>;
 	}
-	console.log(url)
 	var jiathis_config = { 
 		url: url, 
 		title: <%= raw "#{@survey.title.to_s}  ".to_json %>
