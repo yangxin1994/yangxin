@@ -1,7 +1,7 @@
-set :output, {
-    :error    => "#{path}/log/error.log",
-    :standard => "#{path}/log/cron.log"
-}
+# set :output, {
+#     :error    => "#{path}/log/error.log",
+#     :standard => "#{path}/log/cron.log"
+# }
 case @environment
 when 'production'
 	every 10.minutes do
