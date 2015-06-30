@@ -61,9 +61,9 @@
 <script "text/javascript"> 
 	var u = <%= raw "#{current_user.try(:id).to_s}".to_json %>;
 	if(u.length > 0 ){
-		url = <%= raw "http://wenjunaba.com/s/#{@reward_scheme_id}?i=#{current_user.try(:id).to_s}".to_json %>;
+		url = <%= raw "http://wenjunanba.com/s/#{@reward_scheme_id}?i=#{current_user.try(:id).to_s}".to_json %>;
 	}else{
-		url = <%= raw "http://wenjunaba.com/s/#{@reward_scheme_id}".to_json %>;
+		url = <%= raw "http://wenjunanba.com/s/#{@reward_scheme_id}".to_json %>;
 	}
 	var jiathis_config = { 
 		url: url, 
