@@ -75,8 +75,9 @@ class Filler::AnswersController < Filler::FillerController
     @answer = Answer.find_by_id(params[:id])
     render_404 if @answer.nil?
     survey = @answer.survey
-    agent_answers = survey.answers.select { |e| e.agent_task.present? }
-    exist_answer = agent_answers.select{|e| e.mobile == params[:mobile]}
+    # agent_answers = survey.answers.select { |e| e.agent_task.present? }
+    # exist_answer = agent_answers.select{|e| e.mobile == params[:mobile]}
+    exist_answer = survey.answers.where(:agent_task_id.ne => nil, :mobile => params[:mobile])
     if exist_answer.length > 0
       if exist_answer.first.status != Answer::EDIT
         render_json_auto ErrorEnum::MOBILE_EXIST and return

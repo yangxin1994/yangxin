@@ -113,6 +113,8 @@ class Answer
   index({ user_id: 1, survey_id: 1, is_preview:1 }, { background: true } )
   index({ import_id:1},{ background: true })
   index({ ip_address:1},{ background: true })
+  index({ survey:1, agent_task_id:1, mobile: 1},{ background: true })
+  index({ survey:1, mobile: 1},{ background: true })
 
 
   after_create do |doc|
