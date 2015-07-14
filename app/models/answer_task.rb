@@ -20,7 +20,7 @@ class AnswerTask < Answer
       user = User.where(:id => options[:user_id]).first
       # answer = AnswerTask.new(options[:answer])
       # survey.answers << answer
-      answer = AnswerTask.create_answer(survey.id, options[:reward_scheme_id], nil, nil, options[:answer])
+      answer = AnswerTask.create_answer(survey.id, options[:reward_scheme_id], nil, nil, nil, nil, options[:answer])
       if user
         user.answers << answer 
         user.save
