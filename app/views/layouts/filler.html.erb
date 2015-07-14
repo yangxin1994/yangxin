@@ -86,8 +86,8 @@
 	</div>
 	<% end %>
   <!-- hack for trip survey -->
-  <% trip_id = '5578e2efeb0e5b686200000b' %>
-  <% if @survey['_id'].to_s == trip_id %> 
+  <% trip_id = ['55a4a974eb0e5b2722000008','5578e2efeb0e5b686200000b'] %>
+  <% if trip_id.include?(@survey['_id'].to_s) %> 
   <style type="text/css">
     #sf_banner .sf_banner_top{
       height:80px;
@@ -109,13 +109,13 @@
   </style>
   <% end %>
   <!-- hack for trip survey -->
-	<div class='sf_banner_top' <% if @survey['_id'].to_s == trip_id %> style='background:#fdfdfd;' <% end %>>
+	<div class='sf_banner_top' <% if trip_id.include?(@survey['_id'].to_s) %> style='background:#fdfdfd;' <% end %>>
 		<div class='inner'>
       <% if ["530ecc12eb0e5be18500001a", "5372c7f6eb0e5b41fc000003"].include?(@survey['_id'].to_s) %>
       <a id='logo' href="http://netranking.cn">
         <img src="/assets/filler/default/logo-nr.png" />
       </a>
-      <% elsif @survey['_id'].to_s == trip_id %>
+      <% elsif trip_id.include?(@survey['_id'].to_s) %>
       <a id='logo' href="javascript:void(0);">
         <img src="/hbly.jpg" />
       </a>
@@ -144,7 +144,7 @@
     <% if @survey[:lang] == 'en' %>
 	<a href='/' target="_blank">Tech Support: http://wenjuanba.com</a>
     <% else %>
-      <% if @survey['_id'].to_s == trip_id %>
+      <% if trip_id.include?(@survey['_id'].to_s) %>
         <a href='http://netranking.com.cn/' target="_blank">技术支持 清研灵智信息咨询（北京）有公司</a>
       <% else %>
         <a href='/' target="_blank">技术支持 <%= corp_name %></a>
