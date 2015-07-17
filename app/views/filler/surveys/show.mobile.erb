@@ -107,7 +107,7 @@
 			<% unless params[:ati].present? %>
 				<% unless @is_preview %> <!-- 为住建委项目特殊添加-->
 					<% unless params[:id] == '5485611beb0e5b8af10002e1' or ['55120905eb0e5b2984000003', '551208dbeb0e5be514000004', '55069ab7eb0e5bba6300001e', '54365c14eb0e5bba58000204'].include?(@survey['_id'].to_s) or @survey['title'].include?('北京市城镇基本住房保障条例') %> <!-- 2014年北京市公安局群众安全感和满意度调查问卷 -->
-						<% trip_id = ['55a4a974eb0e5b2722000008','5578e2efeb0e5b686200000b'] %>
+						<% trip_id = ['55a4a974eb0e5b2722000008','5578e2efeb0e5b686200000b','55a8b12feb0e5bf8fd000065'] %>
 						<% unless trip_id.include?(@survey.id.to_s) %>
 							<p class="tip">
 								<span class='fl'>耗时<span id="left_time"></span></span>
