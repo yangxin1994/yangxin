@@ -53,7 +53,7 @@ class Wechart
     return ticket
   end
 
-  def self.access_token
+  def self.get_openid
     token = $redis.get('access_token')
     unless token.present?
       token = refresh_access_token
@@ -95,7 +95,7 @@ class Wechart
 
   def self.batch_refresh_tasks
     refresh_access_token
-    refresh_jsapi_tickets
+    refresh_jsapi_ticket
   end
 
 
