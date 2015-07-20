@@ -530,15 +530,15 @@ $(function() {
                             }, this));
                         }, this));
                         
-                        wechart_btn.click(function(){
+                        wechart_btn.click($.proxy(function(){
                             $.postJSON(this._uri('/wecharts/get_red_pack'),{},$.proxy(function(retval){
                                 if(retval.success){
                                     location.href = '/s/' + this.options.reward.id;
                                 }else{
-                                    alert(retval.value.error_code)
+                                    alert(retval.value.error_code);
                                 }
-                            },this))
-                        })
+                            },this));
+                        },this));
                     } else {
                         this.hbs({
                             is_wechart:this.model.get('wechart_promotable'),
