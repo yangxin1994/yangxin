@@ -77,7 +77,7 @@ class Answer
   field :mobile, :type => String
   field :sample_attributes_updated, :type => Boolean, default: false
   field :suspected, :type => Boolean
-
+  field :open_id,:type => String
 
   belongs_to :agent_task
   belongs_to :user, class_name: "User", inverse_of: :answers
@@ -190,7 +190,7 @@ class Answer
     self.send_agent_notification
   end
 
-  def self.create_answer(survey_id, reward_scheme_id, introducer_id, agent_task_id, agent_user_id, task_id, answer_obj)
+  def self.create_answer(survey_id, reward_scheme_id, introducer_id, agent_task_id, agent_user_id, task_id, openid=nil,answer_obj)
     answer = self.create(answer_obj)
     Survey.normal.find(survey_id).answers << answer
     # AgentTask.find_by_id(agent_task_id).try(:new_answer, answer)

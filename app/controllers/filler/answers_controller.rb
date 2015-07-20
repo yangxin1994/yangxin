@@ -19,6 +19,7 @@ class Filler::AnswersController < Filler::FillerController
     survey = Survey.normal.find_by_id(params[:survey_id])
     answer = Answer.find_by_survey_id_sample_id_is_preview(params[:survey_id], current_user.try(:_id), params[:is_preview] || false)
     answer ||= Answer.find_by_survey_id_carnival_user_id_is_preview(params[:survey_id], current_carnival_user.try(:_id), params[:is_preview] || false)
+    answer ||= Answer.find_by_open_id(cookies[:oid]) if cookies[:oid].present?
     render_json_s(answer._id.to_s) and return if !answer.nil?
     render_json_e ErrorEnum::MAX_NUM_PER_IP_REACHED and return if !params[:is_preview] && survey.max_num_per_ip_reached?(request.remote_ip)
     retval = survey.check_password(params[:username], params[:password], params[:is_preview] || false)
@@ -30,7 +31,9 @@ class Filler::AnswersController < Filler::FillerController
       ip_address: request.remote_ip,
       username: params[:username],
       password: params[:password],
-      http_user_agent: request.env['HTTP_USER_AGENT'] }
+      http_user_agent: request.env['HTTP_USER_AGENT'],
+      open_id:cookies[:oid],#微信红包用户id
+      }
     answer = Answer.create_answer(params[:survey_id],
       params[:reward_scheme_id],
       params[:introducer_id],

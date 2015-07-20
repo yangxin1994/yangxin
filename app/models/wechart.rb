@@ -61,6 +61,10 @@ class Wechart
     return token
   end
 
+  def self.snsapi_base_redirect(url,state)
+    "https://open.weixin.qq.com/connect/oauth2/authorize?appid=#{self.appid}&redirect_uri=#{url}&response_type=code&scope=snsapi_base&state=#{state}#wechat_redirect"
+  end
+
 
   #定时任务 每1个小时执行一次
   def self.refresh_access_token
