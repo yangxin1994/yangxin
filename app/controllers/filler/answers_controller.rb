@@ -128,7 +128,7 @@ class Filler::AnswersController < Filler::FillerController
             openid = Wechart.get_open_id(code)
             cookies[:od] = {
               :value => openid,
-              :expires => Rails.application.config.permanent_signed_in_years.months.from_now,
+              :expires => Rails.application.config.permanent_signed_in_months.months.from_now,
               :domain => :all
             }
             @answer.update_attributes(open_id:openid) if @answer.open_id.blank?
