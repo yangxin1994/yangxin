@@ -173,32 +173,35 @@ class Wechart
       "remark" => '分享到朋友圈,让更多人领红包'
     }
 
-    tmp_json    = wechat_hash.to_json.dup.encode("UTF-8")
-    sign        = generate_sign(tmp_json)
-    wechat_hash.merge!({sign:sign})
+    # sign        = self.generate_sign(JSON wechat_hash)
+    # tmp_json    = wechat_hash.to_json.dup.encode("UTF-8")
+    # sign        = generate_sign(tmp_json)
+    # wechat_hash.merge!({sign:sign})
 
-    builder = Nokogiri::XML::Builder.new(:encoding => 'UTF-8') do |xml|
-      xml.root {
-        xml.sign sign
-        xml.mch_billno order_code
-        xml.mch_id Wechart.mch_id
-        xml.wxappid Wechart.wxappid
-        xml.nick_name Wechart.nick_name
-        xml.send_name Wechart.send_name
-        xml.re_openid openid
-        xml.total_amount total_amount
-        xml.min_value min_value
-        xml.max_value max_value
-        xml.total_num 1
-        xml.wishing '感谢您参与问卷吧调研,祝您生活愉快!'
-        xml.client_ip ip
-        xml.act_name '问卷吧红包大派送'
-        xml.remark '分享到朋友圈,让更多人领红包'
-        xml.nonce_str nonce_str
-      }
-    end
+    # builder = Nokogiri::XML::Builder.new(:encoding => 'UTF-8') do |xml|
+    #   xml.root {
+    #     xml.sign sign
+    #     xml.mch_billno order_code
+    #     xml.mch_id Wechart.mch_id
+    #     xml.wxappid Wechart.wxappid
+    #     xml.nick_name Wechart.nick_name
+    #     xml.send_name Wechart.send_name
+    #     xml.re_openid openid
+    #     xml.total_amount total_amount
+    #     xml.min_value min_value
+    #     xml.max_value max_value
+    #     xml.total_num 1
+    #     xml.wishing '感谢您参与问卷吧调研,祝您生活愉快!'
+    #     xml.client_ip ip
+    #     xml.act_name '问卷吧红包大派送'
+    #     xml.remark '分享到朋友圈,让更多人领红包'
+    #     xml.nonce_str nonce_str
+    #   }
+    # end
 
-    wechat_hash = builder.to_xml
+
+    xml = make_xml(wechat_hash)
+    #wechat_hash = builder.to_xml
 
 
     p12 = OpenSSL::PKCS12.new(File.read(Rails.root.to_s + '/apiclient_cert.p12'), "#{Wechart.mch_id}")
@@ -206,7 +209,7 @@ class Wechart
 
     Net::HTTP.start(uri.host,uri.port,use_ssl:true,ca_file:Rails.root.to_s + '/rootca.pem',key:p12.key,cert:p12.certificate) do |http|
       request  = Net::HTTP::Post.new(uri.path)
-      request.body = wechat_hash
+      request.body = xml
       response = http.request(request)
       res      = Nokogiri::XML(response.body,nil,'UTF-8')
       if res.css('return_code').text.match(/SUCCESS/) && res.css('result_code').text.match(/SUCCESS/)

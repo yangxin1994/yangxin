@@ -11,6 +11,10 @@ when 'production'
 	every :hour do
 	  runner "Wechart.batch_refresh_tasks"	
 	end
+
+	every :6.hours do 
+		runner "Wechart.update_order_status"
+	end
 	
 	every 1.days, :at => '4:30 pm' do
 		runner "SmsInvitationWorker.perform_async"
