@@ -27,7 +27,7 @@ class WechartsController < ApplicationController
 				sids  = Order.where(type:Order::HONGBAO,open_id:openid).map{|order| order.answer.survey.id.to_s}
 				unless sids.include?(sid)
 					#未领红包	
-					order  = Order.create_hongbao_order(params[:state],openid)
+					order  = Order.create_hongbao_order(awid,openid)
 					total_amount = answer.reward_scheme.wechart_reward_amount.to_s
 					amount_arr   = total_amount.scan(/\d+/)
 					if amount_arr.length == 1
