@@ -53,6 +53,17 @@ class Wechart
     return ticket
   end
 
+
+  def self.access_token
+    access_token = $redis.get('access_token')
+    unless access_token.present?
+      access_token = refresh_access_token
+    end
+    return access_token
+  end
+
+
+
   def self.get_openid
     token = $redis.get('access_token')
     unless token.present?
