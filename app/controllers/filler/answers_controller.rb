@@ -19,7 +19,6 @@ class Filler::AnswersController < Filler::FillerController
     survey = Survey.normal.find_by_id(params[:survey_id])
     answer = Answer.find_by_survey_id_sample_id_is_preview(params[:survey_id], current_user.try(:_id), params[:is_preview] || false)
     answer ||= Answer.find_by_survey_id_carnival_user_id_is_preview(params[:survey_id], current_carnival_user.try(:_id), params[:is_preview] || false)
-    answer ||= Answer.find_by_open_id(cookies[:oid]) if cookies[:oid].present?
     render_json_s(answer._id.to_s) and return if !answer.nil?
     render_json_e ErrorEnum::MAX_NUM_PER_IP_REACHED and return if !params[:is_preview] && survey.max_num_per_ip_reached?(request.remote_ip)
     retval = survey.check_password(params[:username], params[:password], params[:is_preview] || false)
@@ -31,9 +30,7 @@ class Filler::AnswersController < Filler::FillerController
       ip_address: request.remote_ip,
       username: params[:username],
       password: params[:password],
-      http_user_agent: request.env['HTTP_USER_AGENT'],
-      open_id:cookies[:oid],#微信红包用户id
-      }
+      http_user_agent: request.env['HTTP_USER_AGENT'] }
     answer = Answer.create_answer(params[:survey_id],
       params[:reward_scheme_id],
       params[:introducer_id],
@@ -117,6 +114,31 @@ class Filler::AnswersController < Filler::FillerController
 
     # load data
     redirect_to sign_in_account_path({ref: request.url}) and return if @answer.user.present? && @answer.user != current_user
+
+    
+    if @survey.wechart_promotable
+      if cookies[:od].blank?
+        code = params[:code]
+        if code.nil?
+          redirect_to Wechart.snsapi_base_redirect(request.url,request.url)
+        else
+          #调用微信的分享接口需要的配置
+          generate_wechart_sign
+          begin
+            openid = Wechart.get_open_id(code)
+            cookies[:od] = {
+              :value => openid,
+              :expires => Rails.application.config.permanent_signed_in_years.months.from_now,
+              :domain => :all
+            }
+            @answer.update_attributes(open_id:openid) if @answer.open_id.blank?
+          rescue Exception => e
+              render_500
+          end
+        end        
+      end 
+    end
+
     @answer.update_status # check whether it is time out
     if @answer.is_edit
       questions = @answer.load_question(nil, true)
@@ -177,10 +199,7 @@ class Filler::AnswersController < Filler::FillerController
     end
 
     @binded = user_signed_in ? (current_user.email_activation || current_user.mobile_activation) : false
-    #调用微信的分享接口需要的配置
-    if @survey.wechart_promotable
-      generate_wechart_sign
-    end
+
   end
 
 

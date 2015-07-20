@@ -18,8 +18,8 @@ class WechartsController < ApplicationController
     end
 
 	def wechart_auth
-		openid    = cookies[:oid]
-		answer    = Answer.where(id:params[:state],open_id:openid).first
+		openid    = Wechart.get_open_id(params[:code])
+		answer    = Answer.where(:id => params[:state],:open_id => openid,:status => Answer::FINISH).first
 		if answer
 			sid   = answer.survey.id.to_s
 			sids  = Order.where(type:Order::HONGBAO,open_id:openid).map{|order| order.answer.survey.id.to_s}
@@ -41,6 +41,10 @@ class WechartsController < ApplicationController
 					order.update_attributes(amount:total_amount,status:Order::SUCCESS)
 				else
 					order.destroy
+				end
+				wuser  = WechartUser.where(openid:openid).first
+				unless wuser.present?
+					WechartWorker.perform_async('create',{open_id:openid}) 
 				end
 			else
 				#已领红包
