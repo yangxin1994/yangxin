@@ -117,8 +117,16 @@ class Filler::AnswersController < Filler::FillerController
 
     
     if @answer.survey.wechart_promotable
-      generate_wechart_sign
       #调用微信的分享接口需要的配置
+      generate_wechart_sign
+      
+      #领取红包用
+      cookies[:awd] =  {
+        :value => params[:id],
+        :expires => Rails.application.config.permanent_signed_in_months.months.from_now,
+        :domain => :all
+      }
+      # 领取红包用
       if cookies[:od].blank?
         code = params[:code]
         if code.nil?

@@ -417,15 +417,15 @@ $(function() {
                         
                         this.hbs({
                             is_wechart:this.model.get('wechart_promotable'),
-                            is_time_limit:time_limit,
-                            auth_url:this.options.auth_url
+                            is_time_limit:time_limit
                         }, 'survey_filler_end_money_mobile').appendTo($('#f_body'));
 
                         $('.s_type select').children('option[value="zhifubao"]').text('为您支付宝付款￥' + this.options.reward.reward_money + '元')
                         $('.s_type select').children('option[value="chongzhi"]').text('为您手机充值￥' + this.options.reward.reward_money + '元')
 
                         var next_btn = $('#rew_next'),
-                            check_btn = $('#check_btn');
+                            check_btn = $('#check_btn')
+                            wechart_btn = $('get_wechart_reward');
 
 
                         function show_zhifubao_ipt() {
@@ -529,6 +529,16 @@ $(function() {
                                 }
                             }, this));
                         }, this));
+                        
+                        wechart_btn.click(function(){
+                            $.postJSON(this._uri('/wecharts/get_red_pack'),{},$.proxy(function(retval){
+                                if(retval.success){
+                                    location.href = '/s/' + this.options.reward.id;
+                                }else{
+                                    console.log(retval)
+                                }
+                            },this))
+                        })
                     } else {
                         this.hbs({
                             is_wechart:this.model.get('wechart_promotable'),

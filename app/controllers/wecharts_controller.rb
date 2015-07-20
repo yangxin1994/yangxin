@@ -17,46 +17,45 @@ class WechartsController < ApplicationController
     	render :text => 'false'
     end
 
-	def wechart_auth
-		openid    = Wechart.get_open_id(params[:code])
-		answer    = Answer.where(:id => params[:state],:open_id => openid,:status => Answer::FINISH).first
-		if answer
-			sid   = answer.survey.id.to_s
-			sids  = Order.where(type:Order::HONGBAO,open_id:openid).map{|order| order.answer.survey.id.to_s}
-			unless sids.include?(sid)
-				#未领红包	
-				order  = Order.create_hongbao_order(params[:state],openid)
-				total_amount = answer.reward_scheme.wechart_reward_amount.to_s
-				amount_arr   = total_amount.scan(/\d+/)
-				if amount_arr.length == 1
-					#设置了每份问卷奖励多少
-					min_value    = max_value  = total_amount = amount_arr.first.to_i
-				elsif amount_arr.length == 2
-					#设置了每份问卷奖励的金额范围,具体金额由微信随机分配
-					value        = rand(amount_arr.first.to_i..amount_arr.last.to_i)
-					min_value    = max_value = total_amount = value
-				end
-				res = Wechart.send_red_pack(order.code,openid,request.remote_ip,total_amount,min_value,max_value)
-				if res
-					order.update_attributes(amount:total_amount,status:Order::SUCCESS)
+	def get_red_pack
+		openid    = cookies[:od]
+		awid      = cookies[:awd]
+		if openid && awid
+			answer    = Answer.where(:id => awid,:open_id => openid,:status => Answer::FINISH).first
+			if answer
+				sid   = answer.survey.id.to_s
+				sids  = Order.where(type:Order::HONGBAO,open_id:openid).map{|order| order.answer.survey.id.to_s}
+				unless sids.include?(sid)
+					#未领红包	
+					order  = Order.create_hongbao_order(params[:state],openid)
+					total_amount = answer.reward_scheme.wechart_reward_amount.to_s
+					amount_arr   = total_amount.scan(/\d+/)
+					if amount_arr.length == 1
+						#设置了每份问卷奖励多少
+						min_value    = max_value  = total_amount = amount_arr.first.to_i
+					elsif amount_arr.length == 2
+						#设置了每份问卷奖励的金额范围,具体金额由微信随机分配
+						value        = rand(amount_arr.first.to_i..amount_arr.last.to_i)
+						min_value    = max_value = total_amount = value
+					end
+					res = Wechart.send_red_pack(order.code,openid,request.remote_ip,total_amount,min_value,max_value)
+					if res
+						order.update_attributes(amount:total_amount,status:Order::SUCCESS)
+						render_json_s(true)
+					else
+						order.destroy
+						render_json_e('system_error')
+					end
 				else
-					order.destroy
-				end
-				wuser  = WechartUser.where(openid:openid).first
-				unless wuser.present?
-					WechartWorker.perform_async('create',{open_id:openid}) 
+					#已领红包
+					render_json_e('red_pack_getted')					
 				end
 			else
-				#已领红包
-				Rails.logger.info '============================'
-				Rails.logger.info '您已经领取过红包╮(╯▽╰)╭'
-				Rails.logger.info '============================'					
+				render_json_e('answer_not_exist')
 			end
 		else
-			Rails.logger.info '------系统错误,没有找到对应的answer----'
+			render_json_e('openid_not_exist')		
 		end
-
-		redirect_to "/s/#{answer.survey.wechart_scheme_id}"
 	end
 
 	def verify

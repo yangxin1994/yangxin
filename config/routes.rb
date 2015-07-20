@@ -157,7 +157,7 @@ OopsData::Application.routes.draw do
    collection do 
      get  'wechart_api'
      post 'wechart_api' 
-     get  'wechart_auth'
+     post 'get_red_pack'
    end    
   end
 
