@@ -117,13 +117,13 @@ class Filler::AnswersController < Filler::FillerController
 
     
     if @answer.survey.wechart_promotable
+      generate_wechart_sign
+      #调用微信的分享接口需要的配置
       if cookies[:od].blank?
         code = params[:code]
         if code.nil?
           redirect_to Wechart.snsapi_base_redirect(request.url,request.url)
         else
-          #调用微信的分享接口需要的配置
-          generate_wechart_sign
           begin
             openid = Wechart.get_open_id(code)
             cookies[:od] = {
