@@ -531,7 +531,7 @@ $(function() {
                         }, this));
                         
                         wechart_btn.click($.proxy(function(){
-                            $.postJSON(this._uri('/wecharts/get_red_pack'),{},$.proxy(function(retval){
+                            $.post('/wecharts/get_red_pack',{},$.proxy(function(retval){
                                 if(retval.success){
                                     location.href = '/s/' + this.options.reward.id;
                                 }else{
