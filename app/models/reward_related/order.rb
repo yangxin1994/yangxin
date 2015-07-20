@@ -220,7 +220,7 @@ class Order
     end
     
 
-    order         = Order.create(:source => ANSWER_SURVEY,:type => HONGBAO,:code => order_code)
+    order         = Order.create(:source => ANSWER_SURVEY,:type => HONGBAO,:code => order_code,:remark => '发放中')
     order.survey  = survey
     order.answer  = answer
     order.open_id = openid

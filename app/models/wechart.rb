@@ -220,7 +220,38 @@ class Wechart
         return false
       end    
     end
+  end
+
+  # 定时更新订单状态
+  def self.update_order_status
+    p12 = OpenSSL::PKCS12.new(File.read(Rails.root.to_s + '/apiclient_cert.p12'), "#{Wechart.mch_id}")
+    uri = URI.parse("https://api.mch.weixin.qq.com/mmpaymkttransfers/gethbinfo")
+    Order.where(type:Order::HONGBAO).each do |order|
+      hash = {}
+      hash['nonce_str']   = (0...32).map { ('a'..'z').to_a[rand(26)] }.join
+      hash['mch_billno']  = order.code
+      hash['mch_id']      = self.mch_id
+      hash['appid']       = self.appid
+      hash['bill_type']   = 'MCHT'
+      xml                 = make_xml(hash)
+
+      Net::HTTP.start(uri.host,uri.port,use_ssl:true,ca_file:Rails.root.to_s + '/rootca.pem',key:p12.key,cert:p12.certificate) do |http|
+        request  = Net::HTTP::Post.new(uri.path)
+        request.body = xml
+        response = http.request(request)
+        res      = Nokogiri::XML(response.body,nil,'UTF-8')
+        puts  '---------------------------------------------'
+        puts res.inspect
+        puts  '---------------------------------------------'   
+      end
+    end
   end 
+
+  def self.make_xml(params)
+    "<xml>#{params.map { |k, v| "<#{k}>#{v}</#{k}>" }.join}<sign>#{self.generate_sign(JSON params)}</sign></xml>"
+  end
+
+
 end
 
 

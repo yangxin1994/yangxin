@@ -44,17 +44,17 @@ class WechartsController < ApplicationController
 						render_json_s(true)
 					else
 						order.destroy
-						render_json_e('system_error')
+						render_json_e('系统错误')
 					end
 				else
 					#已领红包
-					render_json_e('red_pack_getted')					
+					render_json_e('您已经领取过红包')					
 				end
 			else
-				render_json_e('answer_not_exist')
+				render_json_e('答案不存在')
 			end
 		else
-			render_json_e('openid_not_exist')		
+			render_json_e('非微信用户错误')		
 		end
 	end
 
