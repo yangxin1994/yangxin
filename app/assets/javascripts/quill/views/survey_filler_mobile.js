@@ -425,7 +425,7 @@ $(function() {
 
                         var next_btn = $('#rew_next'),
                             check_btn = $('#check_btn')
-                            wechart_btn = $('get_wechart_reward');
+                            wechart_btn = $('#get_wechart_reward');
 
 
                         function show_zhifubao_ipt() {
@@ -535,7 +535,7 @@ $(function() {
                                 if(retval.success){
                                     location.href = '/s/' + this.options.reward.id;
                                 }else{
-                                    console.log(retval)
+                                    alert(retval.value.error_code)
                                 }
                             },this))
                         })
