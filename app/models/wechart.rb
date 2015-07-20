@@ -240,10 +240,37 @@ class Wechart
         request.body = xml
         response = http.request(request)
         res      = Nokogiri::XML(response.body,nil,'UTF-8')
-        puts  '---------------------------------------------'
-        puts res.inspect
-        puts  '---------------------------------------------'   
-      end
+        if res.css('return_code').text.match(/SUCCESS/) && res.css('result_code').text.match(/SUCCESS/)
+          code   = res.css('status').text
+          remark = case code  
+          when 'SENDING' 
+            '发放中'
+          when 'SENT'
+            '已发放待领取'
+          when 'FAILED'
+            '发放失败'
+          when 'RECEIVED'
+            '已领取'
+          when 'REFUND'
+            '已退款'
+          end
+          puts remark
+          order.update_attributes(remark:remark)
+        else
+          puts res.inspect
+          puts '--------------------------------------'
+        end    
+      end 
+
+
+# SENDING:发放中
+# SENT:已发放待领取
+# FAILED：发放失败
+# RECEIVED:已领取
+# REFUND:已退款 
+
+
+
     end
   end 
 
