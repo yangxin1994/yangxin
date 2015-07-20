@@ -116,7 +116,7 @@ class Filler::AnswersController < Filler::FillerController
     redirect_to sign_in_account_path({ref: request.url}) and return if @answer.user.present? && @answer.user != current_user
 
     
-    if @survey.wechart_promotable
+    if @answer.survey.wechart_promotable
       if cookies[:od].blank?
         code = params[:code]
         if code.nil?
