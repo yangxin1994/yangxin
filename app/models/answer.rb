@@ -193,7 +193,7 @@ class Answer
         s.pages.each do |page|
           page['questions'].each do |qid|
             q = Question.find(qid)
-            question_content << q.content['text'].scan(/[\u4E00-\u9FA5]/).join
+            question_content << q.content['text'].gsub(/<\/?.*?>/,"")
           end
         end
         sheet1.row(0).concat question_content
@@ -210,10 +210,25 @@ class Answer
                   end
                 end              
               else
-                puts q.content['text']
-                puts '-------------------------'
-                puts content.inspect
-                puts '========================='
+                if content.class == String
+                  rw << content
+                elsif content.class == Hash
+                  if content.length > 0
+                    if content['address']
+                      text = QuillCommon::AddressUtility.find_province_city_town_by_code(content['address'])
+                      if content['detail']
+                        text += content['detail']
+                        puts text 
+                        puts '----------------------'
+                      end
+                    else
+                      puts content
+                      puts '========================'
+                    end
+                  else
+                    rw << ''
+                  end
+                end
               end
             end
             sheet1.row(row_count + 1).replace(rw)
