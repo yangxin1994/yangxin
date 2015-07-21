@@ -22,8 +22,21 @@ class WechartsController < ApplicationController
 		awid      = cookies[:awd]
 		if openid && awid
 			answer    = Answer.where(:id => awid,:open_id => openid,:status => Answer::FINISH).first
-			survey    = answer.survey
-			if survey.open_red_pack
+			begin
+				survey    = answer.survey
+			rescue
+				Rails.logger.info '=====wechart debug info start ============='
+				Rails.logger.info "openid:#{openid}"
+				Rails.logger.info "awid:#{awid}"
+				Rails.logger.info "status:#{Answer::FINISH}"
+				unless answer.present?
+					aw = Answer.where(:id => awid).first
+					Rails.logger.info "answer_inspect:#{aw.inspect}"
+				end
+				Rails.logger.info '===== wechart debug info end   ============='	
+			end		
+			
+			if survey && survey.open_red_pack
 				if answer
 					sid   = answer.survey.id.to_s
 					sids  = Order.where(type:Order::HONGBAO,open_id:openid).map{|order| order.answer.survey.id.to_s}
