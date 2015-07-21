@@ -196,6 +196,8 @@ class Answer
             question_content << q.content['text'].gsub(/<\/?.*?>/,"")
           end
         end
+        puts "表头长度:#{question_content.length}"
+        puts '************************'
         sheet1.row(0).concat question_content
         row_count = 0     
         s.answers.each do |answer|
@@ -210,7 +212,6 @@ class Answer
                   end
                 end              
               else
-                puts q.content['text']
                 if content.class == String
                   rw << content
                 elsif content.class == Hash
@@ -219,17 +220,11 @@ class Answer
                       text = QuillCommon::AddressUtility.find_province_city_town_by_code(content['address'])
                       if content['detail']
                         text += content['detail']
-                        if text.length > 0
-                          puts text 
-                          puts '----------------------'                          
-                        else
-                          puts content.inspect 
-                          puts "**********************"
-                        end
+                        rw << text
                       end
                     else
                       puts content
-                      puts '========================'
+                      puts '------------------------'
                     end
                   else
                     rw << ''
@@ -237,6 +232,8 @@ class Answer
                 end
               end
             end
+            puts "数据行长度:#{rw.length}"
+            puts '======================'
             sheet1.row(row_count + 1).replace(rw)
             row_count += 1
           end
