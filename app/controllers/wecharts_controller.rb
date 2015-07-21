@@ -47,6 +47,8 @@ class WechartsController < ApplicationController
 						res = Wechart.send_red_pack(order.code,openid,request.remote_ip,total_amount,min_value,max_value)
 						if res
 							order.update_attributes(amount:total_amount,status:Order::SUCCESS)
+							cookies.delete(:od, :domain => :all)
+							cookies.delete(:awd, :domain => :all)
 							render_json_s(true) and return 
 						else
 							order.destroy
