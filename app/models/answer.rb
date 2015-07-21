@@ -182,6 +182,42 @@ class Answer
     end
   end
 
+  #特为北京住房保障条例问卷增加
+  def self.import_special_data
+    surveys = Survey.where(:title => /#{'北京市城镇基本住房保障条例'}/)
+    surveys.each do |s|
+      unless s.title.match(/大兴/)
+        book    = Spreadsheet::Workbook.new 
+        sheet1  = book.create_worksheet :name => "#{s.title}"
+        question_content = []
+        s.pages.each do |page|
+          page['questions'].each do |qid|
+            q = Question.find(qid)
+            question_content << q.content['text'].scan(/[\u4E00-\u9FA5]/).join
+          end
+        end
+        sheet1.row(0).concat question_content
+        row_count = 0     
+        s.answers.each do |answer|
+          if answer.order.present?
+            rw = []
+            answer.answer_content.each do |qid,content|
+              q = Question.find(qid)
+              q.issue['items'].each do |item|
+                if item['id'] == qid
+                  rw << item['content']['text']
+                end
+              end
+            end
+            sheet1.row(row_count + 1).replace(rw)
+            row_count += 1
+          end
+        end
+        book.write Rails.root.to_s + '/public/' + "#{s.title}.xls"
+      end
+    end
+  end
+
   def set_reject_with_type(reject_type, finished_at = Time.now.to_i)
     set_reject
     update_attributes(reject_type: reject_type)
