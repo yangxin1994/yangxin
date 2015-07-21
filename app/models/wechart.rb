@@ -197,11 +197,13 @@ class Wechart
     end
   end
 
-  # 定时更新订单状态
-  def self.update_order_status
+  # 查询并更改红包订单状态
+  def self.get_hongbao_order_status(openid)
     p12 = OpenSSL::PKCS12.new(File.read(Rails.root.to_s + '/apiclient_cert.p12'), "#{Wechart.mch_id}")
     uri = URI.parse("https://api.mch.weixin.qq.com/mmpaymkttransfers/gethbinfo")
-    Order.where(type:Order::HONGBAO).each do |order|
+    order = Order.find_by_open_id(openid)
+    if order.present? 
+    # Order.where(type:Order::HONGBAO).each do |order|
       hash = {}
       hash['nonce_str']   = (0...32).map { ('a'..'z').to_a[rand(26)] }.join
       hash['mch_billno']  = order.code
@@ -236,16 +238,7 @@ class Wechart
           puts '--------------------------------------'
         end    
       end 
-
-
-# SENDING:发放中
-# SENT:已发放待领取
-# FAILED：发放失败
-# RECEIVED:已领取
-# REFUND:已退款 
-
-
-
+    # end
     end
   end 
 
