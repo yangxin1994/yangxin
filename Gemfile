@@ -57,7 +57,7 @@ gem 'nokogiri', '~> 1.6.6.2'
 gem "iconv", "~> 1.0.3"
 gem "typhoeus"
 gem 'redis'
-
+gem 'spreadsheet'
 group :assets do
   gem 'sass-rails', '~> 3.2.6'
   gem 'coffee-rails', '~> 3.2.2'
