@@ -134,9 +134,6 @@ class Filler::AnswersController < Filler::FillerController
         else
           begin
             openid = Wechart.get_open_id(code)
-            Rails.logger.info '-------------------------'
-            Rails.logger.info openid
-            Rails.logger.info '-------------------------'
             cookies[:od] = {
               :value => openid,
               :expires => Rails.application.config.permanent_signed_in_months.months.from_now,

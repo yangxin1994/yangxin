@@ -282,7 +282,6 @@ class Survey
       )
       if promote_type.to_s == 'wechart' 
         self.update_attributes(open_red_pack:options[:wechart][:open_red_pack])
-        Rails.logger.info '==================='
       end
       update_quillme_promote_reward_type if options[promote_type] == :quillme
     end
