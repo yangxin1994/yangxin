@@ -210,6 +210,7 @@ class Answer
                   end
                 end              
               else
+                puts q.content['text']
                 if content.class == String
                   rw << content
                 elsif content.class == Hash
@@ -218,8 +219,13 @@ class Answer
                       text = QuillCommon::AddressUtility.find_province_city_town_by_code(content['address'])
                       if content['detail']
                         text += content['detail']
-                        puts text 
-                        puts '----------------------'
+                        if text.length > 0
+                          puts text 
+                          puts '----------------------'                          
+                        else
+                          puts content.inspect 
+                          puts "**********************"
+                        end
                       end
                     else
                       puts content
