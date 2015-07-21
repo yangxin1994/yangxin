@@ -62,6 +62,7 @@ class Survey
   field :spread_point, :type => Integer, default: 0
   field :quillme_promotable, :type => Boolean, default: false
   field :wechart_promotable, :type => Boolean, default: false
+  field :open_red_pack,:type => Boolean,default:true # 是否打开红包领取功能,只在微信红包发放渠道有用
   field :quillme_hot, :type => Boolean, :default => false #是否为热点小调查(quillme用)
   field :recommend_position, :type => Integer, :default => nil  #推荐位
   field :email_promotable, :type => Boolean, default: false
@@ -258,6 +259,7 @@ class Survey
     options.each do |promote_type, promote_info|
       next unless promote_info.is_a? Hash
       options[promote_type][:promotable] = promote_info[:promotable] == "true"
+      options[promote_type][:open_red_pack] = promote_info[:open_red_pack] == "true" if promote_info[:open_red_pack].present?
     end
     update_promote_info(options)
     update_agent_promote(options)
@@ -278,6 +280,10 @@ class Survey
       "#{promote_type}_promotable".to_sym => _params[:promotable],
       "#{promote_type}_promote_info".to_sym => _params["#{promote_type}_promote_setting".to_sym]
       )
+      if promote_type.to_s == 'wechart' 
+        self.update_attributes(open_red_pack:options[:wechart][:open_red_pack])
+        Rails.logger.info '==================='
+      end
       update_quillme_promote_reward_type if options[promote_type] == :quillme
     end
     email_promote_info["promote_email_count"] = _promote_email_count
@@ -919,6 +925,7 @@ class Survey
     survey_obj["quillme_promotable"] = self.quillme_promotable
     survey_obj["quillme_promote_info"] = Marshal.load(Marshal.dump(self.quillme_promote_info))
     survey_obj["wechart_promotable"] = self.wechart_promotable
+    survey_obj["wechart_open_red_pack"] = self.open_red_pack
     survey_obj["wechart_promote_info"] = Marshal.load(Marshal.dump(self.wechart_promote_info))    
     survey_obj["email_promotable"] = self.email_promotable
     survey_obj["email_promote_info"] = Marshal.load(Marshal.dump(self.email_promote_info))

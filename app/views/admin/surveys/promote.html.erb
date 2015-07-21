@@ -128,7 +128,18 @@
             </div>
           </div>
           <span>(<a href="/s/<%=@s.wechart_scheme_id%>"><%= request.protocol + request.host_with_port %>/s/<%= @s.wechart_scheme_id %></a>)</span> 
-        </div>
+        </div>      
+      </div>
+      <div class="control-group">
+        <label class="control-label" >是否开启红包:</label>
+        <div class="controls">
+          <div class="input-append">
+            <div class="btn-group" data-toggle="buttons-checkbox">
+              <button type="button" class="btn btn-info btn-pack <%= "active" if @promote['wechart_open_red_pack'] %> " data-toggle="wechart" >开启</button>
+              <input value="<%= @promote['wechart_open_red_pack'] ? true : false %>" id="open_red_pack" type="hidden" name="wechart[open_red_pack]">
+            </div>
+          </div>
+        </div>          
       </div>
 
       <div class="control-group">

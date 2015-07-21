@@ -452,6 +452,14 @@ $ ->
       $("##{$this.data('toggle')}_promotable").val(true)
       $(".#{$this.data('toggle')}-info")?.show()
 
+
+  $('.btn-pack').click(->
+    if $(this).hasClass('active')
+      $('#open_red_pack').val(false)
+    else
+      $('#open_red_pack').val(true)
+  )
+
   $(document).on 'click','.attr-li', ->
     $this = $(this)
     _placeholder = ""
