@@ -203,10 +203,17 @@ class Answer
             rw = []
             answer.answer_content.each do |qid,content|
               q = Question.find(qid)
-              q.issue['items'].each do |item|
-                if item['id'] == qid
-                  rw << item['content']['text']
-                end
+              if q.issue['items'].present?
+                q.issue['items'].each do |item|
+                  if item['id'] == qid
+                    rw << item['content']['text']
+                  end
+                end              
+              else
+                puts q.content['text']
+                puts '-------------------------'
+                puts content.inspect
+                puts '========================='
               end
             end
             sheet1.row(row_count + 1).replace(rw)
