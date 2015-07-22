@@ -149,6 +149,7 @@ class Survey
   index({ title: 1 }, { background: true } )
   index({ quillme_promotable: 1, quillme_hot: 1,status: 1,created_at: -1}, { background: true } )
   index({ quillme_promotable: 1, quillme_hot: 1,status: 1,quillme_promote_reward_type: 1}, { background: true } )
+  index({ wechart_promotable:1},{background: true})
 
   public
   # Class Methods
