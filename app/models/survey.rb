@@ -1172,11 +1172,12 @@ class Survey
   end
 
   def cost_info
-    cost_info = {hongbao_count: 0,hongbao_cost: 0,mobile_cost: 0, alipay_cost: 0, point_cost: 0, lottery_cost: 0.0, jifenbao_cost: 0, introduce_number: 0}
+    cost_info = {answer_count: 0,hongbao_count: 0,hongbao_cost: 0,mobile_cost: 0, alipay_cost: 0, point_cost: 0, lottery_cost: 0.0, jifenbao_cost: 0, introduce_number: 0}
     self.answers.not_preview.finished.each do |a|
       if self.wechart_promotable
         if a.order
           cost_info[:hongbao_count] += 1
+          cost_info[:answer_count] += 1 if a.status == Answer::FINISH
           cost_info[:hongbao_cost] += (a.order.amount.to_f / 100 )
         end
       end      
