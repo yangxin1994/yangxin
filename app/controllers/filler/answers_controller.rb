@@ -121,11 +121,13 @@ class Filler::AnswersController < Filler::FillerController
       generate_wechart_sign
       
       #领取红包用
-      cookies[:awd] =  {
-        :value => params[:id],
-        :expires => Rails.application.config.permanent_signed_in_months.months.from_now,
-        :domain => :all
-      }
+      unless cookies[:awd].present?
+        cookies[:awd] =  {
+          :value => params[:id],
+          :expires => Rails.application.config.permanent_signed_in_months.months.from_now,
+          :domain => :all
+        }      
+      end
       # 领取红包用
       if cookies[:od].blank?
         code = params[:code]
@@ -139,11 +141,17 @@ class Filler::AnswersController < Filler::FillerController
               :expires => Rails.application.config.permanent_signed_in_months.months.from_now,
               :domain => :all
             }
-            @answer.update_attributes(open_id:openid) if @answer.open_id.blank?
+            unless @answer.open_id.present?
+              @answer.update_attributes(open_id:openid)  
+            end
           rescue Exception => e
               render_500
           end
-        end        
+        end
+      else
+        unless  @answer.open_id.present?
+          @answer.update_attributes(open_id:cookies[:od])
+        end 
       end 
     end
 
