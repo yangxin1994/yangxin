@@ -119,7 +119,6 @@ class Filler::AnswersController < Filler::FillerController
     if @answer.survey.wechart_promotable
       #调用微信的分享接口需要的配置
       generate_wechart_sign
-      
       #领取红包用
       unless cookies[:awd].present?
         cookies[:awd] =  {
@@ -129,30 +128,26 @@ class Filler::AnswersController < Filler::FillerController
         }      
       end
       # 领取红包用
-      if cookies[:od].blank?
-        code = params[:code]
-        if code.nil?
+      unless cookies[:od].present?
+        unless params[:code].present?
           redirect_to Wechart.snsapi_base_redirect(request.url,request.url)
         else
           begin
-            openid = Wechart.get_open_id(code)
+            openid = Wechart.get_open_id(params[:code])
             cookies[:od] = {
               :value => openid,
               :expires => Rails.application.config.permanent_signed_in_months.months.from_now,
               :domain => :all
-            }
-            unless @answer.open_id.present?
-              @answer.update_attributes(open_id:openid)  
-            end
-          rescue Exception => e
-              render_500
+            }            
+          rescue
+            render_500
           end
         end
-      else
-        unless  @answer.open_id.present?
-          @answer.update_attributes(open_id:cookies[:od])
-        end 
-      end 
+      end
+
+      unless @answer.open_id.present?
+        @answer.update_attributes(open_id:cookies[:od])
+      end
     end
 
     @answer.update_status # check whether it is time out
