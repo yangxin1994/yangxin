@@ -57,7 +57,8 @@ class WechartsController < ApplicationController
 							value        = rand(amount_arr.first.to_i..amount_arr.last.to_i)
 							min_value    = max_value = total_amount = value
 						end
-						res = Wechart.send_red_pack(order.code,openid,request.remote_ip,total_amount,min_value,max_value)
+						remark = survey.title
+						res = Wechart.send_red_pack(order.code,openid,request.remote_ip,total_amount,min_value,max_value,remark)
 						if res
 							order.update_attributes(amount:total_amount,status:Order::SUCCESS)
 							cookies.delete(:od, :domain => :all)

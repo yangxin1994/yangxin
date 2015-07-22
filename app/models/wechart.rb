@@ -148,7 +148,7 @@ class Wechart
     return   sign 
   end
 
-  def self.send_red_pack(order_code,openid,ip,total_amount,min_value,max_value)
+  def self.send_red_pack(order_code,openid,ip,total_amount,min_value,max_value,remark)
     uri = "https://api.mch.weixin.qq.com/mmpaymkttransfers/sendredpack"
     #min_value 最小金额
     #max_value 最大金额
@@ -170,7 +170,7 @@ class Wechart
       "wishing" => '感谢您参与问卷吧调研,祝您生活愉快!',
       "client_ip" => ip,
       "act_name" => '问卷吧红包大派送',
-      "remark" => '分享到朋友圈,让更多人领红包'
+      "remark" => remark
     }
 
     xml = make_xml(wechat_hash)
