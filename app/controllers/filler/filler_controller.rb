@@ -1,6 +1,7 @@
+# encoding: utf-8
 class Filler::FillerController < ApplicationController
 
-  before_filter :force_tablet_html, :check_mobile_param
+  before_filter :force_tablet_html, :check_mobile_param,:get_wx_config_info
   has_mobile_fu
 
   layout 'filler'
@@ -31,10 +32,23 @@ class Filler::FillerController < ApplicationController
     return if rewards.blank?
     r = rewards[0]
     case r['type']
-    when RewardScheme::MOBILE, RewardScheme::ALIPAY, RewardScheme::JIFENBAO
-      if r['amount'] > 0
-        @reward_scheme_type = 1
-        @reward_money = r["type"] == RewardScheme::JIFENBAO ? r['amount'].to_f / 100 : r['amount']
+    when RewardScheme::MOBILE, RewardScheme::ALIPAY, RewardScheme::JIFENBAO, RewardScheme::HONGBAO
+      if r['type'].to_i == RewardScheme::HONGBAO.to_i
+        if r['amount'].to_s
+          @reward_scheme_type = 1
+          if r['amount'].to_s.match(/^\d+$/)
+            @reward_money = r['amount'].to_f / 100 
+          elsif r['amount'].to_s.match(/-/)
+            min = r['amount'].split('-').first
+            max = r['amount'].split('-').last
+            @reward_money = (min.to_f / 100).to_s + '~' + (max.to_f / 100).to_s
+          end
+        end
+      else
+        if r['amount'] > 0
+          @reward_scheme_type = 1
+          @reward_money = r["type"] == RewardScheme::JIFENBAO ? r['amount'].to_f / 100 : r['amount']
+        end
       end
     when RewardScheme::POINT
       if r['amount'] > 0
@@ -145,4 +159,17 @@ class Filler::FillerController < ApplicationController
     # 12. check ip restrict
     @forbidden_ip = !is_preview && !answer.present? && @survey.max_num_per_ip_reached?(request.remote_ip)
   end
+
+
+  def get_wx_config_info
+    @appid        = Wechart.appid
+    @noncestr     = Wechart.random_string
+    @jsapi_ticket = Wechart.jsapi_ticket
+    @timestamp    = Time.now.to_i
+    @url          = request.url
+    string1       = "jsapi_ticket=#{@jsapi_ticket}&noncestr=#{@noncestr}&timestamp=#{@timestamp}&url=#{@url}"
+    @signure      =  Digest::SHA1.hexdigest(string1)    
+  end
+
+
 end

@@ -187,6 +187,29 @@
         </div>
       </div>
     </div>  
+    <div class="control-group">
+      <label class="control-label" >微信红包:</label>
+      <div class="controls">
+        <div class="input-prepend" id="jifenbao_select">
+          <div class="btn-group">
+            <button class="btn dropdown-toggle" data-toggle="dropdown">
+              快捷设置
+              <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu">
+              <li><a href="#hongbao-1">1</a></li>
+              <li><a href="#hongbao-2">2</a></li>
+              <li><a href="#hongbao-3">3</a></li>
+              <li><a href="#hongbao-5">5</a></li>
+              <li><a href="#hongbao-10">10</a></li>
+              <li><a href="#hongbao-15">15</a></li>
+              <li><a href="#hongbao-20">20</a></li>
+            </ul>
+            <input class="input-medium" type="text" name="reward_scheme[hongbao]" id="hongbao_amount" placeholder="额度(分) 或者范围(100-200)" value="<%= @editing_rs["hongbao"] %>">
+          </div>
+        </div>
+      </div>
+    </div>      
   </div>
 
   <div id="point_group">

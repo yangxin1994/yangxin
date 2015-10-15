@@ -36,6 +36,15 @@ class Sample::AccountsController < Sample::SampleController
     end
   end
 
+  # 检查图片验证码是否正确
+  def check_picture_code
+    if session[:picture_code] == params[:code].to_s.upcase
+      render_json_s
+    else
+      render_json_e 'error_captcha'
+    end
+  end
+
   #用户注册
   def regist
     if params[:email_mobile].present?
@@ -52,8 +61,16 @@ class Sample::AccountsController < Sample::SampleController
   end
 
   def check_user_exist
+    transfer_picture_code
     u = User.find_by_email_or_mobile(params[:email_mobile])
     render_json_auto({ exist: (u && u.is_activated)}) and return
+  end
+
+  def transfer_picture_code
+    session[:picture_code] = session[:captcha].to_s.upcase
+    if params[:code]
+      render_json_s
+    end
   end
 
   #注册成功后的跳转页面

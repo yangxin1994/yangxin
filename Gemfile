@@ -1,7 +1,7 @@
 #source 'http://rubygems.org'
 source 'http://ruby.taobao.org'
 
-# ruby "1.9.3"
+ruby "1.9.3"
 
 gem 'rails', '~> 3.2.6'
 
@@ -39,7 +39,8 @@ gem 'gon', "~> 4.1.1"
 
 gem 'yab62', require: 'yab62'
 # uploader
-
+gem 'easy_captcha'
+# gem 'rmagick'
 gem 'mini_magick', '~> 3.5.0'
 gem 'carrierwave', '~> 0.8.0'
 gem 'carrierwave-video'
@@ -53,8 +54,10 @@ gem 'carrierwave-mongoid', :require => 'carrierwave/mongoid'
 gem 'roadie', '~> 2.3.4'# html email
 gem 'premailer-rails', '~> 1.4.0'
 gem 'nokogiri', '~> 1.6.6.2'
-
-
+gem "iconv", "~> 1.0.3"
+gem "typhoeus"
+gem 'redis'
+gem 'spreadsheet'
 group :assets do
   gem 'sass-rails', '~> 3.2.6'
   gem 'coffee-rails', '~> 3.2.2'

@@ -61,6 +61,8 @@ class Survey
   # reward for introducing others
   field :spread_point, :type => Integer, default: 0
   field :quillme_promotable, :type => Boolean, default: false
+  field :wechart_promotable, :type => Boolean, default: false
+  field :open_red_pack,:type => Boolean,default:true # 是否打开红包领取功能,只在微信红包发放渠道有用
   field :quillme_hot, :type => Boolean, :default => false #是否为热点小调查(quillme用)
   field :recommend_position, :type => Integer, :default => nil  #推荐位
   field :email_promotable, :type => Boolean, default: false
@@ -70,6 +72,9 @@ class Survey
   field :quillme_promote_info, :type => Hash, :default => {
     "reward_scheme_id" => ""
   }
+  field :wechart_promote_info, :type => Hash, :default => {
+    "reward_scheme_id" => ""
+  }  
   # 0 免费, 1 表示话费，2表示支付宝转账，4表示积分，8表示抽奖，16表示发放集分宝
   field :quillme_promote_reward_type,:type => Integer, default: nil
   field :email_promote_info, :type => Hash, default: {
@@ -144,6 +149,7 @@ class Survey
   index({ title: 1 }, { background: true } )
   index({ quillme_promotable: 1, quillme_hot: 1,status: 1,created_at: -1}, { background: true } )
   index({ quillme_promotable: 1, quillme_hot: 1,status: 1,quillme_promote_reward_type: 1}, { background: true } )
+  index({ wechart_promotable:1},{background: true})
 
   public
   # Class Methods
@@ -191,6 +197,10 @@ class Survey
   delegate :count, :to => :answers,:prefix => true
   def scheme_id
     self.quillme_promote_info['reward_scheme_id']
+  end
+
+  def wechart_scheme_id
+    self.wechart_promote_info['reward_scheme_id']
   end
 
   # 查找某个sample 某个survey的answer
@@ -250,6 +260,7 @@ class Survey
     options.each do |promote_type, promote_info|
       next unless promote_info.is_a? Hash
       options[promote_type][:promotable] = promote_info[:promotable] == "true"
+      options[promote_type][:open_red_pack] = promote_info[:open_red_pack] == "true" if promote_info[:open_red_pack].present?
     end
     update_promote_info(options)
     update_agent_promote(options)
@@ -264,12 +275,15 @@ class Survey
     options["browser_extension"]["browser_extension_promote_setting"]["filters"] = filters
     _promote_email_count = email_promote_info["promote_email_count"]
     _promote_sms_count = sms_promote_info["promote_sms_count"]
-    [:quillme, :email, :sms, :browser_extension, :weibo].each do |promote_type|
+    [:quillme,:wechart, :email, :sms, :browser_extension, :weibo].each do |promote_type|
       _params = options[promote_type]
       self.update_attributes(
       "#{promote_type}_promotable".to_sym => _params[:promotable],
       "#{promote_type}_promote_info".to_sym => _params["#{promote_type}_promote_setting".to_sym]
       )
+      if promote_type.to_s == 'wechart' 
+        self.update_attributes(open_red_pack:options[:wechart][:open_red_pack])
+      end
       update_quillme_promote_reward_type if options[promote_type] == :quillme
     end
     email_promote_info["promote_email_count"] = _promote_email_count
@@ -277,6 +291,9 @@ class Survey
     if self.quillme_promotable && self.quillme_promote_info["reward_scheme_id"].blank?
       self.quillme_promote_info["reward_scheme_id"] = self.reward_schemes.where(default: true).first.id.to_s
     end
+    if self.wechart_promotable && self.wechart_promote_info["reward_scheme_id"].blank?
+      self.wechart_promote_info["reward_scheme_id"] = self.reward_schemes.where(default: true).first.id.to_s
+    end    
     if self.email_promotable && self.email_promote_info["reward_scheme_id"].blank?
       self.email_promote_info["reward_scheme_id"] = self.reward_schemes.where(default: true).first.id.to_s
     end
@@ -602,7 +619,11 @@ class Survey
        "spss_label" => "地点"},
       {"spss_name" => "time",
        "spss_type" => "String",
-       "spss_label" => "答题时长"} 
+       "spss_label" => "答题时长"},
+      {"spss_name" => 'created_at',
+        "spss_type" => 'String',
+        "spss_label" => "答题时间"
+      } 
     ]
 
     self.all_questions(false).each_with_index do |e, i|
@@ -612,7 +633,7 @@ class Survey
   end
 
   def agent_excel_header
-    headers =["agent_user_id", "状态", "IP", "地点", "答题时长"]
+    headers =["agent_user_id", "状态", "IP", "地点", "答题时长","答题时间"]
     self.all_questions(false).each_with_index do |e, i|
       headers += e.excel_header("q#{i+1}")
     end
@@ -620,7 +641,7 @@ class Survey
   end
 
   def excel_header
-    headers =["user_id", "answer_id", "is_agent", "email", "mobile", "IP", "地点", "答题时长"]
+    headers =["user_id", "answer_id", "is_agent", "email", "mobile", "IP", "地点", "答题时长","答题时间"]
     self.all_questions(false).each_with_index do |e, i|
       headers += e.excel_header("q#{i+1}")
     end
@@ -683,7 +704,7 @@ class Survey
       else
         user_id = ""
       end
-      line_answer = [user_id, answer._id, answer.agent_task.present?.to_s, answer.user.try(:email), answer.user.try(:mobile), answer.ip_address, QuillCommon::AddressUtility.find_province_city_town_by_code(answer.region), "#{answer_time} 分"]
+      line_answer = [user_id, answer._id, answer.agent_task.present?.to_s, answer.user.try(:email), answer.user.try(:mobile), answer.ip_address, QuillCommon::AddressUtility.find_province_city_town_by_code(answer.region), "#{answer_time} 分","#{answer.created_at.strftime('%Y-%m-%d %H:%I')}"]
       begin
         all_questions_id(false).each_with_index do |question, index|
           qindex = index
@@ -745,7 +766,7 @@ class Survey
             status = "被管理员拒绝"
           end
         end
-        line_answer = [answer.agent_user_id || "", status, answer.remote_ip, QuillCommon::AddressUtility.find_province_city_town_by_code(answer.region), "#{answer_time} 分"]
+        line_answer = [answer.agent_user_id || "", status, answer.remote_ip, QuillCommon::AddressUtility.find_province_city_town_by_code(answer.region), "#{answer_time} 分","#{answer.created_at.strftime('%Y-%m-%d %H:%I')}"]
         begin
           all_questions_id(false).each_with_index do |question, index|
             qindex = index
@@ -784,7 +805,7 @@ class Survey
           agent_info = answer.agent_task.agent.name
           agent_info += "(#{answer.mobile})" if answer.mobile.present?
         end
-        line_answer = [answer.carnival_user.try(:id) || answer.user.try(:id) || "", answer._id, agent_info.to_s, answer.user.try(:email), answer.user.try(:mobile), answer.remote_ip, QuillCommon::AddressUtility.find_province_city_town_by_code(answer.region), "#{answer_time} 分"]
+        line_answer = [answer.carnival_user.try(:id) || answer.user.try(:id) || "", answer._id, agent_info.to_s, answer.user.try(:email), answer.user.try(:mobile), answer.remote_ip, QuillCommon::AddressUtility.find_province_city_town_by_code(answer.region), "#{answer_time} 分","#{answer.created_at.strftime('%Y-%m-%d %H:%I')}"]
         begin
           all_questions_id(false).each_with_index do |question, index|
             qindex = index
@@ -903,6 +924,9 @@ class Survey
     survey_obj = Hash.new
     survey_obj["quillme_promotable"] = self.quillme_promotable
     survey_obj["quillme_promote_info"] = Marshal.load(Marshal.dump(self.quillme_promote_info))
+    survey_obj["wechart_promotable"] = self.wechart_promotable
+    survey_obj["wechart_open_red_pack"] = self.open_red_pack
+    survey_obj["wechart_promote_info"] = Marshal.load(Marshal.dump(self.wechart_promote_info))    
     survey_obj["email_promotable"] = self.email_promotable
     survey_obj["email_promote_info"] = Marshal.load(Marshal.dump(self.email_promote_info))
     survey_obj["sms_promotable"] = self.sms_promotable
@@ -1148,8 +1172,15 @@ class Survey
   end
 
   def cost_info
-    cost_info = {mobile_cost: 0, alipay_cost: 0, point_cost: 0, lottery_cost: 0.0, jifenbao_cost: 0, introduce_number: 0}
-    self.answers.not_preview.finished.each do |a|
+    cost_info = {answer_count: 0,hongbao_count: 0,hongbao_cost: 0,mobile_cost: 0, alipay_cost: 0, point_cost: 0, lottery_cost: 0.0, jifenbao_cost: 0, introduce_number: 0}
+    orders    = Order.where(survey_id:self.id.to_s,type:Order::HONGBAO).to_a
+    if orders.length > 0
+      cost_info[:hongbao_count] = orders.length
+      cost_info[:hongbao_cost]  = orders.map{|o| o.amount.to_f}.inject{|k,v| k + v} / 100 
+      cost_info[:answer_count]  = self.answers.finished.count
+    end
+
+    self.answers.not_preview.finished.each do |a|    
       cost_info[:introduce_number] += 1 if a.introducer_id.present? && a.introducer_reward_assigned == true
       next if a.reward_delivered != true
       reward = (a.rewards.select { |e| e["checked"] == true }).first

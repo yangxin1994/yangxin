@@ -10,8 +10,9 @@ class RewardScheme
   POINT = 4
   LOTTERY = 8
   JIFENBAO = 16
+  HONGBAO  = 32
   
-  CASH_REWARD = "1,2,16"
+  CASH_REWARD = "1,2,16,32"
   FREE = "0"
 
   field :name, type: String, default: ""
@@ -72,6 +73,16 @@ class RewardScheme
     answer.need_review = self.need_review
     self.answers << answer
     answer.save
+  end
+
+
+  def wechart_reward_amount
+    hash = self.rewards.select{|hash| hash['type'] == 32}
+    if hash.length > 0
+      return hash.first['amount']
+    else
+      return nil
+    end
   end
   
 

@@ -499,6 +499,26 @@ $(function() {
 		$('span.notice').hide()
 	})
 
+	// $('input.sub_btn').on('click', function() {
+	// 	if ($(this).hasClass('con_sub_btn')) {
+	// 		var order_data = {}
+
+	// 		$('div.sub_infor').find('span.recerver_info').each(function() {
+	// 			var name = $(this).attr('name')
+	// 			order_data[name] = $(this).attr('data')
+	// 		})
+	// 		order_data['answer_id'] = window._id
+	// 		generate_orders($(this), order_data)
+	// 	} else {
+	// 		//确认地址信息
+	// 		var go_on = check_enter()
+	// 		if (go_on) {
+	// 			popup_address_confirm_page()
+	// 		}
+	// 	}
+	// })
+
+	// 住建委项目修改代码，去除了地址验证信息
 	$('input.sub_btn').on('click', function() {
 		if ($(this).hasClass('con_sub_btn')) {
 			var order_data = {}
@@ -511,9 +531,9 @@ $(function() {
 			generate_orders($(this), order_data)
 		} else {
 			//确认地址信息
-			var go_on = check_enter()
-
-			if (go_on) {
+			var receiver = $.trim($('input[name="receiver"]').val())
+			var mobile = $.trim($('input[name="mobile"]').val())
+			if (receiver.length > 0 && mobile.length > 0 ) {
 				popup_address_confirm_page()
 			}
 		}

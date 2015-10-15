@@ -22,7 +22,7 @@
 				id: <%= raw @reward_scheme_id.to_json %>,
 				reward_scheme_type: <%= @reward_scheme_type %>,
 				<% if @reward_scheme_type == 1 %>
-				reward_money: <%= @reward_money %>,
+				reward_money: '<%= "#{@reward_money}" %>',
 				<% elsif @reward_scheme_type == 2 %>
 				reward_point: <%= @reward_point %>,
 				<% elsif @reward_scheme_type == 3 %>
@@ -38,15 +38,36 @@
 			mobile: <%= raw current_user.try(:mobile).to_json %>,
 			spread_point: <%= raw @survey['spread_point'] %>,
 			spread_url: window.spread_url,
+			iqiyi_redirect:<%= raw @redirect_link.to_json %>,
 			binded: <%= raw @binded %>
 		});
 	});
+	</script>
+
+
+	<script type='text/javascript'>
+		window.is_wechart       = <%= raw @survey.wechart_promotable.to_json %>;
+		window.appid     	= <%= raw (@appid).to_json %>;
+		window.noncestr  	= <%= raw (@noncestr).to_json %>;    
+		window.timestamp 	= <%= raw (@timestamp).to_json %>;
+		window.url       	= <%= raw (@url).to_json %>;
+		window.signure   	= <%= raw (@signure).to_json %>;
+		window.share_link   = window.location.origin + '/s/' + <%= raw @reward_scheme_id.to_json %>;
+		window.survey_title = <%= raw @survey.title.to_json %>;
+		wx.config({
+		    debug: false,
+		    appId: window.appid,
+		    timestamp: window.timestamp,
+		    nonceStr: window.noncestr,
+		    signature: window.signure,
+		    jsApiList: ['onMenuShareTimeline','onMenuShareAppMessage','hideMenuItems']
+		})
 	</script>
 <% end %>
 
 
 
-<h2 class="title"><%= @survey['title'] %></h2>
+<!-- <h2 class="title"><%#= @survey['title'] %></h2> -->
 <% if @survey['style_setting']['has_progress_bar'] %>
 	<div class="progress" id="progress">
 		<em></em>

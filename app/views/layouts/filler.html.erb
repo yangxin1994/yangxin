@@ -16,14 +16,15 @@
 
 	<% if ["52a59fc6eb0e5bb2c5000007", "54365c14eb0e5bba58000204", "544a0602eb0e5b829e000016", 
     "544a0ab5eb0e5bfab700019d", "544b6d8eeb0e5bef46000006",'547fb68beb0e5b4cc4000016', "55069ab7eb0e5bba6300001e",
-    "55120905eb0e5b2984000003", "551208dbeb0e5be514000004"].include?(@survey['_id'].to_s) %>
-	<!-- hack gonganbu to hide logo -->
+    "55120905eb0e5b2984000003", "551208dbeb0e5be514000004", "555d96f8eb0e5b25d600001c", "55d43268eb0e5b412d000002"].include?(@survey['_id'].to_s) or @survey['title'].include?('北京市城镇基本住房保障条例') %>
+	<!-- hack to hide logo -->
 		<style type="text/css">
 			#logo { display: none; }
 		</style>
 	<% end %>
 
-  <% if ["55120905eb0e5b2984000003", "551208dbeb0e5be514000004", "55069ab7eb0e5bba6300001e", "54365c14eb0e5bba58000204"].include?(@survey['_id'].to_s) %>
+  <% if ["55120905eb0e5b2984000003", "551208dbeb0e5be514000004", "55069ab7eb0e5bba6300001e", "54365c14eb0e5bba58000204", 
+    "555d96f8eb0e5b25d600001c"].include?(@survey['_id'].to_s) or @survey['title'].include?('北京市城镇基本住房保障条例') %>
   <!-- hack background -->
     <style type="text/css">
       #sf_banner .sf_banner_top { background: #21A1DC; border-bottom: none;}
@@ -85,9 +86,17 @@
 	</div>
 	<% end %>
   <!-- hack for trip survey -->
-  <% trip_id = '537e9abdeb0e5b357b000096' %>
-  <% if @survey['_id'].to_s == trip_id %> 
+  <% trip_id = ['55a4a974eb0e5b2722000008','5578e2efeb0e5b686200000b','55a8b12feb0e5bf8fd000065'] %>
+  <% if trip_id.include?(@survey['_id'].to_s) %> 
   <style type="text/css">
+    #sf_banner .sf_banner_top{
+      height:80px;
+      line-height:80px;
+      background-color: #fdfdfd;
+    }
+    #sf_banner .sf_banner_top img{
+      height:80px;
+    }
     #sf_banner .sf_banner_top > .inner #progress_con {
       color: #FFC800;
     }
@@ -100,15 +109,15 @@
   </style>
   <% end %>
   <!-- hack for trip survey -->
-	<div class='sf_banner_top' <% if @survey['_id'].to_s == trip_id %> style='background:#fff;' <% end %>>
+	<div class='sf_banner_top' <% if trip_id.include?(@survey['_id'].to_s) %> style='background:#fdfdfd;' <% end %>>
 		<div class='inner'>
       <% if ["530ecc12eb0e5be18500001a", "5372c7f6eb0e5b41fc000003"].include?(@survey['_id'].to_s) %>
       <a id='logo' href="http://netranking.cn">
         <img src="/assets/filler/default/logo-nr.png" />
       </a>
-      <% elsif @survey['_id'].to_s == trip_id %>
-      <a id='logo' href="http://www.shanxichina.gov.cn/zh/index.shtml">
-        <img src="/sxlyj.png" />
+      <% elsif trip_id.include?(@survey['_id'].to_s) %>
+      <a id='logo' href="javascript:void(0);">
+        <img src="/hbly.jpg" />
       </a>
       <% else %>
       <a id='logo' href="http://oopsdata.com">
@@ -135,7 +144,12 @@
     <% if @survey[:lang] == 'en' %>
 	<a href='/' target="_blank">Tech Support: http://wenjuanba.com</a>
     <% else %>
-  <a href='/' target="_blank">技术支持 <%= corp_name %></a>
+      <% if trip_id.include?(@survey['_id'].to_s) %>
+        <a href='http://netranking.com.cn/' target="_blank">技术支持 清研灵智信息咨询（北京）有公司</a>
+      <% else %>
+        <a href='/' target="_blank">技术支持 <%= corp_name %></a>
+      <% end %>
+        
     <% end %>
 	<% end %>
 	<% if @survey['style_setting']['has_advertisement'] %>

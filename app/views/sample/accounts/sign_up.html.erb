@@ -31,6 +31,11 @@
               </span>
               <div style="clear:both;"></div>  
             </div> -->
+            <%= captcha_tag %>
+            <div class="wraper">
+              <%= text_field_tag :captcha, nil, :placeholder => '请输入验证码' %>
+            </div>
+            
             <input class="login_btn" type="submit" value="立即注册" />
           </div>
         </div>

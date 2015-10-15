@@ -1,6 +1,8 @@
 require 'sidekiq/web'
 OopsData::Application.routes.draw do
 
+  captcha_route
+
   mount Sidekiq::Web, at: "/sidekiq"
 
   # match '*path' => 'welcome#index'
@@ -43,7 +45,8 @@ OopsData::Application.routes.draw do
         post :login,   :as => :login 
         post :regist,:as => :regist
         post :mobile_activate,:as => :mobile_activate
-        post  :get_basic_info_by_auth_key, :as => :get_basic_info_by_auth_key
+        post :get_basic_info_by_auth_key, :as => :get_basic_info_by_auth_key
+        post :check_picture_code,:transfer_picture_code
       end
     end
 
@@ -150,6 +153,13 @@ OopsData::Application.routes.draw do
 
   resources :realogs
 
+  resources :wecharts ,:only => [] do 
+   collection do 
+     get  'wechart_api'
+     post 'wechart_api' 
+     post 'get_red_pack'
+   end    
+  end
 
   # surveys, pages and questions
   scope :module => "quill" do
@@ -607,7 +617,7 @@ OopsData::Application.routes.draw do
   # Survey filler
   scope :module => "filler" do
     match "s/:id" => "surveys#show", :as => :show_s, :via => :get
-    resources :surveys, :only => [:show] 
+    resources :surveys, :only => [:show]
 
     match "p/:id" => "previews#show", :as => :show_p, :via => :get
     resources :previews, :only => [:show]

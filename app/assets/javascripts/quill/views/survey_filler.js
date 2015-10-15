@@ -79,9 +79,20 @@ $(function() {
 
         _close: function() {
             // close window or redirect
-            var link = this.model.get('style_setting').redirect_link;
+            if(this.options.iqiyi_redirect){
+                answer_stat = this.options.data.value.answer_status
+                if ($.inArray(answer_stat,[1,4,8,32]) >= 0 ){
+                    var link = this.options.iqiyi_redirect;
+                }else{
+                    var link = '';
+                }
+            }else{
+                var link = this.model.get('style_setting').redirect_link;    
+            }    
             if ($.regex.isUrl(link)) {
-                link = link.toLowerCase();
+                if(!this.options.iqiyi_redirect){
+                    link = link.toLowerCase();    
+                }                
                 if (link.indexOf('http') != 0)
                     link = 'http://' + link;
                 location.href = link;
@@ -302,11 +313,18 @@ $(function() {
                 // answer_status: 4（待审核），8（等待代理审核），32（完成）
                 if (this.options.reward.reward_scheme_type == 0) {
                     // hack for survey carnival
-                    if (!this.options.is_preview && this.model.get('style_setting').redirect_link == 'carnival') {
-                        var d = new Date();
-                        location.href = "/carnival/campaigns?t=" + d.getTime();
-                        return;
+                    redirect_link = this.model.get('style_setting').redirect_link;
+                    if (!this.options.is_preview && redirect_link == 'carnival') {
+                      var d = new Date();
+                      location.href = "/carnival/campaigns?t=" + d.getTime();
+                      return;
                     }
+                    
+                    if (!this.options.is_preview && redirect_link && redirect_link.indexOf('new ') == 0) {
+                      location.href = redirect_link.substr(4, redirect_link.length - 4);
+                      return;
+                    }
+
                     // end hack
                     // free, show message
                     this.hbs({
@@ -315,6 +333,7 @@ $(function() {
                         publish_result: this.model.get('publish_result'),
                         spreadable: this.options.spread_point > 0,
                         agent: this.options.is_agent,
+                        is_iqiyi:this.options.iqiyi_redirect,
                         spread_point: this.options.spread_point,
                         show_subscribe: !this.options.binded && this.model.get('_id') != gonganbu
                     }, 'survey_filler_end_free').appendTo('#f_body');

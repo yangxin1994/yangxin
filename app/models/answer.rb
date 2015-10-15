@@ -77,7 +77,7 @@ class Answer
   field :mobile, :type => String
   field :sample_attributes_updated, :type => Boolean, default: false
   field :suspected, :type => Boolean
-
+  field :open_id,:type => String
 
   belongs_to :agent_task
   belongs_to :user, class_name: "User", inverse_of: :answers
@@ -113,12 +113,16 @@ class Answer
   index({ user_id: 1, survey_id: 1, is_preview:1 }, { background: true } )
   index({ import_id:1},{ background: true })
   index({ ip_address:1},{ background: true })
+  index({ survey:1, agent_task_id:1, mobile: 1},{ background: true })
+  index({ survey:1, mobile: 1},{ background: true })
 
 
   after_create do |doc|
-    unless doc.region.present?
-      doc.region = QuillCommon::AddressUtility.find_address_code_by_ip(doc.ip_address) 
-      doc.save
+    if(!doc.region.present? || doc.region < 0)
+      if doc.ip_address.present?
+        doc.region = QuillCommon::AddressUtility.find_address_code_by_ip(doc.ip_address) 
+        doc.save
+      end
     end
   end
 
@@ -178,6 +182,90 @@ class Answer
     end
   end
 
+  #特为北京住房保障条例问卷增加
+  # def self.import_special_data
+  #   surveys = Survey.where(:title => /#{'北京市城镇基本住房保障条例'}/)
+  #   surveys.each do |s|
+  #     unless s.title.match(/大兴/)
+  #       book    = Spreadsheet::Workbook.new 
+  #       sheet1  = book.create_worksheet :name => "#{s.title}"
+  #       question_content = ['订单id','订单联系人','联系方式','奖品']
+  #       s.pages.each do |page|
+  #         page['questions'].each do |qid|
+  #           q = Question.find(qid)
+  #           question_content << q.content['text'].gsub(/<\/?.*?>/,"")
+  #         end
+  #       end
+  #       sheet1.row(0).concat question_content
+  #       row_count = 0     
+  #       s.answers.each do |answer|
+  #         if answer.order.present?
+  #           prize = Prize.find(answer.order.prize_id.to_s)
+  #           rw = [answer.order.id.to_s,answer.order.receiver,answer.order.mobile,prize.try(:title)]
+  #           answer.answer_content.each do |qid,content|
+  #             q = Question.find(qid)
+  #             if content['selection']
+  #               select = ''
+  #               content['selection'].each do |oid|
+  #                 q.issue['items'].each do |item|
+  #                   if item['id'] == oid
+  #                     select += "#{item['content']['text'].gsub(/<\/?.*?>/,"")}    "
+  #                   end
+  #                 end 
+  #               end
+  #               rw << select
+  #             else
+  #               if content.class == String
+  #                 rw << content
+  #               elsif content.class == Hash
+  #                 if content.length > 0
+  #                   if content['address']
+  #                     text = QuillCommon::AddressUtility.find_province_city_town_by_code(content['address'])
+  #                     if content['detail']
+  #                       text += content['detail']
+  #                     end
+  #                     rw << text.gsub(/<\/?.*?>/,"")
+  #                   else
+  #                     txt = ''
+  #                     content.each do |row_id,item_id_arr|
+  #                       if q.issue['rows'].present?
+  #                         q.issue['rows'].each do |row_hash|
+  #                           if row_hash['id'] == row_id
+  #                             item_id_arr.each do |item_id|
+  #                               if q.issue['items'].present?
+  #                                 q.issue['items'].each do |item|
+  #                                   if item['id'] == item_id
+  #                                     txt += item['content']['text'].gsub(/<\/?.*?>/,"")
+  #                                   end
+  #                                 end
+  #                               end
+  #                             end
+  #                           end
+  #                         end
+  #                       end
+  #                     end
+  #                     rw << txt.gsub(/<\/?.*?>/,"")
+  #                   end
+  #                 else
+  #                   rw << ''
+  #                 end
+  #               else
+  #                 rw << ''
+  #               end
+  #             end
+  #           end
+  #           puts rw.inspect
+  #           puts '----------------------------------------------------------'
+  #           sheet1.row(row_count + 1).replace(rw)
+  #           row_count += 1
+  #         end
+  #       end
+  #       book.write Rails.root.to_s + '/public/' + "#{s.title}.xls"
+  #     end
+  #   end
+  # end
+
+
   def set_reject_with_type(reject_type, finished_at = Time.now.to_i)
     set_reject
     update_attributes(reject_type: reject_type)
@@ -186,7 +274,7 @@ class Answer
     self.send_agent_notification
   end
 
-  def self.create_answer(survey_id, reward_scheme_id, introducer_id, agent_task_id, agent_user_id, task_id, answer_obj)
+  def self.create_answer(survey_id, reward_scheme_id, introducer_id, agent_task_id, agent_user_id, task_id, openid=nil,answer_obj)
     answer = self.create(answer_obj)
     Survey.normal.find(survey_id).answers << answer
     # AgentTask.find_by_id(agent_task_id).try(:new_answer, answer)

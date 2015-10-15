@@ -172,10 +172,19 @@ $(function(){
 		},
 
 		_checkAnswer: function(answer, lang) {
+      console.log(answer);
       if(!this.get('is_required')) {
         if(!answer)
           return null;
-        if(_.keys(answer).length == 0)
+        var has_some_answer = false;
+        _.each(answer, function(value, key) {
+          if(value && value.length > 0) {
+            has_some_answer = true;
+            return false;
+          }
+          return true;
+        });
+        if(!has_some_answer)
           return null;
       }
       if(lang=='en') {

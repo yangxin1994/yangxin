@@ -62,9 +62,21 @@ $(function() {
 
         _close: function() {
             // close window or redirect
-            var link = this.model.get('style_setting').redirect_link;
+            if(this.options.iqiyi_redirect){
+                answer_stat = this.options.data.value.answer_status
+                if ($.inArray(answer_stat,[1,4,8,32]) >= 0 ){
+                    var link = this.options.iqiyi_redirect;
+                }else{
+                    var link = '';
+                }
+            }else{
+                var link = this.model.get('style_setting').redirect_link;    
+            }
+            
             if ($.regex.isUrl(link)) {
-                link = link.toLowerCase();
+                if(!this.options.iqiyi_redirect){
+                    link = link.toLowerCase();    
+                }
                 if (link.indexOf('http') != 0)
                     link = 'http://' + link;
                 location.href = link;
@@ -91,7 +103,7 @@ $(function() {
             $('.spread').animate({
                 "top": "0px"
             }, 'fast');
-            var href = window.location.href
+            var href = this.options.spread_url
             _.each(['SinaWeibo', 'TencentWeibo', 'Renren', 'Douban', 'QQSpace',
                 'Kaixin001', 'Diandian', 'Gmail', 'Fetion'
             ], function(v) {
@@ -117,27 +129,35 @@ $(function() {
                 if ($(e.target).attr('id') !== 'socal_share') {
                     $('.spread').animate({
                         "top": "-2000px"
-                    }, 'fast');
+                    }, 'fast',function(){
+                        $('#socal_share').show();
+                    });
                 }
             })
 
             $('#socal_share').click($.proxy(function() {
-                if (this.options.signin) {
-                    this._share_info();
-                } else {
-                    if (this.options.spread_point > 0) {
-                        ref = window.location.href
-                        location.href = '/account/sign_in?ref=' + ref;
-                    } else {
-                        this._share_info();
-                    }
-                }
+                $('#socal_share').hide();
+                this._share_info();
+                // if (this.options.signin) {
+                //     this._share_info();
+                // } else {
+                //     this._share_info();
+                //     // if (this.options.spread_point >= 0) {
+                //     //     ref = window.location.href
+                //     //     location.href = '/account/sign_in?ref=' + ref;
+                //     // } else {
+                //     //     this._share_info();
+                //     // }
+                // }
             }, this));
 
             $('.spread').click(function() {
                 $('.spread').animate({
                     "top": "-2000px"
-                }, 'fast');
+                }, 'fast',function(){
+                    $('#socal_share').show();
+                });
+                
             })
         },
 
@@ -349,17 +369,32 @@ $(function() {
                 // answer_status: 4（待审核），8（等待代理审核），32（完成）
                 if (this.options.reward.reward_scheme_type == 0) {
                     // hack for survey carnival
-                    if (!this.options.is_preview && this.model.get('style_setting').redirect_link == 'carnival') {
+                    redirect_link = this.model.get('style_setting').redirect_link;
+                    //嘉年华活动用
+                    if (!this.options.is_preview && redirect_link == 'carnival') {
                         var d = new Date();
                         location.href = "/carnival/campaigns?t=" + d.getTime();
                         return;
                     }
+
+                    if (!this.options.is_preview && redirect_link && redirect_link.indexOf('new ') == 0) {
+                      location.href = redirect_link.substr(4, redirect_link.length - 4);
+                      return;
+                    }
+
+                    //爱奇艺跳转链接
+                    if(this.options.iqiyi_redirect){
+                        redirect_link  =  this.options.iqiyi_redirect    
+                    }
+                    
+
                     this.hbs({
                         spreadable: this.options.spread_point > 0,
                         agent: this.options.is_agent,
                         spread_point: this.options.spread_point,
                         signin:this.options.signin,
-                        link:this.model.get('style_setting').redirect_link,
+                        link:redirect_link,
+                        is_iqiyi:this.options.iqiyi_redirect,
                         allow_multianswer:this.model.get('style_setting').allow_multianswer,
                         show_restart: this.options.is_preview
                     }, 'survey_filler_end_free_mobile').appendTo('#f_body');
@@ -369,13 +404,28 @@ $(function() {
                         this._close()
                     }, this));
                 } else if (this.options.reward.reward_scheme_type == 1) {
+
                     if (value.order_id == null) {
-                        this.hbs({}, 'survey_filler_end_money_mobile').appendTo($('#f_body'));
+                        var time_limit = false;
+                        if(this.model.get('wechart_promotable')){
+                            var d    = new Date();
+                            var t    = (d + '').split(' ')[4];
+                            if(t >= '00:00:00' && t <= '08:00:00'){
+                                var time_limit = true;
+                            }
+                        }
+                        
+                        this.hbs({
+                            is_wechart:this.model.get('wechart_promotable'),
+                            is_time_limit:time_limit
+                        }, 'survey_filler_end_money_mobile').appendTo($('#f_body'));
+
                         $('.s_type select').children('option[value="zhifubao"]').text('为您支付宝付款￥' + this.options.reward.reward_money + '元')
                         $('.s_type select').children('option[value="chongzhi"]').text('为您手机充值￥' + this.options.reward.reward_money + '元')
 
                         var next_btn = $('#rew_next'),
-                            check_btn = $('#check_btn');
+                            check_btn = $('#check_btn')
+                            wechart_btn = $('#get_wechart_reward');
 
 
                         function show_zhifubao_ipt() {
@@ -479,13 +529,26 @@ $(function() {
                                 }
                             }, this));
                         }, this));
+                        
+                        wechart_btn.click($.proxy(function(){
+                            $.post('/wecharts/get_red_pack',{},$.proxy(function(retval){
+                                if(retval.success){
+                                    location.href = '/s/' + this.options.reward.id;
+                                }else{
+                                    alert(retval.value.error_code);
+                                }
+                            },this));
+                        },this));
                     } else {
                         this.hbs({
+                            is_wechart:this.model.get('wechart_promotable'),
+                            share_link:window.location.origin + '/s/' + this.options.reward.id,
                             reward_money: this.options.reward.reward_money,
                             waiting: value.order_status != 4 && value.order_status != 8,
                             success: value.order_status == 4,
                             failed: value.order_status == 8,
                             order_code: value.order_code,
+                            order_amount:(value.order_amount / 100),
                             signin: this.options.signin,
                             allow_multianswer:this.model.get('style_setting').allow_multianswer,
                             survey_id: this.model.get('_id'),
@@ -500,6 +563,15 @@ $(function() {
                         if (!this.options.signin) {
                             this._set_reward();
                         }
+                        //微信红包分享按钮
+                        $('.wechart .share a.btn').click($.proxy(function(){
+                            $('.share-direc').show()
+                        },this))
+
+                        $('.share-direc').click($.proxy(function(){
+                            $('.share-direc').hide()
+                        },this))
+
 
                         $('#get_order').click($.proxy(function() {
                             $.util.disable($('#get_order').text('正在跳转...'));
@@ -610,8 +682,8 @@ $(function() {
               location.href = restart_ref;
             }, this));            
 
-            var minHeight = $(window).height() - 114;
-            $('.page').css('minHeight', minHeight);
+            // var minHeight = $(window).height() - 114;
+            // $('.page').css('minHeight', minHeight);
 
             // scroll to window top
             $("html, body").animate({

@@ -1,3 +1,4 @@
+# encoding: utf-8
 require 'array'
 class Filler::AnswersController < Filler::FillerController
   def create
@@ -74,8 +75,9 @@ class Filler::AnswersController < Filler::FillerController
     @answer = Answer.find_by_id(params[:id])
     render_404 if @answer.nil?
     survey = @answer.survey
-    agent_answers = survey.answers.select { |e| e.agent_task.present? }
-    exist_answer = agent_answers.select{|e| e.mobile == params[:mobile]}
+    # agent_answers = survey.answers.select { |e| e.agent_task.present? }
+    # exist_answer = agent_answers.select{|e| e.mobile == params[:mobile]}
+    exist_answer = survey.answers.where(:agent_task_id.ne => nil, :mobile => params[:mobile])
     if exist_answer.length > 0
       if exist_answer.first.status != Answer::EDIT
         render_json_auto ErrorEnum::MOBILE_EXIST and return
@@ -112,6 +114,42 @@ class Filler::AnswersController < Filler::FillerController
 
     # load data
     redirect_to sign_in_account_path({ref: request.url}) and return if @answer.user.present? && @answer.user != current_user
+
+    
+    if @answer.survey.wechart_promotable
+      #调用微信的分享接口需要的配置
+      generate_wechart_sign
+      #领取红包用
+      # unless cookies[:awd].present?
+      cookies[:awd] =  {
+        :value => params[:id],
+        :expires => Rails.application.config.permanent_signed_in_months.months.from_now,
+        :domain => :all
+      }      
+      # end
+      # 领取红包用
+      unless cookies[:od].present?
+        unless params[:code].present?
+          redirect_to Wechart.snsapi_base_redirect(request.url,request.url)
+        else
+          begin
+            openid = Wechart.get_open_id(params[:code])
+            cookies[:od] = {
+              :value => openid,
+              :expires => Rails.application.config.permanent_signed_in_months.months.from_now,
+              :domain => :all
+            }            
+          rescue
+            render_500
+          end
+        end
+      end
+
+      unless @answer.open_id.present?
+        @answer.update_attributes(open_id:cookies[:od])
+      end
+    end
+
     @answer.update_status # check whether it is time out
     if @answer.is_edit
       questions = @answer.load_question(nil, true)
@@ -122,6 +160,7 @@ class Filler::AnswersController < Filler::FillerController
           "answer_audit_message" => @answer.audit_message,
           "order_id" => @answer.order.try(:id),
           "order_code" => @answer.order.try(:code),
+          "order_amount" => @answer.order.try(:amount),
           "order_status" => @answer.order.try(:status)}
       else
         answers = @answer.answer_content.merge(@answer.random_quality_control_answer_content)
@@ -136,6 +175,7 @@ class Filler::AnswersController < Filler::FillerController
           "repeat_time" => @answer.repeat_time,
           "order_id" => @answer.order.try(:_id),
           "order_code" => @answer.order.try(:code),
+          "order_amount" => @answer.order.try(:amount),
           "order_status" => @answer.order.try(:status)}
       end
     else
@@ -144,6 +184,7 @@ class Filler::AnswersController < Filler::FillerController
         "answer_audit_message" => @answer.audit_message,
         "order_id" => @answer.order.try(:_id),
         "order_code" => @answer.order.try(:code),
+        "order_amount" => @answer.order.try(:amount),
         "order_status" => @answer.order.try(:status)}
     end
     @data = {:success => true, :value => retval}
@@ -164,8 +205,12 @@ class Filler::AnswersController < Filler::FillerController
       }
     end
 
+    if @survey.title.match(/网络视频使用行为调查/)
+      @redirect_link = generate_iqiyi_link
+    end
 
     @binded = user_signed_in ? (current_user.email_activation || current_user.mobile_activation) : false
+
   end
 
 
@@ -293,4 +338,33 @@ class Filler::AnswersController < Filler::FillerController
     }
     render_json_auto
   end
+
+
+  def generate_iqiyi_link
+    ip   = @answer.ip_address
+    t    = Time.now.to_i
+    str  = "ip=#{ip}t=#{t}gbcnfc0de888db8a"
+    sign = Digest::MD5.hexdigest(str)    
+    link = @answer.survey.style_setting['redirect_link'].to_s + "?sign=#{sign}&ip=#{ip}&t=#{t}"
+  end
+
+  # 生成微信js-sdk签名
+  def generate_wechart_sign
+      @appid        = Wechart.appid
+      @noncestr     = newpass
+      @jsapi_ticket = Wechart.jsapi_ticket
+      @timestamp    = Time.now.to_i
+      @url          = request.url
+      string1       = "jsapi_ticket=#{@jsapi_ticket}&noncestr=#{@noncestr}&timestamp=#{@timestamp}&url=#{@url}"
+      @signure      =  Digest::SHA1.hexdigest(string1)
+  end
+
+  def newpass
+    chars = ("a".."z").to_a + ("A".."Z").to_a + ("0".."9").to_a
+    newpass = ""
+    1.upto(16) { |i| newpass << chars[rand(chars.size-1)] }
+    return newpass
+  end
+
+
 end
